@@ -3,7 +3,7 @@ package kvs
 import (
 	"github.com/btcsuite/btcutil/base58"
 	log "github.com/jeanphorn/log4go"
-	"github.com/programmer74/gotsdb/storage/utils"
+	"github.com/programmer74/gotsdb/utils"
 	"io/ioutil"
 	"os"
 	"sync"
