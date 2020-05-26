@@ -24,6 +24,7 @@ func (f *FileKVS) toFilename(key []byte) string {
 
 func (f *FileKVS) InitStorage() {
 	os.MkdirAll(f.Path, os.ModePerm)
+	log.Warn("FILE-BASED KVS storage initialized at %s", f.Path)
 }
 
 func (f *FileKVS) Save(key []byte, value []byte) {

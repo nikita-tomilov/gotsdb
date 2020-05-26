@@ -2,6 +2,6 @@
   "console": {
     "enable": true,
     "level": "INFO",
-    "pattern": "[%D %T] [%C] [%L] %M"
+    "pattern": "[%D %T] [%S] [%L] %M"
   }
 }

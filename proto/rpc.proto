@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package prototest;
+
+service GoTSDB {
+  rpc KvsSave(KvsStoreRequest) returns (KvsStoreResponse);
+  rpc KvsKeyExists(KvsKeyExistsRequest) returns (KvsKeyExistsResponse);
+  rpc KvsRetrieve(KvsRetrieveRequest) returns (KvsRetrieveResponse);
+  rpc KvsDelete(KvsDeleteRequest) returns (KvsDeleteResponse);
+}
+
+message KvsStoreRequest {
+  bytes key = 1;
+  bytes value = 2;
+}
+
+message KvsStoreResponse {
+  bool ok = 1;
+}
+
+message KvsKeyExistsRequest {
+  bytes key = 1;
+}
+
+message KvsKeyExistsResponse {
+  bool exists = 1;
+}
+
+message KvsRetrieveRequest {
+  bytes key = 1;
+}
+
+message KvsRetrieveResponse {
+  bytes value = 2;
+}
+
+message KvsDeleteRequest {
+  bytes key = 1;
+}
+
+message KvsDeleteResponse {
+  bool ok = 1;
+}

@@ -11,9 +11,9 @@ type Application struct {
 	GrpcServer *interface{} `summer:"*servers.GrpcServer"`
 }
 
-func (a *Application) getKvsStorage() *kvs.Storage {
-	s := a.KvsStorage
-	s2 := (*s).(*kvs.Storage)
+func (a *Application) getKvsStorage() kvs.Storage {
+	s := *a.KvsStorage
+	s2 := (s).(kvs.Storage)
 	return s2
 }
 
@@ -24,7 +24,14 @@ func (a *Application) getGrpcServer() *servers.GrpcServer {
 }
 
 func (a *Application) Startup() {
-	log.Warn("Startup OK")
+	log.Warn("Autowiring OK")
+
+	log.Warn("Initializing storage level...")
+	s := a.getKvsStorage()
+	s.InitStorage()
+	log.Warn("Storage level OK")
+
+
 	log.Warn("Launching GRPC Server...")
 	g := a.getGrpcServer()
 	go g.Start()
