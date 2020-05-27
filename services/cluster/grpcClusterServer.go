@@ -11,6 +11,7 @@ import (
 
 type GrpcClusterServer struct{
 	ListenAddress string `summer.property:"cluster.listenAddress|:5300"`
+	manager *Manager
 }
 
 func (s *GrpcClusterServer) Start() {
@@ -24,21 +25,27 @@ func (s *GrpcClusterServer) Start() {
 	opts := []grpc.ServerOption{}
 	grpcServer := grpc.NewServer(opts...)
 
-	pb.RegisterClusterServer(grpcServer, &clusterServer{})
-	grpcServer.Serve(listener)
+	pb.RegisterClusterServer(grpcServer, &clusterServer{parent:s})
+	go grpcServer.Serve(listener)
 }
 
 //TODO: pass errors from storage level to grpc level?
 
 type clusterServer struct{
+	parent *GrpcClusterServer
+}
 
+func (s clusterServer) Hello(c context.Context, rq *pb.HelloRequest) (*pb.AliveNodesResponse, error) {
+	s.parent.manager.AddKnownNode(rq.Iam)
+	return &pb.AliveNodesResponse{AliveNodes:s.parent.manager.GetKnownNodes()}, nil
 }
 
 func (s clusterServer) Ping(c context.Context, rq *pb.PingRequest) (*pb.PingResponse, error) {
-	panic("implement me")
+	log.Debug("Got ping rq")
+	return &pb.PingResponse{Payload:rq.Payload}, nil
 }
 
 func (s clusterServer) GetAliveNodes(c context.Context, v *pb.Void) (*pb.AliveNodesResponse, error) {
-	panic("implement me")
+	return &pb.AliveNodesResponse{AliveNodes:s.parent.manager.GetKnownNodes()}, nil
 }
 

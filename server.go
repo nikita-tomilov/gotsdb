@@ -7,10 +7,13 @@ import (
 	"github.com/programmer74/gotsdb/services/servers"
 	"github.com/programmer74/gotsdb/services/storage/kvs"
 	"github.com/programmer74/summer/summer"
+	"os"
 )
 
 const logSettingsFile = "./log4go.json"
-const propertiesFile = "./app.properties"
+const defaultPropertiesFile = "./app.properties"
+
+const propertiesOverrideEnvironmentVariable = "GOTSDB_PROPERTY_FILE"
 
 const storageBeanName = "Storage"
 const storageBeanType = "*kvs.Storage"
@@ -24,7 +27,12 @@ const kvsEnginePropertyFileValue = "file"
 const kvsEnginePropertyInMemValue = "inmem"
 
 func setupDI() {
-	summer.ParseProperties(propertiesFile)
+	propertiesOverride, propertiesOverridePresent:= os.LookupEnv(propertiesOverrideEnvironmentVariable)
+	if propertiesOverridePresent {
+		summer.ParseProperties(propertiesOverride)
+	} else {
+		summer.ParseProperties(defaultPropertiesFile)
+	}
 
 	summer.RegisterBean(applicationBeanName, services.Application{})
 	summer.RegisterBean(grpcUserServerBeanName, servers.GrpcUserServer{})
