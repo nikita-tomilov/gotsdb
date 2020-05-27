@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package proto;
+
+service Cluster {
+  rpc Ping(PingRequest) returns (PingResponse);
+  rpc Hello(HelloRequest) returns (AliveNodesResponse);
+  rpc GetAliveNodes(void) returns (AliveNodesResponse);
+}
+
+message void {}
+
+message PingRequest {
+  bytes payload = 1;
+}
+
+message PingResponse {
+  bytes payload = 1;
+}
+
+message Node {
+  string connectionString = 1;
+  string uuid = 2;
+}
+
+message HelloRequest {
+  Node iam = 1;
+}
+
+message AliveNodesResponse {
+  repeated Node aliveNodes = 1;
+}

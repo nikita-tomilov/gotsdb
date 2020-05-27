@@ -3,6 +3,7 @@ package main
 import (
 	log "github.com/jeanphorn/log4go"
 	"github.com/programmer74/gotsdb/services"
+	"github.com/programmer74/gotsdb/services/cluster"
 	"github.com/programmer74/gotsdb/services/servers"
 	"github.com/programmer74/gotsdb/services/storage/kvs"
 	"github.com/programmer74/summer/summer"
@@ -14,7 +15,9 @@ const propertiesFile = "./app.properties"
 const storageBeanName = "Storage"
 const storageBeanType = "*kvs.Storage"
 const applicationBeanName = "Application"
-const grpcServerBeanName = "GrpcServer"
+const grpcUserServerBeanName = "GrpcUserServer"
+const grpcClusterServerBeanName = "GrpcClusterServer"
+const clusterManagerBeanName = "ClusterManager"
 
 const kvsEnginePropertyKey = "kvs.engine"
 const kvsEnginePropertyFileValue = "file"
@@ -24,7 +27,10 @@ func setupDI() {
 	summer.ParseProperties(propertiesFile)
 
 	summer.RegisterBean(applicationBeanName, services.Application{})
-	summer.RegisterBean(grpcServerBeanName, servers.GrpcServer{})
+	summer.RegisterBean(grpcUserServerBeanName, servers.GrpcUserServer{})
+
+	summer.RegisterBean(grpcClusterServerBeanName, cluster.GrpcClusterServer{})
+	summer.RegisterBean(clusterManagerBeanName, cluster.Manager{})
 
 	kvsEngine, _ := summer.GetPropertyValue(kvsEnginePropertyKey)
 	switch kvsEngine {

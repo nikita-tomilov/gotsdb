@@ -10,18 +10,18 @@ import (
 	"net"
 )
 
-type GrpcServer struct{
+type GrpcUserServer struct{
 	ListenAddress string `summer.property:"grpc.listenAddress|:5300"`
 	KvsStorage *interface{} `summer:"*kvs.Storage"`
 }
 
-func (s *GrpcServer) getKvsStorage() kvs.Storage {
+func (s *GrpcUserServer) getKvsStorage() kvs.Storage {
 	ks := *s.KvsStorage
 	ks2 := (ks).(kvs.Storage)
 	return ks2
 }
 
-func (s *GrpcServer) Start() {
+func (s *GrpcUserServer) BeginListening() {
 	log.Warn("Starting to listen at '%s'", s.ListenAddress)
 	listener, err := net.Listen("tcp", s.ListenAddress)
 
