@@ -5,6 +5,7 @@ import (
 	"github.com/programmer74/gotsdb/services"
 	"github.com/programmer74/gotsdb/services/cluster"
 	"github.com/programmer74/gotsdb/services/servers"
+	"github.com/programmer74/gotsdb/services/storage"
 	"github.com/programmer74/gotsdb/services/storage/kvs"
 	"github.com/programmer74/summer/summer"
 	"os"
@@ -15,12 +16,13 @@ const defaultPropertiesFile = "./app.properties"
 
 const propertiesOverrideEnvironmentVariable = "GOTSDB_PROPERTY_FILE"
 
-const storageBeanName = "Storage"
-const storageBeanType = "*kvs.Storage"
+const storageBeanName = "KeyValueStorage"
+const storageBeanType = "*kvs.KeyValueStorage"
 const applicationBeanName = "Application"
 const grpcUserServerBeanName = "GrpcUserServer"
 const grpcClusterServerBeanName = "GrpcClusterServer"
 const clusterManagerBeanName = "ClusterManager"
+const clusteredStorageManagerBeanName = "ClusteredStorageManager"
 
 const kvsEnginePropertyKey = "kvs.engine"
 const kvsEnginePropertyFileValue = "file"
@@ -39,6 +41,7 @@ func setupDI() {
 
 	summer.RegisterBean(grpcClusterServerBeanName, cluster.GrpcClusterServer{})
 	summer.RegisterBean(clusterManagerBeanName, cluster.Manager{})
+	summer.RegisterBean(clusteredStorageManagerBeanName, storage.ClusteredStorageManager{})
 
 	kvsEngine, _ := summer.GetPropertyValue(kvsEnginePropertyKey)
 	switch kvsEngine {

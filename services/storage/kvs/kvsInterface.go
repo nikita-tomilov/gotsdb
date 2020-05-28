@@ -1,6 +1,6 @@
 package kvs
 
-type Storage interface {
+type KeyValueStorage interface {
 	InitStorage()
 	Save(key []byte, value []byte)
 	KeyExists(key []byte) bool

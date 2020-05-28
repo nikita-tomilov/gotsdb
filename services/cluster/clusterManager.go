@@ -68,6 +68,8 @@ func (m *Manager) startPrintingKnownNodes() {
 					log.Info(" - %s: Connection problems", k)
 				}
 			}
+
+			log.Info("Known connections to other nodes: %d", len(m.GetKnownOutboundConnections()))
 		}
 	}()
 }
@@ -86,4 +88,14 @@ func (m *Manager) GetKnownNodes() []*pb.Node {
 
 func (m *Manager) DeleteKnownNode(targetHostPort string) {
 	delete(m.IncomingConnections, targetHostPort)
+}
+
+func (m *Manager) GetKnownOutboundConnections() []*GrpcClusterClient {
+	var arr []*GrpcClusterClient
+	for k, _ := range m.IncomingConnections {
+		if k != m.MyHostPort {
+			arr = append(arr, m.OutcomingConnections[k])
+		}
+	}
+	return arr
 }
