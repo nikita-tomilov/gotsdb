@@ -10,34 +10,42 @@ service GoTSDB {
 }
 
 message KvsStoreRequest {
-  bytes key = 1;
-  bytes value = 2;
+  uint32 msgId = 1;
+  bytes key = 2;
+  bytes value = 3;
 }
 
 message KvsStoreResponse {
-  bool ok = 1;
+  uint32 msgId = 1;
+  bool ok = 2;
 }
 
 message KvsKeyExistsRequest {
-  bytes key = 1;
+  uint32 msgId = 1;
+  bytes key = 2;
 }
 
 message KvsKeyExistsResponse {
-  bool exists = 1;
+  uint32 msgId = 1;
+  bool exists = 2;
 }
 
 message KvsRetrieveRequest {
-  bytes key = 1;
+  uint32 msgId = 1;
+  bytes key = 2;
 }
 
 message KvsRetrieveResponse {
+  uint32 msgId = 1;
   bytes value = 2;
 }
 
 message KvsDeleteRequest {
-  bytes key = 1;
+  uint32 msgId = 1;
+  bytes key = 2;
 }
 
 message KvsDeleteResponse {
-  bool ok = 1;
+  uint32 msgId = 1;
+  bool ok = 2;
 }

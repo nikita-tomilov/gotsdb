@@ -2,10 +2,17 @@ syntax = "proto3";
 
 package proto;
 
+import "rpc.proto";
+
 service Cluster {
   rpc Ping(PingRequest) returns (PingResponse);
   rpc Hello(HelloRequest) returns (AliveNodesResponse);
   rpc GetAliveNodes(void) returns (AliveNodesResponse);
+
+  rpc KvsSave(KvsStoreRequest) returns (KvsStoreResponse);
+  rpc KvsKeyExists(KvsKeyExistsRequest) returns (KvsKeyExistsResponse);
+  rpc KvsRetrieve(KvsRetrieveRequest) returns (KvsRetrieveResponse);
+  rpc KvsDelete(KvsDeleteRequest) returns (KvsDeleteResponse);
 }
 
 message void {}

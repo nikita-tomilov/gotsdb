@@ -4,18 +4,17 @@ import (
 	log "github.com/jeanphorn/log4go"
 	"github.com/programmer74/gotsdb/services/cluster"
 	"github.com/programmer74/gotsdb/services/servers"
-	"github.com/programmer74/gotsdb/services/storage"
 )
 
 type Application struct {
-	ClusteredStorageManager  *interface{} `summer:"*storage.ClusteredStorageManager"`
+	ClusteredStorageManager  *interface{} `summer:"*cluster.ClusteredStorageManager"`
 	GrpcUserServer *interface{} `summer:"*servers.GrpcUserServer"`
 	ClusterManager *interface{} `summer:"*cluster.Manager"`
 }
 
-func (a *Application) getStorageManager() *storage.ClusteredStorageManager {
+func (a *Application) getStorageManager() *cluster.ClusteredStorageManager {
 	s := a.ClusteredStorageManager
-	s2 := (*s).(*storage.ClusteredStorageManager)
+	s2 := (*s).(*cluster.ClusteredStorageManager)
 	return s2
 }
 

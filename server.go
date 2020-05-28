@@ -5,7 +5,6 @@ import (
 	"github.com/programmer74/gotsdb/services"
 	"github.com/programmer74/gotsdb/services/cluster"
 	"github.com/programmer74/gotsdb/services/servers"
-	"github.com/programmer74/gotsdb/services/storage"
 	"github.com/programmer74/gotsdb/services/storage/kvs"
 	"github.com/programmer74/summer/summer"
 	"os"
@@ -22,7 +21,7 @@ const applicationBeanName = "Application"
 const grpcUserServerBeanName = "GrpcUserServer"
 const grpcClusterServerBeanName = "GrpcClusterServer"
 const clusterManagerBeanName = "ClusterManager"
-const clusteredStorageManagerBeanName = "ClusteredStorageManager"
+const clusteredStorageManagerBeanName = "ClusteredStorageManagerAutowired"
 
 const kvsEnginePropertyKey = "kvs.engine"
 const kvsEnginePropertyFileValue = "file"
@@ -41,7 +40,7 @@ func setupDI() {
 
 	summer.RegisterBean(grpcClusterServerBeanName, cluster.GrpcClusterServer{})
 	summer.RegisterBean(clusterManagerBeanName, cluster.Manager{})
-	summer.RegisterBean(clusteredStorageManagerBeanName, storage.ClusteredStorageManager{})
+	summer.RegisterBean(clusteredStorageManagerBeanName, cluster.ClusteredStorageManager{})
 
 	kvsEngine, _ := summer.GetPropertyValue(kvsEnginePropertyKey)
 	switch kvsEngine {
@@ -52,6 +51,8 @@ func setupDI() {
 	}
 
 	summer.PerformDependencyInjection()
+
+	summer.PrintDependencyGraphVertex()
 }
 
 func main() {

@@ -9,6 +9,8 @@ import (
 	"os"
 )
 
+var msgId uint32 = 0
+
 func main() {
 	argsWithoutProg := os.Args[1:]
 	if len(argsWithoutProg) < 1 {
@@ -88,11 +90,13 @@ func main() {
 }
 
 func KvsSaveCmd(c *ishell.Context, client pb.GoTSDBClient) string {
+	msgId += 1
 	stringKey := c.Args[0]
 	stringValue := c.Args[1]
 	key := []byte(stringKey)
 	value := []byte(stringValue)
 	request := &pb.KvsStoreRequest{
+		MsgId: msgId,
 		Key: key,
 		Value: value,
 	}
@@ -108,10 +112,12 @@ func KvsSaveCmd(c *ishell.Context, client pb.GoTSDBClient) string {
 }
 
 func KvsRetrieveCmd(c *ishell.Context, client pb.GoTSDBClient) string {
+	msgId += 1
 	stringKey := c.Args[0]
 	key := []byte(stringKey)
 
 	request := &pb.KvsRetrieveRequest{
+		MsgId: msgId,
 		Key: key,
 	}
 	response, err := client.KvsRetrieve(context.TODO(), request)
@@ -123,10 +129,12 @@ func KvsRetrieveCmd(c *ishell.Context, client pb.GoTSDBClient) string {
 }
 
 func KvsKeyExistsCmd(c *ishell.Context, client pb.GoTSDBClient) string {
+	msgId += 1
 	stringKey := c.Args[0]
 	key := []byte(stringKey)
 
 	request := &pb.KvsKeyExistsRequest{
+		MsgId: msgId,
 		Key: key,
 	}
 	response, err := client.KvsKeyExists(context.TODO(), request)
@@ -141,10 +149,12 @@ func KvsKeyExistsCmd(c *ishell.Context, client pb.GoTSDBClient) string {
 }
 
 func KvsDeleteCmd(c *ishell.Context, client pb.GoTSDBClient) string {
+	msgId += 1
 	stringKey := c.Args[0]
 	key := []byte(stringKey)
 
 	request := &pb.KvsDeleteRequest{
+		MsgId: msgId,
 		Key: key,
 	}
 	response, err := client.KvsDelete(context.TODO(), request)

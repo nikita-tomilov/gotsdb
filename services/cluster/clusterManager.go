@@ -58,14 +58,18 @@ func (m *Manager) startPrintingKnownNodes() {
 			for k, v := range m.OutcomingConnections {
 				if v.IsConnected() {
 					ans, _ := v.GetGrpcChannel().GetAliveNodes(context.TODO(), &pb.Void{})
-					lenOfKnownNodesOnAnotherMachine := len(ans.AliveNodes)
-					if lenOfKnownNodesOnAnotherMachine == lenOfKnownNodesOnThisMachine {
-						log.Info(" - %s: Consensus reached", k)
+					if ans != nil {
+						lenOfKnownNodesOnAnotherMachine := len(ans.AliveNodes)
+						if lenOfKnownNodesOnAnotherMachine == lenOfKnownNodesOnThisMachine {
+							log.Info(" - %s: Consensus reached", k)
+						} else {
+							log.Warn(" - %s: Consensus NOT reached: i think %d nodes, other thinks %d nodes", k, lenOfKnownNodesOnThisMachine, lenOfKnownNodesOnAnotherMachine)
+						}
 					} else {
-						log.Warn(" - %s: Consensus NOT reached: i think %d nodes, other thinks %d nodes", k, lenOfKnownNodesOnThisMachine, lenOfKnownNodesOnAnotherMachine)
+						log.Warn(" - %s: Errored immediately; probably connection lost")
 					}
 				} else {
-					log.Info(" - %s: Connection problems", k)
+					log.Info(" - %s: No connection to node", k)
 				}
 			}
 

@@ -10,8 +10,16 @@ import (
 )
 
 type GrpcClusterServer struct{
-	ListenAddress string `summer.property:"cluster.listenAddress|:5300"`
-	manager *Manager
+	ListenAddress                    string       `summer.property:"cluster.listenAddress|:5300"`
+	ClusteredStorageManagerAutowired *interface{} `summer:"*cluster.ClusteredStorageManager"`
+	manager                          *Manager
+	storageManager                   *ClusteredStorageManager
+}
+
+func (s *GrpcClusterServer) getStorageManager() *ClusteredStorageManager {
+	sm := *s.ClusteredStorageManagerAutowired
+	sm2 := (sm).(*ClusteredStorageManager)
+	return sm2
 }
 
 func (s *GrpcClusterServer) Start() {
@@ -25,6 +33,8 @@ func (s *GrpcClusterServer) Start() {
 	opts := []grpc.ServerOption{}
 	grpcServer := grpc.NewServer(opts...)
 
+	s.storageManager = s.getStorageManager()
+	s.storageManager.clusterManager = s.manager
 	pb.RegisterClusterServer(grpcServer, &clusterServer{parent:s})
 	go grpcServer.Serve(listener)
 }
@@ -35,17 +45,34 @@ type clusterServer struct{
 	parent *GrpcClusterServer
 }
 
-func (s clusterServer) Hello(c context.Context, rq *pb.HelloRequest) (*pb.AliveNodesResponse, error) {
+func (s *clusterServer) Hello(c context.Context, rq *pb.HelloRequest) (*pb.AliveNodesResponse, error) {
 	s.parent.manager.AddKnownNode(rq.Iam)
 	return &pb.AliveNodesResponse{AliveNodes:s.parent.manager.GetKnownNodes()}, nil
 }
 
-func (s clusterServer) Ping(c context.Context, rq *pb.PingRequest) (*pb.PingResponse, error) {
+func (s *clusterServer) Ping(c context.Context, rq *pb.PingRequest) (*pb.PingResponse, error) {
 	log.Debug("Got ping rq")
 	return &pb.PingResponse{Payload:rq.Payload}, nil
 }
 
-func (s clusterServer) GetAliveNodes(c context.Context, v *pb.Void) (*pb.AliveNodesResponse, error) {
+func (s *clusterServer) GetAliveNodes(c context.Context, v *pb.Void) (*pb.AliveNodesResponse, error) {
 	return &pb.AliveNodesResponse{AliveNodes:s.parent.manager.GetKnownNodes()}, nil
 }
+
+func (s *clusterServer) KvsSave(c context.Context, req *pb.KvsStoreRequest) (*pb.KvsStoreResponse, error) {
+	return s.parent.storageManager.KvsSave(c, req)
+}
+
+func (s *clusterServer) KvsKeyExists(c context.Context, req *pb.KvsKeyExistsRequest) (*pb.KvsKeyExistsResponse, error) {
+	return s.parent.storageManager.KvsKeyExists(c, req)
+}
+
+func (s *clusterServer) KvsRetrieve(c context.Context, req *pb.KvsRetrieveRequest) (*pb.KvsRetrieveResponse, error) {
+	return s.parent.storageManager.KvsRetrieve(c, req)
+}
+
+func (s *clusterServer) KvsDelete(c context.Context, req *pb.KvsDeleteRequest) (*pb.KvsDeleteResponse, error) {
+	return s.parent.storageManager.KvsDelete(c, req)
+}
+
 
