@@ -2,11 +2,11 @@ package main
 
 import (
 	log "github.com/jeanphorn/log4go"
-	"github.com/programmer74/gotsdb/services"
-	"github.com/programmer74/gotsdb/services/cluster"
-	"github.com/programmer74/gotsdb/services/servers"
-	"github.com/programmer74/gotsdb/services/storage/kvs"
-	"github.com/programmer74/summer/summer"
+	"github.com/nikita-tomilov/gotsdb/services"
+	"github.com/nikita-tomilov/gotsdb/services/cluster"
+	"github.com/nikita-tomilov/gotsdb/services/servers"
+	"github.com/nikita-tomilov/gotsdb/services/storage/kvs"
+	"github.com/nikita-tomilov/summer/summer"
 	"os"
 )
 

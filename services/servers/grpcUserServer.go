@@ -2,8 +2,8 @@ package servers
 
 import (
 	log "github.com/jeanphorn/log4go"
-	pb "github.com/programmer74/gotsdb/proto"
-	"github.com/programmer74/gotsdb/services/cluster"
+	pb "github.com/nikita-tomilov/gotsdb/proto"
+	"github.com/nikita-tomilov/gotsdb/services/cluster"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"

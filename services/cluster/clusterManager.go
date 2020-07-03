@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	log "github.com/jeanphorn/log4go"
-	pb "github.com/programmer74/gotsdb/proto"
+	pb "github.com/nikita-tomilov/gotsdb/proto"
 	"strings"
 	"time"
 )

@@ -2,8 +2,8 @@ package services
 
 import (
 	log "github.com/jeanphorn/log4go"
-	"github.com/programmer74/gotsdb/services/cluster"
-	"github.com/programmer74/gotsdb/services/servers"
+	"github.com/nikita-tomilov/gotsdb/services/cluster"
+	"github.com/nikita-tomilov/gotsdb/services/servers"
 )
 
 type Application struct {

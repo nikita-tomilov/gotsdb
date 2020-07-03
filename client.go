@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/abiosoft/ishell"
-	pb "github.com/programmer74/gotsdb/proto"
+	pb "github.com/nikita-tomilov/gotsdb/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 	"os"

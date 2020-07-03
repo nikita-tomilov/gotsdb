@@ -2,9 +2,9 @@ package cluster
 
 import (
 	"context"
-	pb "github.com/programmer74/gotsdb/proto"
-	"github.com/programmer74/gotsdb/services/storage"
-	"github.com/programmer74/gotsdb/services/storage/kvs"
+	pb "github.com/nikita-tomilov/gotsdb/proto"
+	"github.com/nikita-tomilov/gotsdb/services/storage"
+	"github.com/nikita-tomilov/gotsdb/services/storage/kvs"
 )
 
 type ClusteredStorageManager struct {

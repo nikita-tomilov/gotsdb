@@ -3,7 +3,7 @@ package cluster
 import (
 	"context"
 	log "github.com/jeanphorn/log4go"
-	pb "github.com/programmer74/gotsdb/proto"
+	pb "github.com/nikita-tomilov/gotsdb/proto"
 	"google.golang.org/grpc"
 	"sync/atomic"
 	"time"

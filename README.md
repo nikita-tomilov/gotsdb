@@ -12,4 +12,4 @@
 - TS optimizations
 - TS search algorithms
 
-Dependency injection provided by [summer](https://github.com/Programmer74/summer).
+Dependency injection provided by [summer](https://github.com/nikita-tomilov/summer).

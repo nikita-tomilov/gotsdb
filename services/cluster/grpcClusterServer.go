@@ -2,7 +2,7 @@ package cluster
 
 import (
 	log "github.com/jeanphorn/log4go"
-	pb "github.com/programmer74/gotsdb/proto"
+	pb "github.com/nikita-tomilov/gotsdb/proto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
