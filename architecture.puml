@@ -1,0 +1,62 @@
+@startuml
+
+node "ServerNode1" {
+    package "storage" {
+        package "kvs" {
+            () KeyValueStorage
+            [fileKVS]
+            [inmemKVS]
+        }
+    }
+
+    package "cluster" as node1cluster {
+        [grpcClusterServer] as node1clusterServer
+        [grpcClusterClient] as node1clusterClient
+        [clusteredStorageManager]
+        [clusterManager]
+    }
+
+    package "servers" {
+        [grpcUserServer]
+    }
+
+    package "proto" {
+         () "GoTSDB\n<<file:rpc.proto>>" as node1clientRpcProto
+         () "Cluster\n<<file:cluster.proto>>" as node1clusterRpcProto
+    }
+}
+
+node "ServerNode2" {
+     package "cluster" as node2cluster {
+            [grpcClusterServer] as node2clusterServer
+            [grpcClusterClient] as node2clusterClient
+     }
+}
+
+node "Client" {
+    package rpc as clientrpc {
+        () GoTSDB as clientRpcProto
+    }
+}
+
+node1clusterServer <-down- node2clusterClient : "<<protocol: GRPC>>"
+node2clusterServer <-up- node1clusterClient : "<<protocol: GRPC>>"
+
+clientrpc <-left-> grpcUserServer : "<<protocol: GRPC>>"
+
+grpcUserServer ..> clusteredStorageManager : Data operation request from client
+clusteredStorageManager ..> storage : Local data operations
+clusteredStorageManager ..> node1clusterClient : Remote data operations
+node1clusterServer ..> clusteredStorageManager : Data operation request from cluster node
+clusteredStorageManager -->> node1clusterRpcProto : <<implements>>
+
+clusteredStorageManager ..> clusterManager : Get active nodes for remote data operations
+clusterManager ..o node1clusterClient : has [1..N]\nN=total amount of nodes
+clusterManager ..* node1clusterServer : owns one
+
+node1clusterRpcProto --|> node1clientRpcProto : <<extends>>
+grpcUserServer -->> node1clientRpcProto : <<implements>>
+
+fileKVS -->> KeyValueStorage
+inmemKVS -->> KeyValueStorage
+@enduml
