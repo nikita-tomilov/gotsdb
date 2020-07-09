@@ -13,6 +13,9 @@ service Cluster {
   rpc KvsKeyExists(KvsKeyExistsRequest) returns (KvsKeyExistsResponse);
   rpc KvsRetrieve(KvsRetrieveRequest) returns (KvsRetrieveResponse);
   rpc KvsDelete(KvsDeleteRequest) returns (KvsDeleteResponse);
+
+  rpc TSSave(TSStoreRequest) returns (TSStoreResponse);
+  rpc TSRetrieve(TSRetrieveRequest) returns (TSRetrieveResponse);
 }
 
 message void {}

@@ -7,6 +7,9 @@ service GoTSDB {
   rpc KvsKeyExists(KvsKeyExistsRequest) returns (KvsKeyExistsResponse);
   rpc KvsRetrieve(KvsRetrieveRequest) returns (KvsRetrieveResponse);
   rpc KvsDelete(KvsDeleteRequest) returns (KvsDeleteResponse);
+
+  rpc TSSave(TSStoreRequest) returns (TSStoreResponse);
+  rpc TSRetrieve(TSRetrieveRequest) returns (TSRetrieveResponse);
 }
 
 message KvsStoreRequest {
@@ -48,4 +51,36 @@ message KvsDeleteRequest {
 message KvsDeleteResponse {
   uint32 msgId = 1;
   bool ok = 2;
+}
+
+message TSPoints {
+  map<uint32, double> points = 1;
+}
+
+message TSStoreRequest {
+  uint32 msgId = 1;
+  string dataSource = 2;
+  map<string, TSPoints> values = 3;
+  uint32 expirationMillis = 4;
+}
+
+message TSStoreResponse {
+  uint32 msgId = 1;
+  bool ok = 2;
+}
+
+message TSRetrieveRequest {
+  uint32 msgId = 1;
+  string dataSource = 2;
+  uint32 fromTimestamp = 3;
+  uint32 toTimestamp = 4;
+  repeated string tags = 5;
+}
+
+message TSRetrieveResponse {
+  uint32 msgId = 1;
+  string dataSource = 2;
+  uint32 fromTimestamp = 3;
+  uint32 toTimestamp = 4;
+  map<string, TSPoints> values = 5;
 }

@@ -90,3 +90,11 @@ func (c *ClusteredStorageManager) KvsDelete(ctx context.Context, req *pb.KvsDele
 
 	return &pb.KvsDeleteResponse{MsgId: req.MsgId, Ok: true}, nil
 }
+
+func (c *ClusteredStorageManager) TSSave(ctx context.Context, req *pb.TSStoreRequest) (*pb.TSStoreResponse, error) {
+	panic("TODO: implement")
+}
+
+func (c *ClusteredStorageManager) TSRetrieve(ctx context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {
+	panic("TODO: implement")
+}
