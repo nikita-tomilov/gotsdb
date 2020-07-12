@@ -6,6 +6,7 @@ import (
 	"github.com/nikita-tomilov/gotsdb/services/cluster"
 	"github.com/nikita-tomilov/gotsdb/services/servers"
 	"github.com/nikita-tomilov/gotsdb/services/storage/kvs"
+	"github.com/nikita-tomilov/gotsdb/services/storage/tss"
 	"github.com/nikita-tomilov/summer/summer"
 	"os"
 )
@@ -15,8 +16,10 @@ const defaultPropertiesFile = "./app.properties"
 
 const propertiesOverrideEnvironmentVariable = "GOTSDB_PROPERTY_FILE"
 
-const storageBeanName = "KeyValueStorage"
-const storageBeanType = "*kvs.KeyValueStorage"
+const kvsStorageBeanName = "KeyValueStorage"
+const kvsStorageBeanType = "*kvs.KeyValueStorage"
+const tssStorageBeanName = "TimeSeriesStorage"
+const tssStorageBeanType = "*tss.TimeSeriesStorage"
 const applicationBeanName = "Application"
 const grpcUserServerBeanName = "GrpcUserServer"
 const grpcClusterServerBeanName = "GrpcClusterServer"
@@ -26,6 +29,10 @@ const clusteredStorageManagerBeanName = "ClusteredStorageManagerAutowired"
 const kvsEnginePropertyKey = "kvs.engine"
 const kvsEnginePropertyFileValue = "file"
 const kvsEnginePropertyInMemValue = "inmem"
+
+const tssEnginePropertyKey = "tss.engine"
+const tssEnginePropertyFileValue = "file"
+const tssEnginePropertyInMemValue = "inmem"
 
 func setupDI() {
 	propertiesOverride, propertiesOverridePresent:= os.LookupEnv(propertiesOverrideEnvironmentVariable)
@@ -45,9 +52,17 @@ func setupDI() {
 	kvsEngine, _ := summer.GetPropertyValue(kvsEnginePropertyKey)
 	switch kvsEngine {
 	case kvsEnginePropertyFileValue:
-		summer.RegisterBeanWithTypeAlias(storageBeanName, kvs.FileKVS{}, storageBeanType)
+		summer.RegisterBeanWithTypeAlias(kvsStorageBeanName, kvs.FileKVS{}, kvsStorageBeanType)
 	case kvsEnginePropertyInMemValue:
-		summer.RegisterBeanWithTypeAlias(storageBeanName, kvs.InMemKVS{}, storageBeanType)
+		summer.RegisterBeanWithTypeAlias(kvsStorageBeanName, kvs.InMemKVS{}, kvsStorageBeanType)
+	}
+
+	tssEngine, _ := summer.GetPropertyValue(tssEnginePropertyKey)
+	switch tssEngine {
+	case tssEnginePropertyInMemValue:
+		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.InMemTSS{}, tssStorageBeanType)
+	case tssEnginePropertyFileValue:
+		panic("file-based tss is currently unsupported") //TODO: support
 	}
 
 	summer.PerformDependencyInjection()

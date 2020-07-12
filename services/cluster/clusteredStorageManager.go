@@ -10,6 +10,8 @@ import (
 type ClusteredStorageManager struct {
 	KvsStorageAutowired *interface{} `summer:"*kvs.KeyValueStorage"`
 	kvsStorage          kvs.KeyValueStorage
+	TssStorageAutowired *interface{} `summer:"*tss.TimeSeriesStorage"`
+	TssStorage          kvs.KeyValueStorage
 	clusterManager      *Manager
 	proxiedCommands     *storage.TTLSet
 }

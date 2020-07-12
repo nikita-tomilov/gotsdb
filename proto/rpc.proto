@@ -61,7 +61,7 @@ message TSStoreRequest {
   uint32 msgId = 1;
   string dataSource = 2;
   map<string, TSPoints> values = 3;
-  uint32 expirationMillis = 4;
+  uint64 expirationMillis = 4;
 }
 
 message TSStoreResponse {
@@ -72,15 +72,15 @@ message TSStoreResponse {
 message TSRetrieveRequest {
   uint32 msgId = 1;
   string dataSource = 2;
-  uint32 fromTimestamp = 3;
-  uint32 toTimestamp = 4;
+  uint64 fromTimestamp = 3;
+  uint64 toTimestamp = 4;
   repeated string tags = 5;
 }
 
 message TSRetrieveResponse {
   uint32 msgId = 1;
   string dataSource = 2;
-  uint32 fromTimestamp = 3;
-  uint32 toTimestamp = 4;
+  uint64 fromTimestamp = 3;
+  uint64 toTimestamp = 4;
   map<string, TSPoints> values = 5;
 }
