@@ -5,13 +5,14 @@ import (
 	pb "github.com/nikita-tomilov/gotsdb/proto"
 	"github.com/nikita-tomilov/gotsdb/services/storage"
 	"github.com/nikita-tomilov/gotsdb/services/storage/kvs"
+	"github.com/nikita-tomilov/gotsdb/services/storage/tss"
 )
 
 type ClusteredStorageManager struct {
 	KvsStorageAutowired *interface{} `summer:"*kvs.KeyValueStorage"`
 	kvsStorage          kvs.KeyValueStorage
 	TssStorageAutowired *interface{} `summer:"*tss.TimeSeriesStorage"`
-	TssStorage          kvs.KeyValueStorage
+	tssStorage          tss.TimeSeriesStorage
 	clusterManager      *Manager
 	proxiedCommands     *storage.TTLSet
 }
@@ -22,9 +23,17 @@ func (c *ClusteredStorageManager) getKvsStorage() kvs.KeyValueStorage {
 	return ks2
 }
 
+func (c *ClusteredStorageManager) getTsStorage() tss.TimeSeriesStorage {
+	ts := *c.TssStorageAutowired
+	ts2 := (ts).(tss.TimeSeriesStorage)
+	return ts2
+}
+
 func (c *ClusteredStorageManager) InitStorage() {
 	c.kvsStorage = c.getKvsStorage()
 	c.kvsStorage.InitStorage()
+	c.tssStorage = c.getTsStorage()
+	c.tssStorage.InitStorage()
 	c.proxiedCommands = storage.NewTTLSet(10000, 10)
 }
 
@@ -94,9 +103,11 @@ func (c *ClusteredStorageManager) KvsDelete(ctx context.Context, req *pb.KvsDele
 }
 
 func (c *ClusteredStorageManager) TSSave(ctx context.Context, req *pb.TSStoreRequest) (*pb.TSStoreResponse, error) {
-	panic("TODO: implement")
+	c.tssStorage.Save(req.DataSource, req.Values, req.ExpirationMillis)
+	return &pb.TSStoreResponse{MsgId: req.MsgId, Ok: true}, nil
 }
 
 func (c *ClusteredStorageManager) TSRetrieve(ctx context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {
-	panic("TODO: implement")
+	ans := c.tssStorage.Retrieve(req.DataSource, req.Tags, req.FromTimestamp, req.ToTimestamp)
+	return &pb.TSRetrieveResponse{MsgId: req.MsgId, DataSource: req.DataSource, FromTimestamp: req.FromTimestamp, ToTimestamp: req.ToTimestamp, Values: ans}, nil
 }

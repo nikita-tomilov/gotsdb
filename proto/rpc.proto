@@ -54,7 +54,7 @@ message KvsDeleteResponse {
 }
 
 message TSPoints {
-  map<uint32, double> points = 1;
+  map<uint64, double> points = 1;
 }
 
 message TSStoreRequest {

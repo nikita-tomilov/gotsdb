@@ -1,6 +1,7 @@
 package tss
 
 import (
+	pb "github.com/nikita-tomilov/gotsdb/proto"
 	"github.com/nikita-tomilov/gotsdb/services/storage/tss/dummytss"
 	"sync"
 	"time"
@@ -24,7 +25,7 @@ func (f *InMemTSS) InitStorage() {
 	}()
 }
 
-func (f *InMemTSS) Save(dataSource string, data map[string]map[uint64]float64, expirationMillis uint64) {
+func (f *InMemTSS) Save(dataSource string, data map[string]*pb.TSPoints, expirationMillis uint64) {
 	f.lock.Lock()
 	if !f.contains(dataSource) {
 		dataForDataSource := dummytss.TSforDatasource{}
@@ -35,9 +36,9 @@ func (f *InMemTSS) Save(dataSource string, data map[string]map[uint64]float64, e
 	f.lock.Unlock()
 }
 
-func (f *InMemTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]map[uint64]float64 {
+func (f *InMemTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*pb.TSPoints {
 	f.lock.Lock()
-	ans := make(map[string]map[uint64]float64)
+	ans := make(map[string]*pb.TSPoints)
 	if f.contains(dataSource) {
 		ans = f.dataForDataSource(dataSource).GetData(tags, fromTimestamp, toTimestamp)
 	}
