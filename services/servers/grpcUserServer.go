@@ -58,6 +58,10 @@ func (s *server) KvsDelete(c context.Context, req *pb.KvsDeleteRequest) (*pb.Kvs
 	return s.storageManager.KvsDelete(c, req)
 }
 
+func (s *server) KvsGetKeys(c context.Context, req *pb.KvsAllKeysRequest) (*pb.KvsAllKeysResponse, error) {
+	return s.storageManager.KvsGetKeys(c, req)
+}
+
 func (s *server) TSSave(c context.Context, req *pb.TSStoreRequest) (*pb.TSStoreResponse, error) {
 	return s.storageManager.TSSave(c, req)
 }

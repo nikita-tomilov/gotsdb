@@ -2,11 +2,14 @@ syntax = "proto3";
 
 package proto;
 
+message void {}
+
 service GoTSDB {
   rpc KvsSave(KvsStoreRequest) returns (KvsStoreResponse);
   rpc KvsKeyExists(KvsKeyExistsRequest) returns (KvsKeyExistsResponse);
   rpc KvsRetrieve(KvsRetrieveRequest) returns (KvsRetrieveResponse);
   rpc KvsDelete(KvsDeleteRequest) returns (KvsDeleteResponse);
+  rpc KvsGetKeys(KvsAllKeysRequest) returns (KvsAllKeysResponse);
 
   rpc TSSave(TSStoreRequest) returns (TSStoreResponse);
   rpc TSRetrieve(TSRetrieveRequest) returns (TSRetrieveResponse);
@@ -51,6 +54,15 @@ message KvsDeleteRequest {
 message KvsDeleteResponse {
   uint32 msgId = 1;
   bool ok = 2;
+}
+
+message KvsAllKeysRequest {
+  uint32 msgId = 1;
+}
+
+message KvsAllKeysResponse {
+  uint32 msgId = 1;
+  repeated bytes keys = 2;
 }
 
 message TSPoints {

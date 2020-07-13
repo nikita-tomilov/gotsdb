@@ -18,6 +18,10 @@ func (f *FileKVS) createKey(s []byte) string {
 	return base58.Encode(s)
 }
 
+func (f *FileKVS) getKey(s string) []byte {
+	return base58.Decode(s)
+}
+
 func (f *FileKVS) toFilename(key []byte) string {
 	return f.Path + "/" + f.createKey(key)
 }
@@ -62,4 +66,15 @@ func (f *FileKVS) Delete(key []byte) {
 	fname := f.toFilename(key)
 	utils.DeleteFile(fname)
 	f.lock.Unlock()
+}
+
+func (f *FileKVS) GetAllKeys() [][]byte {
+	f.lock.Lock()
+	files := utils.GetFileNames(f.Path)
+	keys := make([][]byte, len(files))
+	for i, file := range files {
+		keys[i] = f.getKey(file)
+	}
+	f.lock.Unlock()
+	return keys
 }

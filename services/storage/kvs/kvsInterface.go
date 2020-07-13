@@ -6,4 +6,5 @@ type KeyValueStorage interface {
 	KeyExists(key []byte) bool
 	Retrieve(key []byte) []byte
 	Delete(key []byte)
+	GetAllKeys() [][]byte
 }

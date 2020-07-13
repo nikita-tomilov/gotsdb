@@ -86,6 +86,14 @@ func main() {
 		},
 	})
 
+	shell.AddCmd(&ishell.Cmd{
+		Name: "list",
+		Help: "list all keys",
+		Func: func(c *ishell.Context) {
+			c.Println(KvsListCmd(c, client))
+		},
+	})
+
 	shell.Run()
 }
 
@@ -97,7 +105,7 @@ func KvsSaveCmd(c *ishell.Context, client pb.GoTSDBClient) string {
 	value := []byte(stringValue)
 	request := &pb.KvsStoreRequest{
 		MsgId: msgId,
-		Key: key,
+		Key:   key,
 		Value: value,
 	}
 	response, err := client.KvsSave(context.TODO(), request)
@@ -118,7 +126,7 @@ func KvsRetrieveCmd(c *ishell.Context, client pb.GoTSDBClient) string {
 
 	request := &pb.KvsRetrieveRequest{
 		MsgId: msgId,
-		Key: key,
+		Key:   key,
 	}
 	response, err := client.KvsRetrieve(context.TODO(), request)
 	if err != nil {
@@ -135,7 +143,7 @@ func KvsKeyExistsCmd(c *ishell.Context, client pb.GoTSDBClient) string {
 
 	request := &pb.KvsKeyExistsRequest{
 		MsgId: msgId,
-		Key: key,
+		Key:   key,
 	}
 	response, err := client.KvsKeyExists(context.TODO(), request)
 	if err != nil {
@@ -155,7 +163,7 @@ func KvsDeleteCmd(c *ishell.Context, client pb.GoTSDBClient) string {
 
 	request := &pb.KvsDeleteRequest{
 		MsgId: msgId,
-		Key: key,
+		Key:   key,
 	}
 	response, err := client.KvsDelete(context.TODO(), request)
 	if err != nil {
@@ -166,4 +174,24 @@ func KvsDeleteCmd(c *ishell.Context, client pb.GoTSDBClient) string {
 		return "ok"
 	}
 	return "fail"
+}
+
+func KvsListCmd(c *ishell.Context, client pb.GoTSDBClient) string {
+	msgId += 1
+
+	request := &pb.KvsAllKeysRequest{
+		MsgId: msgId,
+	}
+	response, err := client.KvsGetKeys(context.TODO(), request)
+	if err != nil {
+		grpclog.Fatalf("fail to dial: %v", err)
+		return "err " + err.Error()
+	}
+
+	ans := ""
+	for _, key := range response.Keys {
+		ans = ans + string(key) + "; "
+	}
+
+	return "ok; " + ans
 }
