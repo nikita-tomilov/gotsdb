@@ -11,7 +11,7 @@ import (
 
 var msgId uint32 = 0
 
-func main() {
+func main1() { //wow you cannot have two mains in one package, cool
 	argsWithoutProg := os.Args[1:]
 	if len(argsWithoutProg) < 1 {
 		println("Usage: " + os.Args[0] + " <hostPort>")

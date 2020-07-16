@@ -1,6 +1,7 @@
 package dummytss
 
 import (
+	log "github.com/jeanphorn/log4go"
 	pb "github.com/nikita-tomilov/gotsdb/proto"
 	"time"
 )
@@ -13,10 +14,12 @@ type TSPointWithExpiration struct {
 }
 
 type TSforTag struct {
+	tag string
 	data map[uint64]TSPointWithExpiration
 }
 
-func (tagData *TSforTag) Init() {
+func (tagData *TSforTag) Init(tag string) {
+	tagData.tag = tag
 	tagData.data = make(map[uint64]TSPointWithExpiration)
 }
 
@@ -42,11 +45,12 @@ func (tagData *TSforTag) ExpirationCycle() {
 	now := getNowMillis()
 	for ts, point := range tagData.data {
 		if point.expireAt <= now {
+			log.Debug("expiring point for %s ts %d as it expires at %d and now it is %d", tagData.tag, ts, point.expireAt, now)
 			delete(tagData.data, ts)
 		}
 	}
 }
 
 func getNowMillis() uint64 {
-	return uint64(time.Now().UnixNano() / 1000)
+	return uint64(time.Now().UnixNano() / 1000000)
 }

@@ -16,7 +16,7 @@ func (dataSourceData *TSforDatasource) GetData(tags []string, fromTimestamp uint
 		if dataSourceData.contains(tag) {
 			ans[tag] = dataSourceData.dataForTag(tag).GetData(fromTimestamp, toTimestamp)
 		} else {
-			ans[tag] = &pb.TSPoints{} //TODO: throw exception?
+			ans[tag] = &pb.TSPoints{Points: make(map[uint64]float64)} //TODO: throw exception?
 		}
 	}
 	return ans
@@ -26,7 +26,7 @@ func (dataSourceData *TSforDatasource) SaveData(data map[string]*pb.TSPoints, ex
 	for tag, values := range data {
 		if !dataSourceData.contains(tag) {
 			dataForTag := TSforTag{}
-			dataForTag.Init()
+			dataForTag.Init(tag)
 			dataSourceData.data[tag] = dataForTag
 		}
 		dataSourceData.dataForTag(tag).SaveData(values, expiration)

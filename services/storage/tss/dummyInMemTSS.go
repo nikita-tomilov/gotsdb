@@ -8,21 +8,32 @@ import (
 )
 
 type InMemTSS struct {
+	isRunning bool
 	data map[string]dummytss.TSforDatasource
 	lock sync.Mutex
+	periodBetweenWipes time.Duration
 }
 
 func (f *InMemTSS) InitStorage() {
-	go func() {
-		for true {
-			f.lock.Lock()
-			for _, d := range f.data {
+	f.isRunning = true
+	if f.periodBetweenWipes == 0 * time.Second {
+		f.periodBetweenWipes = time.Second * 5
+	}
+	f.data = make(map[string]dummytss.TSforDatasource)
+	go func(s *InMemTSS) {
+		for s.isRunning {
+			s.lock.Lock()
+			for _, d := range s.data {
 				d.ExpirationCycle()
 			}
-			f.lock.Unlock()
-			time.Sleep(time.Second * 5)
+			s.lock.Unlock()
+			time.Sleep(s.periodBetweenWipes)
 		}
-	}()
+	}(f)
+}
+
+func (f *InMemTSS) CloseStorage() {
+	f.isRunning = false
 }
 
 func (f *InMemTSS) Save(dataSource string, data map[string]*pb.TSPoints, expirationMillis uint64) {

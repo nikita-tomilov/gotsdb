@@ -19,7 +19,7 @@ func (f *InMemKVS) getKey(s string) []byte {
 }
 
 func (f *InMemKVS) InitStorage() {
-	//nothing
+	f.data = make(map[string][]byte)
 }
 
 func (f *InMemKVS) Save(key []byte, value []byte) {
