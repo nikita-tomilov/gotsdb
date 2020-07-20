@@ -1,6 +1,10 @@
 package dummytss
 
-import pb "github.com/nikita-tomilov/gotsdb/proto"
+import (
+	pb "github.com/nikita-tomilov/gotsdb/proto"
+	"github.com/nikita-tomilov/gotsdb/utils"
+	"math"
+)
 
 type TSforDatasource struct {
 	data map[string]TSforTag
@@ -47,4 +51,32 @@ func (dataSourceData *TSforDatasource) contains(tag string) bool {
 func (dataSourceData *TSforDatasource) dataForTag(tag string) *TSforTag {
 	dataForTag := dataSourceData.data[tag]
 	return &dataForTag
+}
+
+func (dataSourceData *TSforDatasource) Availability(fromTimestamp uint64, toTimestamp uint64) []*pb.TSAvailabilityChunk {
+	ansMin := uint64(math.MaxUint64)
+	ansMax := uint64(0)
+
+	for _, data := range dataSourceData.data {
+		for ts, _ := range data.data {
+			ansMin = utils.Min(ts, ansMin)
+			ansMax = utils.Max(ts, ansMax)
+		}
+	}
+
+	if ansMin == uint64(math.MaxUint64) {
+		ansMin = 0
+	}
+
+	if ansMin != 0 {
+		ansMin = utils.Max(fromTimestamp, ansMin)
+	}
+
+	if ansMax != 0 {
+		ansMax = utils.Min(toTimestamp, ansMax)
+	}
+
+	ans := make([]*pb.TSAvailabilityChunk, 1)
+	ans[0] = &pb.TSAvailabilityChunk{FromTimestamp: ansMin, ToTimestamp: ansMax}
+	return ans
 }

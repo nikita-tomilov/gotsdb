@@ -17,6 +17,7 @@ service Cluster {
 
   rpc TSSave(TSStoreRequest) returns (TSStoreResponse);
   rpc TSRetrieve(TSRetrieveRequest) returns (TSRetrieveResponse);
+  rpc TSAvailability(TSAvailabilityRequest) returns (TSAvailabilityResponse);
 }
 
 message PingRequest {

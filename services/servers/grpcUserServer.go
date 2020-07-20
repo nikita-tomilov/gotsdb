@@ -69,3 +69,7 @@ func (s *server) TSSave(c context.Context, req *pb.TSStoreRequest) (*pb.TSStoreR
 func (s *server) TSRetrieve(c context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {
 	return s.storageManager.TSRetrieve(c, req)
 }
+
+func (s *server) TSAvailability(c context.Context, req *pb.TSAvailabilityRequest) (*pb.TSAvailabilityResponse, error) {
+	return s.storageManager.TSAvailability(c, req)
+}

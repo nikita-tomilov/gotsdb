@@ -149,3 +149,8 @@ func (c *ClusteredStorageManager) TSRetrieve(ctx context.Context, req *pb.TSRetr
 	ans := c.tssStorage.Retrieve(req.DataSource, req.Tags, req.FromTimestamp, req.ToTimestamp)
 	return &pb.TSRetrieveResponse{MsgId: req.MsgId, DataSource: req.DataSource, FromTimestamp: req.FromTimestamp, ToTimestamp: req.ToTimestamp, Values: ans}, nil
 }
+
+func (c *ClusteredStorageManager) TSAvailability(ctx context.Context, req *pb.TSAvailabilityRequest) (*pb.TSAvailabilityResponse, error) {
+	ans := c.tssStorage.Availability(req.DataSource, req.FromTimestamp, req.ToTimestamp)
+	return &pb.TSAvailabilityResponse{MsgId: req.MsgId, Availability: ans}, nil
+}

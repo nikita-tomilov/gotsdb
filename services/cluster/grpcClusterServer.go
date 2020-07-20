@@ -86,3 +86,7 @@ func (s *clusterServer) TSSave(c context.Context, req *pb.TSStoreRequest) (*pb.T
 func (s *clusterServer) TSRetrieve(c context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {
 	return s.parent.storageManager.TSRetrieve(c, req)
 }
+
+func (s *clusterServer) TSAvailability(c context.Context, req *pb.TSAvailabilityRequest) (*pb.TSAvailabilityResponse, error) {
+	return s.parent.storageManager.TSAvailability(c, req)
+}

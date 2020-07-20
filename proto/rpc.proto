@@ -13,6 +13,7 @@ service GoTSDB {
 
   rpc TSSave(TSStoreRequest) returns (TSStoreResponse);
   rpc TSRetrieve(TSRetrieveRequest) returns (TSRetrieveResponse);
+  rpc TSAvailability(TSAvailabilityRequest) returns (TSAvailabilityResponse);
 }
 
 message KvsStoreRequest {
@@ -95,4 +96,21 @@ message TSRetrieveResponse {
   uint64 fromTimestamp = 3;
   uint64 toTimestamp = 4;
   map<string, TSPoints> values = 5;
+}
+
+message TSAvailabilityRequest {
+  uint32 msgId = 1;
+  string dataSource = 2;
+  uint64 fromTimestamp = 3;
+  uint64 toTimestamp = 4;
+}
+
+message TSAvailabilityResponse {
+  uint32 msgId = 1;
+  repeated TSAvailabilityChunk availability = 2;
+}
+
+message TSAvailabilityChunk {
+  uint64 fromTimestamp = 1;
+  uint64 toTimestamp = 2;
 }

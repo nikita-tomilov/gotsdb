@@ -57,6 +57,18 @@ func (f *InMemTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint
 	return ans
 }
 
+func (f *InMemTSS) Availability(dataSource string, fromTimestamp uint64, toTimestamp uint64) []*pb.TSAvailabilityChunk {
+	f.lock.Lock()
+	var ans []*pb.TSAvailabilityChunk
+	if f.contains(dataSource) {
+		ans = f.dataForDataSource(dataSource).Availability(fromTimestamp, toTimestamp)
+	} else {
+		ans = make([]*pb.TSAvailabilityChunk, 0)
+	}
+	f.lock.Unlock()
+	return ans
+}
+
 func (f *InMemTSS) contains(dataSource string) bool {
 	_, found := f.data[dataSource]
 	return found

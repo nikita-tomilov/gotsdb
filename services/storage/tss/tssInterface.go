@@ -9,4 +9,5 @@ type TimeSeriesStorage interface {
 	CloseStorage()
 	Save(dataSource string, data map[string]*pb.TSPoints, expirationMillis uint64)
 	Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*pb.TSPoints
+	Availability(dataSource string, fromTimestamp uint64, toTimestamp uint64) []*pb.TSAvailabilityChunk
 }

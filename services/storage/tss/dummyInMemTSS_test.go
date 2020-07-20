@@ -44,6 +44,11 @@ func TestInMemTSS_BasicFunctionsWork3(t *testing.T) {
 	//then
 	assert.Equal(t, dataToStore[testTag1], retrievedData[testTag1], "Data for tag1 for 04.05-06.05 should be same")
 	assert.Equal(t, dataToStore[testTag2], retrievedData[testTag2], "Data for tag2 for 04.05-06.05 should be empty")
+	//when
+	avail := s.Availability(testDataSource, 0, may060520+10000)
+	//then
+	assert.Equal(t, 1, len(avail))
+	assert.Equal(t, &pb.TSAvailabilityChunk{FromTimestamp: may040520, ToTimestamp: may050520 + 2000}, avail[0])
 }
 
 func TestInMemTSS_ExpirationWorks1(t *testing.T) {
@@ -58,6 +63,11 @@ func TestInMemTSS_ExpirationWorks1(t *testing.T) {
 	//then
 	assert.Equal(t, make(map[uint64]float64), retrievedData[testTag1].Points, "Data for tag1 should be expired")
 	assert.Equal(t, make(map[uint64]float64), retrievedData[testTag2].Points, "Data for tag2 should be expired")
+	//when
+	avail := s.Availability(testDataSource, 0, may060520+10000)
+	//then
+	assert.Equal(t, 1, len(avail))
+	assert.Equal(t, &pb.TSAvailabilityChunk{FromTimestamp: 0, ToTimestamp: 0}, avail[0])
 }
 
 func TestInMemTSS_ExpirationWorks2(t *testing.T) {
@@ -72,8 +82,12 @@ func TestInMemTSS_ExpirationWorks2(t *testing.T) {
 	//then
 	assert.Equal(t, dataToStore[testTag1], retrievedData[testTag1], "Data for tag1 should not be expired")
 	assert.Equal(t, dataToStore[testTag2], retrievedData[testTag2], "Data for tag2 should not be expired")
+	//when
+	avail := s.Availability(testDataSource, 0, may060520+10000)
+	//then
+	assert.Equal(t, 1, len(avail))
+	assert.Equal(t, &pb.TSAvailabilityChunk{FromTimestamp: may040520, ToTimestamp: may050520 + 2000}, avail[0])
 }
-
 
 func buildStorage() *InMemTSS {
 	s := InMemTSS{periodBetweenWipes: time.Second * 1}
