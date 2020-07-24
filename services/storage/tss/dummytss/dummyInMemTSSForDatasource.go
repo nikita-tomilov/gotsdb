@@ -74,6 +74,14 @@ func (dataSourceData *TSforDatasource) Availability(fromTimestamp uint64, toTime
 
 	if ansMax != 0 {
 		ansMax = utils.Min(toTimestamp, ansMax)
+		if ansMax <= fromTimestamp {
+			ansMax = toTimestamp
+		}
+	}
+
+	if ansMin >= ansMax {
+		ans := make([]*pb.TSAvailabilityChunk, 0)
+		return ans
 	}
 
 	ans := make([]*pb.TSAvailabilityChunk, 1)
