@@ -9,7 +9,7 @@ import (
 
 func TestInMemTSS_BasicFunctionsWork1(t *testing.T) {
 	//given
-	s := buildStorage()
+	s := buildInMemStorage()
 	defer s.CloseStorage()
 	dataToStore := buildData()
 	//when
@@ -22,7 +22,7 @@ func TestInMemTSS_BasicFunctionsWork1(t *testing.T) {
 
 func TestInMemTSS_BasicFunctionsWork2(t *testing.T) {
 	//given
-	s := buildStorage()
+	s := buildInMemStorage()
 	defer s.CloseStorage()
 	dataToStore := buildData()
 	//when
@@ -35,7 +35,7 @@ func TestInMemTSS_BasicFunctionsWork2(t *testing.T) {
 
 func TestInMemTSS_BasicFunctionsWork3(t *testing.T) {
 	//given
-	s := buildStorage()
+	s := buildInMemStorage()
 	defer s.CloseStorage()
 	dataToStore := buildData()
 	//when
@@ -53,7 +53,7 @@ func TestInMemTSS_BasicFunctionsWork3(t *testing.T) {
 
 func TestInMemTSS_ExpirationWorks1(t *testing.T) {
 	//given
-	s := buildStorage()
+	s := buildInMemStorage()
 	defer s.CloseStorage()
 	dataToStore := buildData()
 	//when
@@ -72,7 +72,7 @@ func TestInMemTSS_ExpirationWorks1(t *testing.T) {
 
 func TestInMemTSS_ExpirationWorks2(t *testing.T) {
 	//given
-	s := buildStorage()
+	s := buildInMemStorage()
 	defer s.CloseStorage()
 	dataToStore := buildData()
 	//when
@@ -89,7 +89,7 @@ func TestInMemTSS_ExpirationWorks2(t *testing.T) {
 	assert.Equal(t, &pb.TSAvailabilityChunk{FromTimestamp: may040520, ToTimestamp: may050520 + 2000}, avail[0])
 }
 
-func buildStorage() *InMemTSS {
+func buildInMemStorage() *InMemTSS {
 	s := InMemTSS{periodBetweenWipes: time.Second * 1}
 	s.InitStorage()
 	return &s

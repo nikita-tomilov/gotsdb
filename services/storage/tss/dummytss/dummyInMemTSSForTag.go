@@ -3,7 +3,7 @@ package dummytss
 import (
 	log "github.com/jeanphorn/log4go"
 	pb "github.com/nikita-tomilov/gotsdb/proto"
-	"time"
+	"github.com/nikita-tomilov/gotsdb/utils"
 )
 
 //TODO: treemap?
@@ -34,7 +34,7 @@ func (tagData *TSforTag) GetData(fromTimestamp uint64, toTimestamp uint64) *pb.T
 }
 
 func (tagData *TSforTag) SaveData(data *pb.TSPoints, expirationMillis uint64) {
-	now := getNowMillis()
+	now := utils.GetNowMillis()
 	expireAt := now + expirationMillis
 	for timestamp, value := range data.Points {
 		tagData.data[timestamp] = TSPointWithExpiration{value, expireAt}
@@ -42,15 +42,11 @@ func (tagData *TSforTag) SaveData(data *pb.TSPoints, expirationMillis uint64) {
 }
 
 func (tagData *TSforTag) ExpirationCycle() {
-	now := getNowMillis()
+	now := utils.GetNowMillis()
 	for ts, point := range tagData.data {
 		if point.expireAt <= now {
 			log.Debug("expiring point for %s ts %d as it expires at %d and now it is %d", tagData.tag, ts, point.expireAt, now)
 			delete(tagData.data, ts)
 		}
 	}
-}
-
-func getNowMillis() uint64 {
-	return uint64(time.Now().UnixNano() / 1000000)
 }

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 )
 
 func ToString(e interface{}) string {
@@ -110,4 +111,8 @@ func Max(a uint64, b uint64) uint64 {
 		return a
 	}
 	return b
+}
+
+func GetNowMillis() uint64 {
+	return uint64(time.Now().UnixNano() / 1000000)
 }

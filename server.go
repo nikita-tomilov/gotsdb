@@ -62,7 +62,7 @@ func setupDI() {
 	case tssEnginePropertyInMemValue:
 		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.InMemTSS{}, tssStorageBeanType)
 	case tssEnginePropertyFileValue:
-		panic("file-based tss is currently unsupported") //TODO: support
+		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.QlBasedPersistentTSS{}, tssStorageBeanType)
 	}
 
 	summer.PerformDependencyInjection()
