@@ -17,13 +17,15 @@ type QlBasedPersistentTSS struct {
 	ctx  *ql.TCtx
 	db   *ql.DB
 	Path string `summer.property:"ts.filePath|/tmp/gotsdb/tss"`
+	dbFilePath string
 	periodBetweenWipes time.Duration
 	isRunning bool
 }
 
 func (qp *QlBasedPersistentTSS) InitStorage() {
 	_ = os.MkdirAll(qp.Path, os.ModePerm)
-	db, err := ql.OpenFile(qp.Path+"/file.bin", &ql.Options{CanCreate: true, FileFormat: 1})
+	qp.dbFilePath = qp.Path+"/db.bin"
+	db, err := ql.OpenFile(qp.dbFilePath, &ql.Options{CanCreate: true, FileFormat: 1})
 	if err != nil {
 		panic("Unable to instantiate db " + err.Error())
 	}
@@ -141,7 +143,7 @@ func (qp *QlBasedPersistentTSS) Availability(dataSource string, fromTimestamp ui
 }
 
 func (qp *QlBasedPersistentTSS) String() string {
-	return "QlBasedPersistentTSS"
+	return fmt.Sprintf("QlBasedPersistentTSS on file %s", qp.dbFilePath)
 }
 
 func (qp *QlBasedPersistentTSS) expirationCycle() {

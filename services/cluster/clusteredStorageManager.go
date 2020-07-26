@@ -3,6 +3,7 @@ package cluster
 import (
 	"bytes"
 	"context"
+	log "github.com/jeanphorn/log4go"
 	pb "github.com/nikita-tomilov/gotsdb/proto"
 	"github.com/nikita-tomilov/gotsdb/services/storage"
 	"github.com/nikita-tomilov/gotsdb/services/storage/kvs"
@@ -34,8 +35,10 @@ func (c *ClusteredStorageManager) getTsStorage() tss.TimeSeriesStorage {
 func (c *ClusteredStorageManager) InitStorage() {
 	c.kvsStorage = c.getKvsStorage()
 	c.kvsStorage.InitStorage()
+	log.Warn("Using '%s' as KeyValue storage backend", c.kvsStorage.String())
 	c.tssStorage = c.getTsStorage()
 	c.tssStorage.InitStorage()
+	log.Warn("Using '%s' as TimeSeries storage backend", c.tssStorage.String())
 	c.proxiedCommands = storage.NewTTLSet(10000, 10)
 }
 

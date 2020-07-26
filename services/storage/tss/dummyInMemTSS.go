@@ -70,7 +70,7 @@ func (f *InMemTSS) Availability(dataSource string, fromTimestamp uint64, toTimes
 }
 
 func (f *InMemTSS) String() string {
-	return "InMemTSS"
+	return "Dummy In-Memory map-based TSS"
 }
 
 func (f *InMemTSS) contains(dataSource string) bool {
