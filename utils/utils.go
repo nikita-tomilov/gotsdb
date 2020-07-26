@@ -90,7 +90,6 @@ func ComputeHashCode(arr []byte) uint32 {
 		hash = (hash ^ b2) * p
 	}
 
-
 	hash += hash << 13
 	hash ^= hash >> 7
 	hash += hash << 3

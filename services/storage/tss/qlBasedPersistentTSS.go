@@ -10,12 +10,15 @@ import (
 	"modernc.org/ql"
 	"os"
 	"strings"
+	"time"
 )
 
 type QlBasedPersistentTSS struct {
 	ctx  *ql.TCtx
 	db   *ql.DB
 	Path string `summer.property:"ts.filePath|/tmp/gotsdb/tss"`
+	periodBetweenWipes time.Duration
+	isRunning bool
 }
 
 func (qp *QlBasedPersistentTSS) InitStorage() {
@@ -27,6 +30,17 @@ func (qp *QlBasedPersistentTSS) InitStorage() {
 	qp.ctx = &ql.TCtx{}
 	qp.db = db
 	qp.createTableIfNotExists()
+
+	qp.isRunning = true
+	if qp.periodBetweenWipes == 0 * time.Second {
+		qp.periodBetweenWipes = time.Second * 5
+	}
+	go func(qp *QlBasedPersistentTSS) {
+		for qp.isRunning {
+			qp.expirationCycle()
+			time.Sleep(qp.periodBetweenWipes)
+		}
+	}(qp)
 }
 
 func (qp *QlBasedPersistentTSS) createTableIfNotExists() {
@@ -47,6 +61,7 @@ func (qp *QlBasedPersistentTSS) createTableIfNotExists() {
 
 func (qp *QlBasedPersistentTSS) CloseStorage() {
 	qp.db.Close()
+	qp.isRunning = false
 }
 
 func (qp *QlBasedPersistentTSS) Save(dataSource string, data map[string]*proto.TSPoints, expirationMillis uint64) {
@@ -95,5 +110,46 @@ func (qp *QlBasedPersistentTSS) Retrieve(dataSource string, tags []string, fromT
 }
 
 func (qp *QlBasedPersistentTSS) Availability(dataSource string, fromTimestamp uint64, toTimestamp uint64) []*proto.TSAvailabilityChunk {
-	panic("implement me")
+	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM RawData WHERE ds = \"%s\";", dataSource)
+	res, _, err := qp.db.Run(qp.ctx, rq)
+	min := uint64(math.MaxUint64)
+	max := uint64(0)
+	if err != nil {
+		log.Error("Error in DB in Availability: " + err.Error())
+		ans := make([]*proto.TSAvailabilityChunk, 0)
+		return ans
+	} else {
+		for _, ress := range res {
+			rows, _ := ress.Rows(math.MaxInt64, 0)
+			for _, row := range rows {
+				if (row[0] != nil) && (row[1] != nil) {
+					min = utils.Min(min, row[0].(uint64))
+					max = utils.Max(max, row[1].(uint64))
+				}
+			}
+		}
+	}
+	if min >= max {
+		ans := make([]*proto.TSAvailabilityChunk, 0)
+		return ans
+	}
+	min = utils.Max(fromTimestamp, min)
+	max = utils.Min(toTimestamp, max)
+	ans := make([]*proto.TSAvailabilityChunk, 1)
+	ans[0] = &proto.TSAvailabilityChunk{FromTimestamp:min, ToTimestamp:max}
+	return ans
+}
+
+func (qp *QlBasedPersistentTSS) String() string {
+	return "QlBasedPersistentTSS"
+}
+
+func (qp *QlBasedPersistentTSS) expirationCycle() {
+	now := utils.GetNowMillis()
+	rq := fmt.Sprintf("BEGIN TRANSACTION;DELETE FROM RawData WHERE expat <= %d;COMMIT;", now)
+	_, _, err := qp.db.Run(qp.ctx, rq)
+
+	if err != nil {
+		log.Error("Error in DB in expirationCycle: " + err.Error())
+	}
 }

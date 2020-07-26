@@ -69,6 +69,10 @@ func (f *InMemTSS) Availability(dataSource string, fromTimestamp uint64, toTimes
 	return ans
 }
 
+func (f *InMemTSS) String() string {
+	return "InMemTSS"
+}
+
 func (f *InMemTSS) contains(dataSource string) bool {
 	_, found := f.data[dataSource]
 	return found
