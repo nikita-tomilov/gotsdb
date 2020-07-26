@@ -22,6 +22,10 @@ func (f *InMemKVS) InitStorage() {
 	f.data = make(map[string][]byte)
 }
 
+func (f *InMemKVS) CloseStorage() {
+	//nothing here
+}
+
 func (f *InMemKVS) Save(key []byte, value []byte) {
 	f.lock.Lock()
 	f.data[f.createKey(key)] = value
@@ -58,4 +62,8 @@ func (f *InMemKVS) GetAllKeys() [][]byte {
 	}
 	f.lock.Unlock()
 	return keys
+}
+
+func (f *InMemKVS) String() string {
+	return "Simple in-memory map-based KVS"
 }

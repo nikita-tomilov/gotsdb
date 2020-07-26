@@ -127,7 +127,8 @@ func buildInMemStorage() *InMemTSS {
 }
 
 func buildQlStorage() *QlBasedPersistentTSS {
-	s := QlBasedPersistentTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d", utils.GetNowMillis()), periodBetweenWipes: time.Second * 1}
+	idx += 1
+	s := QlBasedPersistentTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), periodBetweenWipes: time.Second * 1}
 	s.InitStorage()
 	return &s
 }
@@ -154,3 +155,4 @@ const testTag2 string = "test-tag-2"
 const may040520 = 1588550400000
 const may050520 = 1588636800000
 const may060520 = 1588723200000
+var idx = 0

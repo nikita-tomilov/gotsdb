@@ -141,16 +141,19 @@ func (c *ClusteredStorageManager) KvsGetKeys(ctx context.Context, req *pb.KvsAll
 }
 
 func (c *ClusteredStorageManager) TSSave(ctx context.Context, req *pb.TSStoreRequest) (*pb.TSStoreResponse, error) {
+	//TODO: cluster mode
 	c.tssStorage.Save(req.DataSource, req.Values, req.ExpirationMillis)
 	return &pb.TSStoreResponse{MsgId: req.MsgId, Ok: true}, nil
 }
 
 func (c *ClusteredStorageManager) TSRetrieve(ctx context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {
+	//TODO: cluster mode
 	ans := c.tssStorage.Retrieve(req.DataSource, req.Tags, req.FromTimestamp, req.ToTimestamp)
 	return &pb.TSRetrieveResponse{MsgId: req.MsgId, DataSource: req.DataSource, FromTimestamp: req.FromTimestamp, ToTimestamp: req.ToTimestamp, Values: ans}, nil
 }
 
 func (c *ClusteredStorageManager) TSAvailability(ctx context.Context, req *pb.TSAvailabilityRequest) (*pb.TSAvailabilityResponse, error) {
+	//TODO: cluster mode
 	ans := c.tssStorage.Availability(req.DataSource, req.FromTimestamp, req.ToTimestamp)
 	return &pb.TSAvailabilityResponse{MsgId: req.MsgId, Availability: ans}, nil
 }
