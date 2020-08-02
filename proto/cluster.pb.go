@@ -24,37 +24,6 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type Void struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *Void) Reset()         { *m = Void{} }
-func (m *Void) String() string { return proto.CompactTextString(m) }
-func (*Void) ProtoMessage()    {}
-func (*Void) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3cfb3b8ec240c376, []int{0}
-}
-
-func (m *Void) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Void.Unmarshal(m, b)
-}
-func (m *Void) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Void.Marshal(b, m, deterministic)
-}
-func (m *Void) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Void.Merge(m, src)
-}
-func (m *Void) XXX_Size() int {
-	return xxx_messageInfo_Void.Size(m)
-}
-func (m *Void) XXX_DiscardUnknown() {
-	xxx_messageInfo_Void.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Void proto.InternalMessageInfo
-
 type PingRequest struct {
 	Payload              []byte   `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -66,7 +35,7 @@ func (m *PingRequest) Reset()         { *m = PingRequest{} }
 func (m *PingRequest) String() string { return proto.CompactTextString(m) }
 func (*PingRequest) ProtoMessage()    {}
 func (*PingRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3cfb3b8ec240c376, []int{1}
+	return fileDescriptor_3cfb3b8ec240c376, []int{0}
 }
 
 func (m *PingRequest) XXX_Unmarshal(b []byte) error {
@@ -105,7 +74,7 @@ func (m *PingResponse) Reset()         { *m = PingResponse{} }
 func (m *PingResponse) String() string { return proto.CompactTextString(m) }
 func (*PingResponse) ProtoMessage()    {}
 func (*PingResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3cfb3b8ec240c376, []int{2}
+	return fileDescriptor_3cfb3b8ec240c376, []int{1}
 }
 
 func (m *PingResponse) XXX_Unmarshal(b []byte) error {
@@ -145,7 +114,7 @@ func (m *Node) Reset()         { *m = Node{} }
 func (m *Node) String() string { return proto.CompactTextString(m) }
 func (*Node) ProtoMessage()    {}
 func (*Node) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3cfb3b8ec240c376, []int{3}
+	return fileDescriptor_3cfb3b8ec240c376, []int{2}
 }
 
 func (m *Node) XXX_Unmarshal(b []byte) error {
@@ -191,7 +160,7 @@ func (m *HelloRequest) Reset()         { *m = HelloRequest{} }
 func (m *HelloRequest) String() string { return proto.CompactTextString(m) }
 func (*HelloRequest) ProtoMessage()    {}
 func (*HelloRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3cfb3b8ec240c376, []int{4}
+	return fileDescriptor_3cfb3b8ec240c376, []int{3}
 }
 
 func (m *HelloRequest) XXX_Unmarshal(b []byte) error {
@@ -230,7 +199,7 @@ func (m *AliveNodesResponse) Reset()         { *m = AliveNodesResponse{} }
 func (m *AliveNodesResponse) String() string { return proto.CompactTextString(m) }
 func (*AliveNodesResponse) ProtoMessage()    {}
 func (*AliveNodesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3cfb3b8ec240c376, []int{5}
+	return fileDescriptor_3cfb3b8ec240c376, []int{4}
 }
 
 func (m *AliveNodesResponse) XXX_Unmarshal(b []byte) error {
@@ -259,7 +228,6 @@ func (m *AliveNodesResponse) GetAliveNodes() []*Node {
 }
 
 func init() {
-	proto.RegisterType((*Void)(nil), "proto.void")
 	proto.RegisterType((*PingRequest)(nil), "proto.PingRequest")
 	proto.RegisterType((*PingResponse)(nil), "proto.PingResponse")
 	proto.RegisterType((*Node)(nil), "proto.Node")
@@ -272,30 +240,34 @@ func init() {
 }
 
 var fileDescriptor_3cfb3b8ec240c376 = []byte{
-	// 359 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x91, 0x41, 0x6b, 0xea, 0x40,
-	0x14, 0x85, 0xf1, 0x19, 0x15, 0x6f, 0x22, 0x3c, 0xe6, 0xc1, 0x6b, 0x4c, 0x29, 0x48, 0x36, 0x95,
-	0x96, 0x5a, 0xb0, 0x0b, 0xa1, 0x8b, 0x82, 0xd4, 0xd6, 0x42, 0xa0, 0x48, 0xfc, 0x05, 0x69, 0x72,
-	0x91, 0x81, 0x34, 0x93, 0x66, 0x26, 0x43, 0xfd, 0x65, 0xfd, 0x7b, 0x25, 0x93, 0x19, 0x4d, 0xab,
-	0xb8, 0x4a, 0xe6, 0x3b, 0xe7, 0x9e, 0x7b, 0x32, 0x81, 0x41, 0x9c, 0x96, 0x5c, 0x60, 0x31, 0xc9,
-	0x0b, 0x26, 0x18, 0xe9, 0xa8, 0x87, 0xd7, 0x2f, 0xf2, 0xb8, 0x26, 0x7e, 0x17, 0x2c, 0xc9, 0x68,
-	0xe2, 0x5f, 0x82, 0xbd, 0xa2, 0xd9, 0x26, 0xc4, 0x8f, 0x12, 0xb9, 0x20, 0x2e, 0xf4, 0xf2, 0x68,
-	0x9b, 0xb2, 0x28, 0x71, 0x5b, 0xa3, 0xd6, 0xd8, 0x09, 0xcd, 0xd1, 0x1f, 0x83, 0x53, 0x1b, 0x79,
-	0xce, 0x32, 0x8e, 0x27, 0x9c, 0xcf, 0x60, 0xbd, 0xb2, 0x04, 0xc9, 0x15, 0xfc, 0x8d, 0x59, 0x96,
-	0x61, 0x2c, 0x28, 0xcb, 0xd6, 0xa2, 0xa0, 0xd9, 0x46, 0x59, 0xfb, 0xe1, 0x01, 0x27, 0x04, 0xac,
-	0xb2, 0xa4, 0x89, 0xfb, 0x47, 0xe9, 0xea, 0xdd, 0xbf, 0x01, 0xe7, 0x05, 0xd3, 0x94, 0x99, 0x6e,
-	0x17, 0xd0, 0xa6, 0xd1, 0xbb, 0x8a, 0xb0, 0xa7, 0x76, 0xfd, 0x1d, 0x93, 0x6a, 0x53, 0x58, 0x71,
-	0x7f, 0x0e, 0x64, 0x9e, 0x52, 0x89, 0x15, 0xe1, 0xbb, 0x9a, 0xd7, 0x00, 0xd1, 0x8e, 0xba, 0xad,
-	0x51, 0xfb, 0xf7, 0x6c, 0x43, 0x9e, 0x7e, 0xb5, 0xa1, 0xf7, 0x58, 0x5f, 0x1c, 0xb9, 0x05, 0x6b,
-	0xa5, 0x9a, 0x69, 0x73, 0xe3, 0x96, 0xbc, 0x7f, 0x3f, 0x98, 0xde, 0x34, 0x83, 0x8e, 0xaa, 0x4b,
-	0x8c, 0xda, 0x2c, 0xef, 0x0d, 0x35, 0x3c, 0x52, 0x71, 0x06, 0x83, 0x25, 0x8a, 0xbd, 0x40, 0x4c,
-	0xbf, 0xea, 0x07, 0x9d, 0x1a, 0xbc, 0x87, 0x5e, 0x20, 0xf9, 0x3a, 0x92, 0x48, 0xfe, 0x6b, 0x57,
-	0x75, 0x16, 0xac, 0x40, 0xb3, 0xf6, 0xec, 0x80, 0xeb, 0xd9, 0x25, 0x38, 0x81, 0xe4, 0x01, 0x6e,
-	0x9f, 0x3e, 0x29, 0x17, 0x9c, 0x78, 0x7b, 0xe3, 0x0e, 0x9a, 0x90, 0xf3, 0xa3, 0x9a, 0x0e, 0x5a,
-	0x80, 0x1d, 0x48, 0x1e, 0xa2, 0x28, 0x28, 0x4a, 0x24, 0xc3, 0xbd, 0xd7, 0x30, 0x13, 0xe3, 0x1d,
-	0x93, 0x74, 0xca, 0x03, 0xf4, 0x03, 0xc9, 0x17, 0x98, 0xa2, 0x40, 0xd2, 0x28, 0x5d, 0x13, 0x93,
-	0xe0, 0x1e, 0x0a, 0xf5, 0xfc, 0x5b, 0x57, 0x09, 0x77, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0xcb,
-	0xc6, 0x23, 0xe7, 0xf8, 0x02, 0x00, 0x00,
+	// 431 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x91, 0x51, 0x6b, 0xd4, 0x40,
+	0x14, 0x85, 0x59, 0xbb, 0xdb, 0x65, 0xef, 0xa6, 0x22, 0x23, 0xd6, 0x6c, 0xb4, 0x50, 0xf2, 0x62,
+	0x51, 0xac, 0x50, 0x1f, 0x0a, 0x3e, 0x08, 0xc1, 0xea, 0x0a, 0x41, 0x29, 0x49, 0xfe, 0x40, 0x9a,
+	0x5c, 0xca, 0xc0, 0x98, 0x89, 0x99, 0xc9, 0x60, 0x7e, 0xa0, 0xff, 0x4b, 0x32, 0x99, 0x49, 0xd2,
+	0x6c, 0xec, 0xd3, 0x6e, 0xbe, 0x73, 0xee, 0xb9, 0x27, 0x37, 0x70, 0x92, 0xb1, 0x5a, 0x48, 0xac,
+	0x2e, 0xcb, 0x8a, 0x4b, 0x4e, 0x56, 0xfa, 0xc7, 0xdb, 0x54, 0x65, 0xd6, 0x11, 0xff, 0x0d, 0x6c,
+	0x6f, 0x69, 0x71, 0x1f, 0xe1, 0xef, 0x1a, 0x85, 0x24, 0x2e, 0xac, 0xcb, 0xb4, 0x61, 0x3c, 0xcd,
+	0xdd, 0xc5, 0xf9, 0xe2, 0xc2, 0x89, 0xec, 0xa3, 0x7f, 0x01, 0x4e, 0x67, 0x14, 0x25, 0x2f, 0x04,
+	0x3e, 0xe2, 0xfc, 0x06, 0xcb, 0x9f, 0x3c, 0x47, 0xf2, 0x16, 0x9e, 0x65, 0xbc, 0x28, 0x30, 0x93,
+	0x94, 0x17, 0xb1, 0xac, 0x68, 0x71, 0xaf, 0xad, 0x9b, 0xe8, 0x80, 0x13, 0x02, 0xcb, 0xba, 0xa6,
+	0xb9, 0xfb, 0x44, 0xeb, 0xfa, 0xbf, 0xff, 0x1e, 0x9c, 0xef, 0xc8, 0x18, 0xb7, 0xdd, 0xce, 0xe0,
+	0x88, 0xa6, 0xbf, 0x74, 0xc4, 0xf6, 0x6a, 0xdb, 0xf5, 0xbf, 0x6c, 0x37, 0x45, 0x2d, 0xf7, 0x03,
+	0x20, 0x01, 0xa3, 0x0a, 0x5b, 0x22, 0xfa, 0x9a, 0xef, 0x00, 0xd2, 0x9e, 0xba, 0x8b, 0xf3, 0xa3,
+	0xe9, 0xec, 0x48, 0xbe, 0xfa, 0xbb, 0x82, 0xf5, 0x97, 0xee, 0x60, 0xe4, 0x03, 0x2c, 0x6f, 0x75,
+	0x33, 0x63, 0x1e, 0x5d, 0xc9, 0x7b, 0xfe, 0x80, 0x99, 0x4d, 0xd7, 0xb0, 0xd2, 0x75, 0x89, 0x55,
+	0xc7, 0xe5, 0xbd, 0x9d, 0x81, 0x33, 0x15, 0xaf, 0xe1, 0x64, 0x8f, 0x72, 0x10, 0x88, 0xed, 0xa7,
+	0x38, 0xcd, 0x1f, 0x1b, 0xfc, 0x04, 0xeb, 0x50, 0x89, 0x38, 0x55, 0x48, 0x4e, 0x8d, 0xab, 0x7d,
+	0x96, 0xbc, 0x42, 0xbb, 0xf6, 0xe5, 0x01, 0x37, 0xb3, 0x7b, 0x70, 0x42, 0x25, 0x42, 0x6c, 0xbe,
+	0xfe, 0xa1, 0x42, 0x0a, 0xe2, 0x0d, 0xc6, 0x1e, 0xda, 0x90, 0x57, 0xb3, 0x9a, 0x09, 0xba, 0x81,
+	0x6d, 0xa8, 0x44, 0x84, 0xb2, 0xa2, 0xa8, 0x90, 0xec, 0x06, 0xaf, 0x65, 0x36, 0xc6, 0x9b, 0x93,
+	0x4c, 0xca, 0x67, 0xd8, 0x84, 0x4a, 0xdc, 0x20, 0x43, 0x89, 0x64, 0x54, 0xba, 0x23, 0x36, 0xc1,
+	0x3d, 0x14, 0xcc, 0x7c, 0x00, 0x10, 0x2a, 0xb1, 0x47, 0x19, 0x62, 0x23, 0xc8, 0xc8, 0x17, 0x30,
+	0xd6, 0xa2, 0xe9, 0x67, 0x18, 0x2b, 0xfd, 0x67, 0x38, 0x4e, 0x62, 0x7d, 0xcc, 0x17, 0xc6, 0x94,
+	0xc4, 0x0f, 0x6e, 0x79, 0x3a, 0xc5, 0xc3, 0xee, 0x24, 0xee, 0x0f, 0xe0, 0xf6, 0xae, 0xe9, 0xfb,
+	0xef, 0x66, 0x14, 0x13, 0xf1, 0x03, 0x9e, 0x26, 0x71, 0xa0, 0x52, 0xca, 0xd2, 0x3b, 0xca, 0xa8,
+	0x6c, 0xc8, 0xeb, 0xde, 0x3c, 0xc6, 0x36, 0xea, 0xec, 0x3f, 0x6a, 0x17, 0x77, 0x77, 0xac, 0xd5,
+	0x8f, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x41, 0x6a, 0x49, 0xd5, 0xfe, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -317,6 +289,10 @@ type ClusterClient interface {
 	KvsKeyExists(ctx context.Context, in *KvsKeyExistsRequest, opts ...grpc.CallOption) (*KvsKeyExistsResponse, error)
 	KvsRetrieve(ctx context.Context, in *KvsRetrieveRequest, opts ...grpc.CallOption) (*KvsRetrieveResponse, error)
 	KvsDelete(ctx context.Context, in *KvsDeleteRequest, opts ...grpc.CallOption) (*KvsDeleteResponse, error)
+	KvsGetKeys(ctx context.Context, in *KvsAllKeysRequest, opts ...grpc.CallOption) (*KvsAllKeysResponse, error)
+	TSSave(ctx context.Context, in *TSStoreRequest, opts ...grpc.CallOption) (*TSStoreResponse, error)
+	TSRetrieve(ctx context.Context, in *TSRetrieveRequest, opts ...grpc.CallOption) (*TSRetrieveResponse, error)
+	TSAvailability(ctx context.Context, in *TSAvailabilityRequest, opts ...grpc.CallOption) (*TSAvailabilityResponse, error)
 }
 
 type clusterClient struct {
@@ -390,6 +366,42 @@ func (c *clusterClient) KvsDelete(ctx context.Context, in *KvsDeleteRequest, opt
 	return out, nil
 }
 
+func (c *clusterClient) KvsGetKeys(ctx context.Context, in *KvsAllKeysRequest, opts ...grpc.CallOption) (*KvsAllKeysResponse, error) {
+	out := new(KvsAllKeysResponse)
+	err := c.cc.Invoke(ctx, "/proto.Cluster/KvsGetKeys", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clusterClient) TSSave(ctx context.Context, in *TSStoreRequest, opts ...grpc.CallOption) (*TSStoreResponse, error) {
+	out := new(TSStoreResponse)
+	err := c.cc.Invoke(ctx, "/proto.Cluster/TSSave", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clusterClient) TSRetrieve(ctx context.Context, in *TSRetrieveRequest, opts ...grpc.CallOption) (*TSRetrieveResponse, error) {
+	out := new(TSRetrieveResponse)
+	err := c.cc.Invoke(ctx, "/proto.Cluster/TSRetrieve", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clusterClient) TSAvailability(ctx context.Context, in *TSAvailabilityRequest, opts ...grpc.CallOption) (*TSAvailabilityResponse, error) {
+	out := new(TSAvailabilityResponse)
+	err := c.cc.Invoke(ctx, "/proto.Cluster/TSAvailability", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ClusterServer is the server API for Cluster service.
 type ClusterServer interface {
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
@@ -399,6 +411,10 @@ type ClusterServer interface {
 	KvsKeyExists(context.Context, *KvsKeyExistsRequest) (*KvsKeyExistsResponse, error)
 	KvsRetrieve(context.Context, *KvsRetrieveRequest) (*KvsRetrieveResponse, error)
 	KvsDelete(context.Context, *KvsDeleteRequest) (*KvsDeleteResponse, error)
+	KvsGetKeys(context.Context, *KvsAllKeysRequest) (*KvsAllKeysResponse, error)
+	TSSave(context.Context, *TSStoreRequest) (*TSStoreResponse, error)
+	TSRetrieve(context.Context, *TSRetrieveRequest) (*TSRetrieveResponse, error)
+	TSAvailability(context.Context, *TSAvailabilityRequest) (*TSAvailabilityResponse, error)
 }
 
 // UnimplementedClusterServer can be embedded to have forward compatible implementations.
@@ -425,6 +441,18 @@ func (*UnimplementedClusterServer) KvsRetrieve(ctx context.Context, req *KvsRetr
 }
 func (*UnimplementedClusterServer) KvsDelete(ctx context.Context, req *KvsDeleteRequest) (*KvsDeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method KvsDelete not implemented")
+}
+func (*UnimplementedClusterServer) KvsGetKeys(ctx context.Context, req *KvsAllKeysRequest) (*KvsAllKeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method KvsGetKeys not implemented")
+}
+func (*UnimplementedClusterServer) TSSave(ctx context.Context, req *TSStoreRequest) (*TSStoreResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TSSave not implemented")
+}
+func (*UnimplementedClusterServer) TSRetrieve(ctx context.Context, req *TSRetrieveRequest) (*TSRetrieveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TSRetrieve not implemented")
+}
+func (*UnimplementedClusterServer) TSAvailability(ctx context.Context, req *TSAvailabilityRequest) (*TSAvailabilityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TSAvailability not implemented")
 }
 
 func RegisterClusterServer(s *grpc.Server, srv ClusterServer) {
@@ -557,6 +585,78 @@ func _Cluster_KvsDelete_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Cluster_KvsGetKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KvsAllKeysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServer).KvsGetKeys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Cluster/KvsGetKeys",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServer).KvsGetKeys(ctx, req.(*KvsAllKeysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Cluster_TSSave_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TSStoreRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServer).TSSave(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Cluster/TSSave",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServer).TSSave(ctx, req.(*TSStoreRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Cluster_TSRetrieve_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TSRetrieveRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServer).TSRetrieve(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Cluster/TSRetrieve",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServer).TSRetrieve(ctx, req.(*TSRetrieveRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Cluster_TSAvailability_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TSAvailabilityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServer).TSAvailability(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Cluster/TSAvailability",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServer).TSAvailability(ctx, req.(*TSAvailabilityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Cluster_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.Cluster",
 	HandlerType: (*ClusterServer)(nil),
@@ -588,6 +688,22 @@ var _Cluster_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "KvsDelete",
 			Handler:    _Cluster_KvsDelete_Handler,
+		},
+		{
+			MethodName: "KvsGetKeys",
+			Handler:    _Cluster_KvsGetKeys_Handler,
+		},
+		{
+			MethodName: "TSSave",
+			Handler:    _Cluster_TSSave_Handler,
+		},
+		{
+			MethodName: "TSRetrieve",
+			Handler:    _Cluster_TSRetrieve_Handler,
+		},
+		{
+			MethodName: "TSAvailability",
+			Handler:    _Cluster_TSAvailability_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

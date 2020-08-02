@@ -75,4 +75,18 @@ func (s *clusterServer) KvsDelete(c context.Context, req *pb.KvsDeleteRequest) (
 	return s.parent.storageManager.KvsDelete(c, req)
 }
 
+func (s *clusterServer) KvsGetKeys(c context.Context, req *pb.KvsAllKeysRequest) (*pb.KvsAllKeysResponse, error) {
+	return s.parent.storageManager.KvsGetKeys(c, req)
+}
 
+func (s *clusterServer) TSSave(c context.Context, req *pb.TSStoreRequest) (*pb.TSStoreResponse, error) {
+	return s.parent.storageManager.TSSave(c, req)
+}
+
+func (s *clusterServer) TSRetrieve(c context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {
+	return s.parent.storageManager.TSRetrieve(c, req)
+}
+
+func (s *clusterServer) TSAvailability(c context.Context, req *pb.TSAvailabilityRequest) (*pb.TSAvailabilityResponse, error) {
+	return s.parent.storageManager.TSAvailability(c, req)
+}

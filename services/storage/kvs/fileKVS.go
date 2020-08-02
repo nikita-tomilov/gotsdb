@@ -1,6 +1,7 @@
 package kvs
 
 import (
+	"fmt"
 	"github.com/btcsuite/btcutil/base58"
 	log "github.com/jeanphorn/log4go"
 	"github.com/nikita-tomilov/gotsdb/utils"
@@ -18,6 +19,10 @@ func (f *FileKVS) createKey(s []byte) string {
 	return base58.Encode(s)
 }
 
+func (f *FileKVS) getKey(s string) []byte {
+	return base58.Decode(s)
+}
+
 func (f *FileKVS) toFilename(key []byte) string {
 	return f.Path + "/" + f.createKey(key)
 }
@@ -25,6 +30,10 @@ func (f *FileKVS) toFilename(key []byte) string {
 func (f *FileKVS) InitStorage() {
 	os.MkdirAll(f.Path, os.ModePerm)
 	log.Warn("FILE-BASED KVS storage initialized at %s", f.Path)
+}
+
+func (f *FileKVS) CloseStorage() {
+	//nothing here
 }
 
 func (f *FileKVS) Save(key []byte, value []byte) {
@@ -62,4 +71,19 @@ func (f *FileKVS) Delete(key []byte) {
 	fname := f.toFilename(key)
 	utils.DeleteFile(fname)
 	f.lock.Unlock()
+}
+
+func (f *FileKVS) GetAllKeys() [][]byte {
+	f.lock.Lock()
+	files := utils.GetFileNames(f.Path)
+	keys := make([][]byte, len(files))
+	for i, file := range files {
+		keys[i] = f.getKey(file)
+	}
+	f.lock.Unlock()
+	return keys
+}
+
+func (f *FileKVS) String() string {
+	return fmt.Sprintf("Simple FS-based KVS at path %s", f.Path)
 }

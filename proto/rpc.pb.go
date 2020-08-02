@@ -24,6 +24,37 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
+type Void struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Void) Reset()         { *m = Void{} }
+func (m *Void) String() string { return proto.CompactTextString(m) }
+func (*Void) ProtoMessage()    {}
+func (*Void) Descriptor() ([]byte, []int) {
+	return fileDescriptor_77a6da22d6a3feb1, []int{0}
+}
+
+func (m *Void) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Void.Unmarshal(m, b)
+}
+func (m *Void) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Void.Marshal(b, m, deterministic)
+}
+func (m *Void) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Void.Merge(m, src)
+}
+func (m *Void) XXX_Size() int {
+	return xxx_messageInfo_Void.Size(m)
+}
+func (m *Void) XXX_DiscardUnknown() {
+	xxx_messageInfo_Void.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Void proto.InternalMessageInfo
+
 type KvsStoreRequest struct {
 	MsgId                uint32   `protobuf:"varint,1,opt,name=msgId,proto3" json:"msgId,omitempty"`
 	Key                  []byte   `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
@@ -37,7 +68,7 @@ func (m *KvsStoreRequest) Reset()         { *m = KvsStoreRequest{} }
 func (m *KvsStoreRequest) String() string { return proto.CompactTextString(m) }
 func (*KvsStoreRequest) ProtoMessage()    {}
 func (*KvsStoreRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_77a6da22d6a3feb1, []int{0}
+	return fileDescriptor_77a6da22d6a3feb1, []int{1}
 }
 
 func (m *KvsStoreRequest) XXX_Unmarshal(b []byte) error {
@@ -91,7 +122,7 @@ func (m *KvsStoreResponse) Reset()         { *m = KvsStoreResponse{} }
 func (m *KvsStoreResponse) String() string { return proto.CompactTextString(m) }
 func (*KvsStoreResponse) ProtoMessage()    {}
 func (*KvsStoreResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_77a6da22d6a3feb1, []int{1}
+	return fileDescriptor_77a6da22d6a3feb1, []int{2}
 }
 
 func (m *KvsStoreResponse) XXX_Unmarshal(b []byte) error {
@@ -138,7 +169,7 @@ func (m *KvsKeyExistsRequest) Reset()         { *m = KvsKeyExistsRequest{} }
 func (m *KvsKeyExistsRequest) String() string { return proto.CompactTextString(m) }
 func (*KvsKeyExistsRequest) ProtoMessage()    {}
 func (*KvsKeyExistsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_77a6da22d6a3feb1, []int{2}
+	return fileDescriptor_77a6da22d6a3feb1, []int{3}
 }
 
 func (m *KvsKeyExistsRequest) XXX_Unmarshal(b []byte) error {
@@ -185,7 +216,7 @@ func (m *KvsKeyExistsResponse) Reset()         { *m = KvsKeyExistsResponse{} }
 func (m *KvsKeyExistsResponse) String() string { return proto.CompactTextString(m) }
 func (*KvsKeyExistsResponse) ProtoMessage()    {}
 func (*KvsKeyExistsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_77a6da22d6a3feb1, []int{3}
+	return fileDescriptor_77a6da22d6a3feb1, []int{4}
 }
 
 func (m *KvsKeyExistsResponse) XXX_Unmarshal(b []byte) error {
@@ -232,7 +263,7 @@ func (m *KvsRetrieveRequest) Reset()         { *m = KvsRetrieveRequest{} }
 func (m *KvsRetrieveRequest) String() string { return proto.CompactTextString(m) }
 func (*KvsRetrieveRequest) ProtoMessage()    {}
 func (*KvsRetrieveRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_77a6da22d6a3feb1, []int{4}
+	return fileDescriptor_77a6da22d6a3feb1, []int{5}
 }
 
 func (m *KvsRetrieveRequest) XXX_Unmarshal(b []byte) error {
@@ -279,7 +310,7 @@ func (m *KvsRetrieveResponse) Reset()         { *m = KvsRetrieveResponse{} }
 func (m *KvsRetrieveResponse) String() string { return proto.CompactTextString(m) }
 func (*KvsRetrieveResponse) ProtoMessage()    {}
 func (*KvsRetrieveResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_77a6da22d6a3feb1, []int{5}
+	return fileDescriptor_77a6da22d6a3feb1, []int{6}
 }
 
 func (m *KvsRetrieveResponse) XXX_Unmarshal(b []byte) error {
@@ -326,7 +357,7 @@ func (m *KvsDeleteRequest) Reset()         { *m = KvsDeleteRequest{} }
 func (m *KvsDeleteRequest) String() string { return proto.CompactTextString(m) }
 func (*KvsDeleteRequest) ProtoMessage()    {}
 func (*KvsDeleteRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_77a6da22d6a3feb1, []int{6}
+	return fileDescriptor_77a6da22d6a3feb1, []int{7}
 }
 
 func (m *KvsDeleteRequest) XXX_Unmarshal(b []byte) error {
@@ -373,7 +404,7 @@ func (m *KvsDeleteResponse) Reset()         { *m = KvsDeleteResponse{} }
 func (m *KvsDeleteResponse) String() string { return proto.CompactTextString(m) }
 func (*KvsDeleteResponse) ProtoMessage()    {}
 func (*KvsDeleteResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_77a6da22d6a3feb1, []int{7}
+	return fileDescriptor_77a6da22d6a3feb1, []int{8}
 }
 
 func (m *KvsDeleteResponse) XXX_Unmarshal(b []byte) error {
@@ -408,7 +439,542 @@ func (m *KvsDeleteResponse) GetOk() bool {
 	return false
 }
 
+type KvsAllKeysRequest struct {
+	MsgId                uint32   `protobuf:"varint,1,opt,name=msgId,proto3" json:"msgId,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *KvsAllKeysRequest) Reset()         { *m = KvsAllKeysRequest{} }
+func (m *KvsAllKeysRequest) String() string { return proto.CompactTextString(m) }
+func (*KvsAllKeysRequest) ProtoMessage()    {}
+func (*KvsAllKeysRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_77a6da22d6a3feb1, []int{9}
+}
+
+func (m *KvsAllKeysRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_KvsAllKeysRequest.Unmarshal(m, b)
+}
+func (m *KvsAllKeysRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_KvsAllKeysRequest.Marshal(b, m, deterministic)
+}
+func (m *KvsAllKeysRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_KvsAllKeysRequest.Merge(m, src)
+}
+func (m *KvsAllKeysRequest) XXX_Size() int {
+	return xxx_messageInfo_KvsAllKeysRequest.Size(m)
+}
+func (m *KvsAllKeysRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_KvsAllKeysRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_KvsAllKeysRequest proto.InternalMessageInfo
+
+func (m *KvsAllKeysRequest) GetMsgId() uint32 {
+	if m != nil {
+		return m.MsgId
+	}
+	return 0
+}
+
+type KvsAllKeysResponse struct {
+	MsgId                uint32   `protobuf:"varint,1,opt,name=msgId,proto3" json:"msgId,omitempty"`
+	Keys                 [][]byte `protobuf:"bytes,2,rep,name=keys,proto3" json:"keys,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *KvsAllKeysResponse) Reset()         { *m = KvsAllKeysResponse{} }
+func (m *KvsAllKeysResponse) String() string { return proto.CompactTextString(m) }
+func (*KvsAllKeysResponse) ProtoMessage()    {}
+func (*KvsAllKeysResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_77a6da22d6a3feb1, []int{10}
+}
+
+func (m *KvsAllKeysResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_KvsAllKeysResponse.Unmarshal(m, b)
+}
+func (m *KvsAllKeysResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_KvsAllKeysResponse.Marshal(b, m, deterministic)
+}
+func (m *KvsAllKeysResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_KvsAllKeysResponse.Merge(m, src)
+}
+func (m *KvsAllKeysResponse) XXX_Size() int {
+	return xxx_messageInfo_KvsAllKeysResponse.Size(m)
+}
+func (m *KvsAllKeysResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_KvsAllKeysResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_KvsAllKeysResponse proto.InternalMessageInfo
+
+func (m *KvsAllKeysResponse) GetMsgId() uint32 {
+	if m != nil {
+		return m.MsgId
+	}
+	return 0
+}
+
+func (m *KvsAllKeysResponse) GetKeys() [][]byte {
+	if m != nil {
+		return m.Keys
+	}
+	return nil
+}
+
+type TSPoints struct {
+	Points               map[uint64]float64 `protobuf:"bytes,1,rep,name=points,proto3" json:"points,omitempty" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"fixed64,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
+}
+
+func (m *TSPoints) Reset()         { *m = TSPoints{} }
+func (m *TSPoints) String() string { return proto.CompactTextString(m) }
+func (*TSPoints) ProtoMessage()    {}
+func (*TSPoints) Descriptor() ([]byte, []int) {
+	return fileDescriptor_77a6da22d6a3feb1, []int{11}
+}
+
+func (m *TSPoints) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TSPoints.Unmarshal(m, b)
+}
+func (m *TSPoints) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TSPoints.Marshal(b, m, deterministic)
+}
+func (m *TSPoints) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TSPoints.Merge(m, src)
+}
+func (m *TSPoints) XXX_Size() int {
+	return xxx_messageInfo_TSPoints.Size(m)
+}
+func (m *TSPoints) XXX_DiscardUnknown() {
+	xxx_messageInfo_TSPoints.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TSPoints proto.InternalMessageInfo
+
+func (m *TSPoints) GetPoints() map[uint64]float64 {
+	if m != nil {
+		return m.Points
+	}
+	return nil
+}
+
+type TSStoreRequest struct {
+	MsgId                uint32               `protobuf:"varint,1,opt,name=msgId,proto3" json:"msgId,omitempty"`
+	DataSource           string               `protobuf:"bytes,2,opt,name=dataSource,proto3" json:"dataSource,omitempty"`
+	Values               map[string]*TSPoints `protobuf:"bytes,3,rep,name=values,proto3" json:"values,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	ExpirationMillis     uint64               `protobuf:"varint,4,opt,name=expirationMillis,proto3" json:"expirationMillis,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
+}
+
+func (m *TSStoreRequest) Reset()         { *m = TSStoreRequest{} }
+func (m *TSStoreRequest) String() string { return proto.CompactTextString(m) }
+func (*TSStoreRequest) ProtoMessage()    {}
+func (*TSStoreRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_77a6da22d6a3feb1, []int{12}
+}
+
+func (m *TSStoreRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TSStoreRequest.Unmarshal(m, b)
+}
+func (m *TSStoreRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TSStoreRequest.Marshal(b, m, deterministic)
+}
+func (m *TSStoreRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TSStoreRequest.Merge(m, src)
+}
+func (m *TSStoreRequest) XXX_Size() int {
+	return xxx_messageInfo_TSStoreRequest.Size(m)
+}
+func (m *TSStoreRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TSStoreRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TSStoreRequest proto.InternalMessageInfo
+
+func (m *TSStoreRequest) GetMsgId() uint32 {
+	if m != nil {
+		return m.MsgId
+	}
+	return 0
+}
+
+func (m *TSStoreRequest) GetDataSource() string {
+	if m != nil {
+		return m.DataSource
+	}
+	return ""
+}
+
+func (m *TSStoreRequest) GetValues() map[string]*TSPoints {
+	if m != nil {
+		return m.Values
+	}
+	return nil
+}
+
+func (m *TSStoreRequest) GetExpirationMillis() uint64 {
+	if m != nil {
+		return m.ExpirationMillis
+	}
+	return 0
+}
+
+type TSStoreResponse struct {
+	MsgId                uint32   `protobuf:"varint,1,opt,name=msgId,proto3" json:"msgId,omitempty"`
+	Ok                   bool     `protobuf:"varint,2,opt,name=ok,proto3" json:"ok,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TSStoreResponse) Reset()         { *m = TSStoreResponse{} }
+func (m *TSStoreResponse) String() string { return proto.CompactTextString(m) }
+func (*TSStoreResponse) ProtoMessage()    {}
+func (*TSStoreResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_77a6da22d6a3feb1, []int{13}
+}
+
+func (m *TSStoreResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TSStoreResponse.Unmarshal(m, b)
+}
+func (m *TSStoreResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TSStoreResponse.Marshal(b, m, deterministic)
+}
+func (m *TSStoreResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TSStoreResponse.Merge(m, src)
+}
+func (m *TSStoreResponse) XXX_Size() int {
+	return xxx_messageInfo_TSStoreResponse.Size(m)
+}
+func (m *TSStoreResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_TSStoreResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TSStoreResponse proto.InternalMessageInfo
+
+func (m *TSStoreResponse) GetMsgId() uint32 {
+	if m != nil {
+		return m.MsgId
+	}
+	return 0
+}
+
+func (m *TSStoreResponse) GetOk() bool {
+	if m != nil {
+		return m.Ok
+	}
+	return false
+}
+
+type TSRetrieveRequest struct {
+	MsgId                uint32   `protobuf:"varint,1,opt,name=msgId,proto3" json:"msgId,omitempty"`
+	DataSource           string   `protobuf:"bytes,2,opt,name=dataSource,proto3" json:"dataSource,omitempty"`
+	FromTimestamp        uint64   `protobuf:"varint,3,opt,name=fromTimestamp,proto3" json:"fromTimestamp,omitempty"`
+	ToTimestamp          uint64   `protobuf:"varint,4,opt,name=toTimestamp,proto3" json:"toTimestamp,omitempty"`
+	Tags                 []string `protobuf:"bytes,5,rep,name=tags,proto3" json:"tags,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TSRetrieveRequest) Reset()         { *m = TSRetrieveRequest{} }
+func (m *TSRetrieveRequest) String() string { return proto.CompactTextString(m) }
+func (*TSRetrieveRequest) ProtoMessage()    {}
+func (*TSRetrieveRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_77a6da22d6a3feb1, []int{14}
+}
+
+func (m *TSRetrieveRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TSRetrieveRequest.Unmarshal(m, b)
+}
+func (m *TSRetrieveRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TSRetrieveRequest.Marshal(b, m, deterministic)
+}
+func (m *TSRetrieveRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TSRetrieveRequest.Merge(m, src)
+}
+func (m *TSRetrieveRequest) XXX_Size() int {
+	return xxx_messageInfo_TSRetrieveRequest.Size(m)
+}
+func (m *TSRetrieveRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TSRetrieveRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TSRetrieveRequest proto.InternalMessageInfo
+
+func (m *TSRetrieveRequest) GetMsgId() uint32 {
+	if m != nil {
+		return m.MsgId
+	}
+	return 0
+}
+
+func (m *TSRetrieveRequest) GetDataSource() string {
+	if m != nil {
+		return m.DataSource
+	}
+	return ""
+}
+
+func (m *TSRetrieveRequest) GetFromTimestamp() uint64 {
+	if m != nil {
+		return m.FromTimestamp
+	}
+	return 0
+}
+
+func (m *TSRetrieveRequest) GetToTimestamp() uint64 {
+	if m != nil {
+		return m.ToTimestamp
+	}
+	return 0
+}
+
+func (m *TSRetrieveRequest) GetTags() []string {
+	if m != nil {
+		return m.Tags
+	}
+	return nil
+}
+
+type TSRetrieveResponse struct {
+	MsgId                uint32               `protobuf:"varint,1,opt,name=msgId,proto3" json:"msgId,omitempty"`
+	DataSource           string               `protobuf:"bytes,2,opt,name=dataSource,proto3" json:"dataSource,omitempty"`
+	FromTimestamp        uint64               `protobuf:"varint,3,opt,name=fromTimestamp,proto3" json:"fromTimestamp,omitempty"`
+	ToTimestamp          uint64               `protobuf:"varint,4,opt,name=toTimestamp,proto3" json:"toTimestamp,omitempty"`
+	Values               map[string]*TSPoints `protobuf:"bytes,5,rep,name=values,proto3" json:"values,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
+}
+
+func (m *TSRetrieveResponse) Reset()         { *m = TSRetrieveResponse{} }
+func (m *TSRetrieveResponse) String() string { return proto.CompactTextString(m) }
+func (*TSRetrieveResponse) ProtoMessage()    {}
+func (*TSRetrieveResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_77a6da22d6a3feb1, []int{15}
+}
+
+func (m *TSRetrieveResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TSRetrieveResponse.Unmarshal(m, b)
+}
+func (m *TSRetrieveResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TSRetrieveResponse.Marshal(b, m, deterministic)
+}
+func (m *TSRetrieveResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TSRetrieveResponse.Merge(m, src)
+}
+func (m *TSRetrieveResponse) XXX_Size() int {
+	return xxx_messageInfo_TSRetrieveResponse.Size(m)
+}
+func (m *TSRetrieveResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_TSRetrieveResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TSRetrieveResponse proto.InternalMessageInfo
+
+func (m *TSRetrieveResponse) GetMsgId() uint32 {
+	if m != nil {
+		return m.MsgId
+	}
+	return 0
+}
+
+func (m *TSRetrieveResponse) GetDataSource() string {
+	if m != nil {
+		return m.DataSource
+	}
+	return ""
+}
+
+func (m *TSRetrieveResponse) GetFromTimestamp() uint64 {
+	if m != nil {
+		return m.FromTimestamp
+	}
+	return 0
+}
+
+func (m *TSRetrieveResponse) GetToTimestamp() uint64 {
+	if m != nil {
+		return m.ToTimestamp
+	}
+	return 0
+}
+
+func (m *TSRetrieveResponse) GetValues() map[string]*TSPoints {
+	if m != nil {
+		return m.Values
+	}
+	return nil
+}
+
+type TSAvailabilityRequest struct {
+	MsgId                uint32   `protobuf:"varint,1,opt,name=msgId,proto3" json:"msgId,omitempty"`
+	DataSource           string   `protobuf:"bytes,2,opt,name=dataSource,proto3" json:"dataSource,omitempty"`
+	FromTimestamp        uint64   `protobuf:"varint,3,opt,name=fromTimestamp,proto3" json:"fromTimestamp,omitempty"`
+	ToTimestamp          uint64   `protobuf:"varint,4,opt,name=toTimestamp,proto3" json:"toTimestamp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TSAvailabilityRequest) Reset()         { *m = TSAvailabilityRequest{} }
+func (m *TSAvailabilityRequest) String() string { return proto.CompactTextString(m) }
+func (*TSAvailabilityRequest) ProtoMessage()    {}
+func (*TSAvailabilityRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_77a6da22d6a3feb1, []int{16}
+}
+
+func (m *TSAvailabilityRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TSAvailabilityRequest.Unmarshal(m, b)
+}
+func (m *TSAvailabilityRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TSAvailabilityRequest.Marshal(b, m, deterministic)
+}
+func (m *TSAvailabilityRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TSAvailabilityRequest.Merge(m, src)
+}
+func (m *TSAvailabilityRequest) XXX_Size() int {
+	return xxx_messageInfo_TSAvailabilityRequest.Size(m)
+}
+func (m *TSAvailabilityRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TSAvailabilityRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TSAvailabilityRequest proto.InternalMessageInfo
+
+func (m *TSAvailabilityRequest) GetMsgId() uint32 {
+	if m != nil {
+		return m.MsgId
+	}
+	return 0
+}
+
+func (m *TSAvailabilityRequest) GetDataSource() string {
+	if m != nil {
+		return m.DataSource
+	}
+	return ""
+}
+
+func (m *TSAvailabilityRequest) GetFromTimestamp() uint64 {
+	if m != nil {
+		return m.FromTimestamp
+	}
+	return 0
+}
+
+func (m *TSAvailabilityRequest) GetToTimestamp() uint64 {
+	if m != nil {
+		return m.ToTimestamp
+	}
+	return 0
+}
+
+type TSAvailabilityResponse struct {
+	MsgId                uint32                 `protobuf:"varint,1,opt,name=msgId,proto3" json:"msgId,omitempty"`
+	Availability         []*TSAvailabilityChunk `protobuf:"bytes,2,rep,name=availability,proto3" json:"availability,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
+	XXX_unrecognized     []byte                 `json:"-"`
+	XXX_sizecache        int32                  `json:"-"`
+}
+
+func (m *TSAvailabilityResponse) Reset()         { *m = TSAvailabilityResponse{} }
+func (m *TSAvailabilityResponse) String() string { return proto.CompactTextString(m) }
+func (*TSAvailabilityResponse) ProtoMessage()    {}
+func (*TSAvailabilityResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_77a6da22d6a3feb1, []int{17}
+}
+
+func (m *TSAvailabilityResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TSAvailabilityResponse.Unmarshal(m, b)
+}
+func (m *TSAvailabilityResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TSAvailabilityResponse.Marshal(b, m, deterministic)
+}
+func (m *TSAvailabilityResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TSAvailabilityResponse.Merge(m, src)
+}
+func (m *TSAvailabilityResponse) XXX_Size() int {
+	return xxx_messageInfo_TSAvailabilityResponse.Size(m)
+}
+func (m *TSAvailabilityResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_TSAvailabilityResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TSAvailabilityResponse proto.InternalMessageInfo
+
+func (m *TSAvailabilityResponse) GetMsgId() uint32 {
+	if m != nil {
+		return m.MsgId
+	}
+	return 0
+}
+
+func (m *TSAvailabilityResponse) GetAvailability() []*TSAvailabilityChunk {
+	if m != nil {
+		return m.Availability
+	}
+	return nil
+}
+
+type TSAvailabilityChunk struct {
+	FromTimestamp        uint64   `protobuf:"varint,1,opt,name=fromTimestamp,proto3" json:"fromTimestamp,omitempty"`
+	ToTimestamp          uint64   `protobuf:"varint,2,opt,name=toTimestamp,proto3" json:"toTimestamp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TSAvailabilityChunk) Reset()         { *m = TSAvailabilityChunk{} }
+func (m *TSAvailabilityChunk) String() string { return proto.CompactTextString(m) }
+func (*TSAvailabilityChunk) ProtoMessage()    {}
+func (*TSAvailabilityChunk) Descriptor() ([]byte, []int) {
+	return fileDescriptor_77a6da22d6a3feb1, []int{18}
+}
+
+func (m *TSAvailabilityChunk) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TSAvailabilityChunk.Unmarshal(m, b)
+}
+func (m *TSAvailabilityChunk) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TSAvailabilityChunk.Marshal(b, m, deterministic)
+}
+func (m *TSAvailabilityChunk) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TSAvailabilityChunk.Merge(m, src)
+}
+func (m *TSAvailabilityChunk) XXX_Size() int {
+	return xxx_messageInfo_TSAvailabilityChunk.Size(m)
+}
+func (m *TSAvailabilityChunk) XXX_DiscardUnknown() {
+	xxx_messageInfo_TSAvailabilityChunk.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TSAvailabilityChunk proto.InternalMessageInfo
+
+func (m *TSAvailabilityChunk) GetFromTimestamp() uint64 {
+	if m != nil {
+		return m.FromTimestamp
+	}
+	return 0
+}
+
+func (m *TSAvailabilityChunk) GetToTimestamp() uint64 {
+	if m != nil {
+		return m.ToTimestamp
+	}
+	return 0
+}
+
 func init() {
+	proto.RegisterType((*Void)(nil), "proto.void")
 	proto.RegisterType((*KvsStoreRequest)(nil), "proto.KvsStoreRequest")
 	proto.RegisterType((*KvsStoreResponse)(nil), "proto.KvsStoreResponse")
 	proto.RegisterType((*KvsKeyExistsRequest)(nil), "proto.KvsKeyExistsRequest")
@@ -417,6 +983,19 @@ func init() {
 	proto.RegisterType((*KvsRetrieveResponse)(nil), "proto.KvsRetrieveResponse")
 	proto.RegisterType((*KvsDeleteRequest)(nil), "proto.KvsDeleteRequest")
 	proto.RegisterType((*KvsDeleteResponse)(nil), "proto.KvsDeleteResponse")
+	proto.RegisterType((*KvsAllKeysRequest)(nil), "proto.KvsAllKeysRequest")
+	proto.RegisterType((*KvsAllKeysResponse)(nil), "proto.KvsAllKeysResponse")
+	proto.RegisterType((*TSPoints)(nil), "proto.TSPoints")
+	proto.RegisterMapType((map[uint64]float64)(nil), "proto.TSPoints.PointsEntry")
+	proto.RegisterType((*TSStoreRequest)(nil), "proto.TSStoreRequest")
+	proto.RegisterMapType((map[string]*TSPoints)(nil), "proto.TSStoreRequest.ValuesEntry")
+	proto.RegisterType((*TSStoreResponse)(nil), "proto.TSStoreResponse")
+	proto.RegisterType((*TSRetrieveRequest)(nil), "proto.TSRetrieveRequest")
+	proto.RegisterType((*TSRetrieveResponse)(nil), "proto.TSRetrieveResponse")
+	proto.RegisterMapType((map[string]*TSPoints)(nil), "proto.TSRetrieveResponse.ValuesEntry")
+	proto.RegisterType((*TSAvailabilityRequest)(nil), "proto.TSAvailabilityRequest")
+	proto.RegisterType((*TSAvailabilityResponse)(nil), "proto.TSAvailabilityResponse")
+	proto.RegisterType((*TSAvailabilityChunk)(nil), "proto.TSAvailabilityChunk")
 }
 
 func init() {
@@ -424,27 +1003,52 @@ func init() {
 }
 
 var fileDescriptor_77a6da22d6a3feb1 = []byte{
-	// 311 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x2c, 0x2a, 0x48, 0xd6,
-	0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x05, 0x53, 0x4a, 0xfe, 0x5c, 0xfc, 0xde, 0x65, 0xc5,
-	0xc1, 0x25, 0xf9, 0x45, 0xa9, 0x41, 0xa9, 0x85, 0xa5, 0xa9, 0xc5, 0x25, 0x42, 0x22, 0x5c, 0xac,
-	0xb9, 0xc5, 0xe9, 0x9e, 0x29, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0xbc, 0x41, 0x10, 0x8e, 0x90, 0x00,
-	0x17, 0x73, 0x76, 0x6a, 0xa5, 0x04, 0x93, 0x02, 0xa3, 0x06, 0x4f, 0x10, 0x88, 0x09, 0x52, 0x57,
-	0x96, 0x98, 0x53, 0x9a, 0x2a, 0xc1, 0x0c, 0x16, 0x83, 0x70, 0x94, 0x2c, 0xb8, 0x04, 0x10, 0x06,
-	0x16, 0x17, 0xe4, 0xe7, 0x15, 0xa7, 0xe2, 0x30, 0x91, 0x8f, 0x8b, 0x29, 0x3f, 0x1b, 0x6c, 0x20,
-	0x47, 0x10, 0x53, 0x7e, 0xb6, 0x92, 0x2d, 0x97, 0xb0, 0x77, 0x59, 0xb1, 0x77, 0x6a, 0xa5, 0x6b,
-	0x45, 0x66, 0x71, 0x49, 0x31, 0x89, 0xce, 0x51, 0x72, 0xe1, 0x12, 0x41, 0xd5, 0x8e, 0xd7, 0x72,
-	0x31, 0x2e, 0xb6, 0x54, 0xb0, 0x3a, 0xa8, 0x03, 0xa0, 0x3c, 0x25, 0x1b, 0x2e, 0x21, 0xef, 0xb2,
-	0xe2, 0xa0, 0xd4, 0x92, 0xa2, 0xcc, 0xd4, 0x32, 0x52, 0x83, 0x44, 0xc9, 0x11, 0xec, 0x05, 0x84,
-	0x6e, 0xbc, 0x4e, 0x80, 0x87, 0x1f, 0x13, 0x72, 0xf8, 0x59, 0x81, 0xc3, 0xcf, 0x25, 0x35, 0x27,
-	0xb5, 0x84, 0x64, 0xeb, 0x2d, 0xb9, 0x04, 0x91, 0xf4, 0x92, 0x12, 0xf8, 0x46, 0x93, 0x99, 0xb8,
-	0xd8, 0xdc, 0xf3, 0x43, 0x82, 0x5d, 0x9c, 0x84, 0xac, 0xb8, 0xd8, 0x41, 0x31, 0x98, 0x58, 0x96,
-	0x2a, 0x24, 0x06, 0x49, 0x2c, 0x7a, 0x68, 0x49, 0x44, 0x4a, 0x1c, 0x43, 0x1c, 0x6a, 0x99, 0x3b,
-	0x17, 0x0f, 0x72, 0x24, 0x08, 0x49, 0x21, 0x14, 0xa2, 0x47, 0xac, 0x94, 0x34, 0x56, 0x39, 0xa8,
-	0x41, 0x2e, 0x5c, 0xdc, 0x48, 0x21, 0x29, 0x24, 0x89, 0x50, 0x8b, 0x16, 0x37, 0x52, 0x52, 0xd8,
-	0xa4, 0xa0, 0xa6, 0xd8, 0x71, 0x71, 0xc2, 0x03, 0x44, 0x08, 0xc9, 0xd1, 0x28, 0xc1, 0x2b, 0x25,
-	0x81, 0x29, 0x01, 0xd1, 0x9f, 0xc4, 0x06, 0x96, 0x30, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0x64,
-	0x48, 0x22, 0xe7, 0x38, 0x03, 0x00, 0x00,
+	// 715 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x55, 0x4d, 0x6f, 0xd3, 0x40,
+	0x10, 0x95, 0x9d, 0xc4, 0x34, 0xe3, 0xf4, 0x6b, 0xdb, 0x06, 0xd7, 0x05, 0x14, 0x56, 0x54, 0x0a,
+	0x1c, 0x72, 0x48, 0x0f, 0xfd, 0x10, 0xad, 0x14, 0x48, 0x55, 0x41, 0x54, 0x81, 0x6c, 0x8b, 0x1b,
+	0x07, 0xb7, 0x5d, 0x8a, 0x15, 0x27, 0x1b, 0xbc, 0x1b, 0xab, 0xe1, 0x7f, 0x70, 0xe4, 0xc0, 0x81,
+	0x1f, 0xc9, 0x0d, 0x79, 0xed, 0xda, 0x1b, 0xc7, 0x0d, 0x8d, 0x84, 0x10, 0x27, 0xaf, 0x67, 0xdf,
+	0xbe, 0x79, 0xf3, 0x3c, 0xde, 0x81, 0x6a, 0x30, 0xba, 0x6c, 0x8d, 0x02, 0xca, 0x29, 0xaa, 0x88,
+	0x07, 0xd6, 0xa0, 0x1c, 0x52, 0xef, 0x0a, 0xbf, 0x83, 0xd5, 0x5e, 0xc8, 0x6c, 0x4e, 0x03, 0x62,
+	0x91, 0x2f, 0x63, 0xc2, 0x38, 0xda, 0x84, 0xca, 0x80, 0x5d, 0xbf, 0xb9, 0x32, 0x94, 0x86, 0xd2,
+	0x5c, 0xb6, 0xe2, 0x17, 0xb4, 0x06, 0xa5, 0x3e, 0x99, 0x18, 0x6a, 0x43, 0x69, 0xd6, 0xac, 0x68,
+	0x19, 0xe1, 0x42, 0xd7, 0x1f, 0x13, 0xa3, 0x24, 0x62, 0xf1, 0x0b, 0x3e, 0x80, 0xb5, 0x8c, 0x90,
+	0x8d, 0xe8, 0x90, 0x91, 0x3b, 0x18, 0x57, 0x40, 0xa5, 0x7d, 0x41, 0xb8, 0x64, 0xa9, 0xb4, 0x8f,
+	0x8f, 0x61, 0xa3, 0x17, 0xb2, 0x1e, 0x99, 0x9c, 0xde, 0x78, 0x8c, 0xb3, 0x05, 0xe5, 0xe0, 0x2e,
+	0x6c, 0x4e, 0x1f, 0x9f, 0x9b, 0xbc, 0x0e, 0x1a, 0x11, 0xb8, 0x44, 0x40, 0xf2, 0x86, 0x5f, 0x02,
+	0xea, 0x85, 0xcc, 0x22, 0x3c, 0xf0, 0x48, 0xb8, 0xa8, 0x25, 0xb8, 0x23, 0x4a, 0xc8, 0x4e, 0xcf,
+	0x95, 0x90, 0xfa, 0xa7, 0xca, 0xfe, 0x1d, 0x09, 0xff, 0xba, 0xc4, 0x27, 0x7c, 0xe1, 0xf4, 0x87,
+	0xb0, 0x2e, 0x9d, 0x5d, 0xc8, 0xfc, 0xe7, 0xe2, 0x68, 0xc7, 0xf7, 0x7b, 0x64, 0x32, 0xdf, 0x7a,
+	0x7c, 0x22, 0x2c, 0x4a, 0xa1, 0x73, 0xd3, 0x20, 0x28, 0xf7, 0xc9, 0x24, 0x32, 0xb9, 0xd4, 0xac,
+	0x59, 0x62, 0x8d, 0xbf, 0xc2, 0x92, 0x63, 0xbf, 0xa7, 0xde, 0x90, 0x33, 0xb4, 0x07, 0xda, 0x48,
+	0xac, 0x0c, 0xa5, 0x51, 0x6a, 0xea, 0xed, 0x9d, 0xb8, 0x4b, 0x5b, 0xb7, 0x80, 0x56, 0xfc, 0x38,
+	0x1d, 0xf2, 0x60, 0x62, 0x25, 0x50, 0xf3, 0x10, 0x74, 0x29, 0x7c, 0xeb, 0x43, 0x94, 0xb7, 0x9c,
+	0xeb, 0xcc, 0xa8, 0x3e, 0x25, 0x71, 0xf6, 0x48, 0x3d, 0x50, 0xf0, 0x2f, 0x05, 0x56, 0x1c, 0xfb,
+	0x1e, 0xed, 0xfe, 0x04, 0xe0, 0xca, 0xe5, 0xae, 0x4d, 0xc7, 0xc1, 0x65, 0xcc, 0x53, 0xb5, 0xa4,
+	0x08, 0x3a, 0x04, 0x4d, 0xb0, 0x32, 0xa3, 0x24, 0x84, 0x3f, 0x4d, 0x85, 0xcb, 0xe4, 0xad, 0x0f,
+	0x02, 0x93, 0xc8, 0x8f, 0x0f, 0xa0, 0x17, 0xb0, 0x46, 0x6e, 0x46, 0x5e, 0xe0, 0x72, 0x8f, 0x0e,
+	0xcf, 0x3d, 0xdf, 0xf7, 0x98, 0x51, 0x16, 0xe2, 0x67, 0xe2, 0xe6, 0x5b, 0xd0, 0x25, 0x0a, 0xb9,
+	0xd4, 0x6a, 0x5c, 0xea, 0xae, 0x5c, 0xaa, 0xde, 0x5e, 0xcd, 0xf9, 0x27, 0xd7, 0xbe, 0x0f, 0xab,
+	0xa9, 0xba, 0x85, 0x7a, 0xe3, 0xa7, 0x02, 0xeb, 0x8e, 0x7d, 0xbf, 0x7f, 0xe2, 0x4f, 0xbe, 0x3d,
+	0x83, 0xe5, 0x4f, 0x01, 0x1d, 0x38, 0xde, 0x80, 0x30, 0xee, 0x0e, 0x46, 0xe2, 0xf2, 0x28, 0x5b,
+	0xd3, 0x41, 0xd4, 0x00, 0x9d, 0xd3, 0x0c, 0x13, 0xbb, 0x23, 0x87, 0xa2, 0xc6, 0xe2, 0xee, 0x35,
+	0x33, 0x2a, 0x8d, 0x52, 0xb3, 0x6a, 0x89, 0x35, 0xfe, 0xae, 0x02, 0x92, 0x75, 0xce, 0x2d, 0xf2,
+	0x5f, 0x09, 0x3d, 0x4e, 0x1b, 0xa5, 0x22, 0x1a, 0x65, 0x37, 0xfd, 0x42, 0x79, 0xa1, 0x45, 0xcd,
+	0xf2, 0x57, 0x1b, 0xe0, 0x9b, 0x02, 0x5b, 0x8e, 0xdd, 0x09, 0x5d, 0xcf, 0x77, 0x2f, 0x3c, 0xdf,
+	0xe3, 0x93, 0xff, 0xe2, 0x5b, 0xe2, 0x21, 0xd4, 0xf3, 0xb2, 0xe6, 0x7e, 0xba, 0x13, 0xa8, 0xb9,
+	0x12, 0x5a, 0x5c, 0x2e, 0x7a, 0xdb, 0x4c, 0x2b, 0x97, 0xa9, 0x5e, 0x7f, 0x1e, 0x0f, 0xfb, 0xd6,
+	0x14, 0x1e, 0x7f, 0x84, 0x8d, 0x02, 0xd0, 0x6c, 0x39, 0xca, 0x3d, 0xca, 0x51, 0x67, 0xca, 0x69,
+	0xff, 0x28, 0x83, 0x76, 0x46, 0x1d, 0xbb, 0xfb, 0x0a, 0x1d, 0xc1, 0x83, 0x68, 0x18, 0xba, 0x21,
+	0x41, 0xf5, 0x44, 0x5e, 0x6e, 0xda, 0x9a, 0x0f, 0x67, 0xe2, 0x49, 0xed, 0x67, 0x50, 0x93, 0xe7,
+	0x19, 0x32, 0x33, 0x60, 0x7e, 0x46, 0x9a, 0x3b, 0x85, 0x7b, 0x09, 0x51, 0x17, 0x74, 0x69, 0x28,
+	0xa1, 0xed, 0x0c, 0x9b, 0xfb, 0xa5, 0x4d, 0xb3, 0x68, 0x2b, 0x61, 0x39, 0x81, 0x6a, 0x3a, 0x5b,
+	0x90, 0x24, 0x7a, 0x6a, 0x52, 0x99, 0xc6, 0xec, 0x46, 0x72, 0xbe, 0x03, 0xd0, 0x0b, 0xd9, 0x19,
+	0xe1, 0xd1, 0xd4, 0x40, 0x12, 0x6e, 0x7a, 0xe6, 0x98, 0xdb, 0x05, 0x3b, 0x09, 0xc5, 0x3e, 0x68,
+	0x8e, 0x2d, 0xcc, 0xdc, 0x2a, 0xbc, 0x6d, 0xcd, 0x7a, 0x3e, 0x9c, 0xe5, 0xce, 0x7e, 0xb7, 0x34,
+	0xf7, 0xcc, 0x95, 0x96, 0xe6, 0x2e, 0xb8, 0x44, 0xce, 0xa3, 0xb9, 0x21, 0xf7, 0x0c, 0x7a, 0x54,
+	0xd8, 0x6f, 0xb7, 0x54, 0x8f, 0xef, 0xd8, 0x8d, 0xe9, 0x2e, 0x34, 0xb1, 0xbb, 0xf7, 0x3b, 0x00,
+	0x00, 0xff, 0xff, 0x68, 0xae, 0x53, 0x02, 0x99, 0x09, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -463,6 +1067,10 @@ type GoTSDBClient interface {
 	KvsKeyExists(ctx context.Context, in *KvsKeyExistsRequest, opts ...grpc.CallOption) (*KvsKeyExistsResponse, error)
 	KvsRetrieve(ctx context.Context, in *KvsRetrieveRequest, opts ...grpc.CallOption) (*KvsRetrieveResponse, error)
 	KvsDelete(ctx context.Context, in *KvsDeleteRequest, opts ...grpc.CallOption) (*KvsDeleteResponse, error)
+	KvsGetKeys(ctx context.Context, in *KvsAllKeysRequest, opts ...grpc.CallOption) (*KvsAllKeysResponse, error)
+	TSSave(ctx context.Context, in *TSStoreRequest, opts ...grpc.CallOption) (*TSStoreResponse, error)
+	TSRetrieve(ctx context.Context, in *TSRetrieveRequest, opts ...grpc.CallOption) (*TSRetrieveResponse, error)
+	TSAvailability(ctx context.Context, in *TSAvailabilityRequest, opts ...grpc.CallOption) (*TSAvailabilityResponse, error)
 }
 
 type goTSDBClient struct {
@@ -509,12 +1117,52 @@ func (c *goTSDBClient) KvsDelete(ctx context.Context, in *KvsDeleteRequest, opts
 	return out, nil
 }
 
+func (c *goTSDBClient) KvsGetKeys(ctx context.Context, in *KvsAllKeysRequest, opts ...grpc.CallOption) (*KvsAllKeysResponse, error) {
+	out := new(KvsAllKeysResponse)
+	err := c.cc.Invoke(ctx, "/proto.GoTSDB/KvsGetKeys", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *goTSDBClient) TSSave(ctx context.Context, in *TSStoreRequest, opts ...grpc.CallOption) (*TSStoreResponse, error) {
+	out := new(TSStoreResponse)
+	err := c.cc.Invoke(ctx, "/proto.GoTSDB/TSSave", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *goTSDBClient) TSRetrieve(ctx context.Context, in *TSRetrieveRequest, opts ...grpc.CallOption) (*TSRetrieveResponse, error) {
+	out := new(TSRetrieveResponse)
+	err := c.cc.Invoke(ctx, "/proto.GoTSDB/TSRetrieve", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *goTSDBClient) TSAvailability(ctx context.Context, in *TSAvailabilityRequest, opts ...grpc.CallOption) (*TSAvailabilityResponse, error) {
+	out := new(TSAvailabilityResponse)
+	err := c.cc.Invoke(ctx, "/proto.GoTSDB/TSAvailability", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GoTSDBServer is the server API for GoTSDB service.
 type GoTSDBServer interface {
 	KvsSave(context.Context, *KvsStoreRequest) (*KvsStoreResponse, error)
 	KvsKeyExists(context.Context, *KvsKeyExistsRequest) (*KvsKeyExistsResponse, error)
 	KvsRetrieve(context.Context, *KvsRetrieveRequest) (*KvsRetrieveResponse, error)
 	KvsDelete(context.Context, *KvsDeleteRequest) (*KvsDeleteResponse, error)
+	KvsGetKeys(context.Context, *KvsAllKeysRequest) (*KvsAllKeysResponse, error)
+	TSSave(context.Context, *TSStoreRequest) (*TSStoreResponse, error)
+	TSRetrieve(context.Context, *TSRetrieveRequest) (*TSRetrieveResponse, error)
+	TSAvailability(context.Context, *TSAvailabilityRequest) (*TSAvailabilityResponse, error)
 }
 
 // UnimplementedGoTSDBServer can be embedded to have forward compatible implementations.
@@ -532,6 +1180,18 @@ func (*UnimplementedGoTSDBServer) KvsRetrieve(ctx context.Context, req *KvsRetri
 }
 func (*UnimplementedGoTSDBServer) KvsDelete(ctx context.Context, req *KvsDeleteRequest) (*KvsDeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method KvsDelete not implemented")
+}
+func (*UnimplementedGoTSDBServer) KvsGetKeys(ctx context.Context, req *KvsAllKeysRequest) (*KvsAllKeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method KvsGetKeys not implemented")
+}
+func (*UnimplementedGoTSDBServer) TSSave(ctx context.Context, req *TSStoreRequest) (*TSStoreResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TSSave not implemented")
+}
+func (*UnimplementedGoTSDBServer) TSRetrieve(ctx context.Context, req *TSRetrieveRequest) (*TSRetrieveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TSRetrieve not implemented")
+}
+func (*UnimplementedGoTSDBServer) TSAvailability(ctx context.Context, req *TSAvailabilityRequest) (*TSAvailabilityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TSAvailability not implemented")
 }
 
 func RegisterGoTSDBServer(s *grpc.Server, srv GoTSDBServer) {
@@ -610,6 +1270,78 @@ func _GoTSDB_KvsDelete_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GoTSDB_KvsGetKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KvsAllKeysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoTSDBServer).KvsGetKeys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.GoTSDB/KvsGetKeys",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoTSDBServer).KvsGetKeys(ctx, req.(*KvsAllKeysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GoTSDB_TSSave_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TSStoreRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoTSDBServer).TSSave(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.GoTSDB/TSSave",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoTSDBServer).TSSave(ctx, req.(*TSStoreRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GoTSDB_TSRetrieve_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TSRetrieveRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoTSDBServer).TSRetrieve(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.GoTSDB/TSRetrieve",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoTSDBServer).TSRetrieve(ctx, req.(*TSRetrieveRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GoTSDB_TSAvailability_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TSAvailabilityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoTSDBServer).TSAvailability(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.GoTSDB/TSAvailability",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoTSDBServer).TSAvailability(ctx, req.(*TSAvailabilityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _GoTSDB_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.GoTSDB",
 	HandlerType: (*GoTSDBServer)(nil),
@@ -629,6 +1361,22 @@ var _GoTSDB_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "KvsDelete",
 			Handler:    _GoTSDB_KvsDelete_Handler,
+		},
+		{
+			MethodName: "KvsGetKeys",
+			Handler:    _GoTSDB_KvsGetKeys_Handler,
+		},
+		{
+			MethodName: "TSSave",
+			Handler:    _GoTSDB_TSSave_Handler,
+		},
+		{
+			MethodName: "TSRetrieve",
+			Handler:    _GoTSDB_TSRetrieve_Handler,
+		},
+		{
+			MethodName: "TSAvailability",
+			Handler:    _GoTSDB_TSAvailability_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

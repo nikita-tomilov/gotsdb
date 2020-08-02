@@ -2,11 +2,18 @@ syntax = "proto3";
 
 package proto;
 
+message void {}
+
 service GoTSDB {
   rpc KvsSave(KvsStoreRequest) returns (KvsStoreResponse);
   rpc KvsKeyExists(KvsKeyExistsRequest) returns (KvsKeyExistsResponse);
   rpc KvsRetrieve(KvsRetrieveRequest) returns (KvsRetrieveResponse);
   rpc KvsDelete(KvsDeleteRequest) returns (KvsDeleteResponse);
+  rpc KvsGetKeys(KvsAllKeysRequest) returns (KvsAllKeysResponse);
+
+  rpc TSSave(TSStoreRequest) returns (TSStoreResponse);
+  rpc TSRetrieve(TSRetrieveRequest) returns (TSRetrieveResponse);
+  rpc TSAvailability(TSAvailabilityRequest) returns (TSAvailabilityResponse);
 }
 
 message KvsStoreRequest {
@@ -48,4 +55,62 @@ message KvsDeleteRequest {
 message KvsDeleteResponse {
   uint32 msgId = 1;
   bool ok = 2;
+}
+
+message KvsAllKeysRequest {
+  uint32 msgId = 1;
+}
+
+message KvsAllKeysResponse {
+  uint32 msgId = 1;
+  repeated bytes keys = 2;
+}
+
+message TSPoints {
+  map<uint64, double> points = 1;
+}
+
+message TSStoreRequest {
+  uint32 msgId = 1;
+  string dataSource = 2;
+  map<string, TSPoints> values = 3;
+  uint64 expirationMillis = 4;
+}
+
+message TSStoreResponse {
+  uint32 msgId = 1;
+  bool ok = 2;
+}
+
+message TSRetrieveRequest {
+  uint32 msgId = 1;
+  string dataSource = 2;
+  uint64 fromTimestamp = 3;
+  uint64 toTimestamp = 4;
+  repeated string tags = 5;
+}
+
+message TSRetrieveResponse {
+  uint32 msgId = 1;
+  string dataSource = 2;
+  uint64 fromTimestamp = 3;
+  uint64 toTimestamp = 4;
+  map<string, TSPoints> values = 5;
+}
+
+message TSAvailabilityRequest {
+  uint32 msgId = 1;
+  string dataSource = 2;
+  uint64 fromTimestamp = 3;
+  uint64 toTimestamp = 4;
+}
+
+message TSAvailabilityResponse {
+  uint32 msgId = 1;
+  repeated TSAvailabilityChunk availability = 2;
+}
+
+message TSAvailabilityChunk {
+  uint64 fromTimestamp = 1;
+  uint64 toTimestamp = 2;
 }
