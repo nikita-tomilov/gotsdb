@@ -2,10 +2,13 @@ package utils
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/gob"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"os"
 	"time"
 )
@@ -114,4 +117,18 @@ func Max(a uint64, b uint64) uint64 {
 
 func GetNowMillis() uint64 {
 	return uint64(time.Now().UnixNano() / 1000000)
+}
+
+func Float64ToByte(f float64) []byte {
+	var buf bytes.Buffer
+	err := binary.Write(&buf, binary.LittleEndian, f)
+	if err != nil {
+		fmt.Println("binary.Write failed:", err)
+	}
+	return buf.Bytes()
+}
+
+func ByteToFloat64(b []byte) float64 {
+	bits := binary.LittleEndian.Uint64(b)
+	return math.Float64frombits(bits)
 }

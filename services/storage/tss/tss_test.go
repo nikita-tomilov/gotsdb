@@ -17,7 +17,7 @@ func TestTSS_BasicFunctionsWork1(t *testing.T) {
 			defer s.CloseStorage()
 			dataToStore := buildData()
 			//when
-			s.Save(testDataSource, dataToStore, 1000)
+			s.Save(testDataSource, dataToStore, 15000)
 			retrievedData := s.Retrieve(testDataSource, []string{testTag1, testTag2}, may040520, may050520)
 			//then
 			assert.Equal(t, dataToStore[testTag1], retrievedData[testTag1], "Data for tag1 for 04.05-05.05 should be same, storage %s", s.String())
@@ -113,7 +113,8 @@ func Test_ExpirationWorks2(t *testing.T) {
 func buildStorages() []TimeSeriesStorage {
 	inMem := buildInMemStorage()
 	qL := buildQlStorage()
-	return toArray(inMem, qL)
+	lsm := buildLSMStorage()
+	return toArray(inMem, qL, lsm)
 }
 
 func toArray(items ...TimeSeriesStorage) []TimeSeriesStorage {
@@ -129,6 +130,13 @@ func buildInMemStorage() *InMemTSS {
 func buildQlStorage() *QlBasedPersistentTSS {
 	idx += 1
 	s := QlBasedPersistentTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), periodBetweenWipes: time.Second * 1}
+	s.InitStorage()
+	return &s
+}
+
+func buildLSMStorage() *LSMTSS {
+	idx += 1
+	s := LSMTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), CommitlogFlushPeriodSeconds:1, MemtExpirationPeriodSeconds:1}
 	s.InitStorage()
 	return &s
 }
