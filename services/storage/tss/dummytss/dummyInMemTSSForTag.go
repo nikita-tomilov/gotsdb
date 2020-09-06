@@ -36,6 +36,9 @@ func (tagData *TSforTag) GetData(fromTimestamp uint64, toTimestamp uint64) *pb.T
 func (tagData *TSforTag) SaveData(data *pb.TSPoints, expirationMillis uint64) {
 	now := utils.GetNowMillis()
 	expireAt := now + expirationMillis
+	if expirationMillis == 0 {
+		expireAt = 0
+	}
 	for timestamp, value := range data.Points {
 		tagData.data[timestamp] = TSPointWithExpiration{value, expireAt}
 	}
@@ -44,7 +47,7 @@ func (tagData *TSforTag) SaveData(data *pb.TSPoints, expirationMillis uint64) {
 func (tagData *TSforTag) ExpirationCycle() {
 	now := utils.GetNowMillis()
 	for ts, point := range tagData.data {
-		if point.expireAt <= now {
+		if (point.expireAt != 0) && (point.expireAt <= now) {
 			log.Debug("expiring point for %s ts %d as it expires at %d and now it is %d", tagData.tag, ts, point.expireAt, now)
 			delete(tagData.data, ts)
 		}

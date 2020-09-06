@@ -1,9 +1,7 @@
 package tss
 
 import (
-	"fmt"
 	pb "github.com/nikita-tomilov/gotsdb/proto"
-	"github.com/nikita-tomilov/gotsdb/utils"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -11,7 +9,7 @@ import (
 
 func TestTSS_BasicFunctionsWork1(t *testing.T) {
 	//given
-	storages := buildStorages()
+	storages := BuildStoragesForTesting()
 	for _, s := range storages {
 		func() {
 			defer s.CloseStorage()
@@ -28,7 +26,7 @@ func TestTSS_BasicFunctionsWork1(t *testing.T) {
 
 func TestTSS_BasicFunctionsWork2(t *testing.T) {
 	//given
-	storages := buildStorages()
+	storages := BuildStoragesForTesting()
 	for _, s := range storages {
 		func() {
 			defer s.CloseStorage()
@@ -45,7 +43,7 @@ func TestTSS_BasicFunctionsWork2(t *testing.T) {
 
 func TestTSS_BasicFunctionsWork3(t *testing.T) {
 	//given
-	storages := buildStorages()
+	storages := BuildStoragesForTesting()
 	for _, s := range storages {
 		func() {
 			defer s.CloseStorage()
@@ -67,7 +65,7 @@ func TestTSS_BasicFunctionsWork3(t *testing.T) {
 
 func Test_ExpirationWorks1(t *testing.T) {
 	//given
-	storages := buildStorages()
+	storages := BuildStoragesForTesting()
 	for _, s := range storages {
 		func() {
 			defer s.CloseStorage()
@@ -89,7 +87,7 @@ func Test_ExpirationWorks1(t *testing.T) {
 
 func Test_ExpirationWorks2(t *testing.T) {
 	//given
-	storages := buildStorages()
+	storages := BuildStoragesForTesting()
 	for _, s := range storages {
 		func() {
 			defer s.CloseStorage()
@@ -110,36 +108,6 @@ func Test_ExpirationWorks2(t *testing.T) {
 	}
 }
 
-func buildStorages() []TimeSeriesStorage {
-	inMem := buildInMemStorage()
-	qL := buildQlStorage()
-	lsm := buildLSMStorage()
-	return toArray(inMem, qL, lsm)
-}
-
-func toArray(items ...TimeSeriesStorage) []TimeSeriesStorage {
-	return items
-}
-
-func buildInMemStorage() *InMemTSS {
-	s := InMemTSS{periodBetweenWipes: time.Second * 1}
-	s.InitStorage()
-	return &s
-}
-
-func buildQlStorage() *QlBasedPersistentTSS {
-	idx += 1
-	s := QlBasedPersistentTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), periodBetweenWipes: time.Second * 1}
-	s.InitStorage()
-	return &s
-}
-
-func buildLSMStorage() *LSMTSS {
-	idx += 1
-	s := LSMTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), CommitlogFlushPeriodSeconds:1, MemtExpirationPeriodSeconds:1}
-	s.InitStorage()
-	return &s
-}
 
 func buildData() map[string]*pb.TSPoints {
 	m := make(map[string]*pb.TSPoints)
@@ -163,4 +131,3 @@ const testTag2 string = "test-tag-2"
 const may040520 = 1588550400000
 const may050520 = 1588636800000
 const may060520 = 1588723200000
-var idx = 0

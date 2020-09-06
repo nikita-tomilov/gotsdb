@@ -62,6 +62,9 @@ func (lsm *LSMTSS) CloseStorage() {
 func (lsm *LSMTSS) Save(dataSource string, data map[string]*proto.TSPoints, expirationMillis uint64) {
 	converted := make(map[string][]dto.Measurement)
 	expireAt := utils.GetNowMillis() + expirationMillis
+	if expirationMillis == 0 {
+		expireAt = 0
+	}
 	for k, v := range data {
 		converted[k] = convertTSPtoMeasurement(v)
 	}
