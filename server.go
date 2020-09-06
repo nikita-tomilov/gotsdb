@@ -33,6 +33,7 @@ const kvsEnginePropertyInMemValue = "inmem"
 const tssEnginePropertyKey = "tss.engine"
 const tssEnginePropertyFileValue = "file"
 const tssEnginePropertyInMemValue = "inmem"
+const tssEnginePropertyLSMValue = "lsm"
 
 func setupDI() {
 	propertiesOverride, propertiesOverridePresent:= os.LookupEnv(propertiesOverrideEnvironmentVariable)
@@ -63,6 +64,8 @@ func setupDI() {
 		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.InMemTSS{}, tssStorageBeanType)
 	case tssEnginePropertyFileValue:
 		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.QlBasedPersistentTSS{}, tssStorageBeanType)
+	case tssEnginePropertyLSMValue:
+		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.LSMTSS{}, tssStorageBeanType)
 	}
 
 	summer.PerformDependencyInjection()
