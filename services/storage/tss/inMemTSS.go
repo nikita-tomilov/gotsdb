@@ -2,14 +2,13 @@ package tss
 
 import (
 	pb "github.com/nikita-tomilov/gotsdb/proto"
-	"github.com/nikita-tomilov/gotsdb/services/storage/tss/dummytss"
 	"sync"
 	"time"
 )
 
 type InMemTSS struct {
 	isRunning bool
-	data map[string]dummytss.TSforDatasource
+	data map[string]TSforDatasource
 	lock sync.Mutex
 	periodBetweenWipes time.Duration
 }
@@ -19,17 +18,7 @@ func (f *InMemTSS) InitStorage() {
 	if f.periodBetweenWipes == 0 * time.Second {
 		f.periodBetweenWipes = time.Second * 5
 	}
-	f.data = make(map[string]dummytss.TSforDatasource)
-	go func(s *InMemTSS) {
-		for s.isRunning {
-			s.lock.Lock()
-			for _, d := range s.data {
-				d.ExpirationCycle()
-			}
-			s.lock.Unlock()
-			time.Sleep(s.periodBetweenWipes)
-		}
-	}(f)
+	f.data = make(map[string]TSforDatasource)
 }
 
 func (f *InMemTSS) CloseStorage() {
@@ -39,7 +28,7 @@ func (f *InMemTSS) CloseStorage() {
 func (f *InMemTSS) Save(dataSource string, data map[string]*pb.TSPoints, expirationMillis uint64) {
 	f.lock.Lock()
 	if !f.contains(dataSource) {
-		dataForDataSource := dummytss.TSforDatasource{}
+		dataForDataSource := TSforDatasource{PeriodBetweenWipes: f.periodBetweenWipes}
 		dataForDataSource.Init()
 		f.data[dataSource] = dataForDataSource
 	}
@@ -78,7 +67,7 @@ func (f *InMemTSS) contains(dataSource string) bool {
 	return found
 }
 
-func (f *InMemTSS) dataForDataSource(dataSource string) *dummytss.TSforDatasource {
+func (f *InMemTSS) dataForDataSource(dataSource string) *TSforDatasource {
 	dataForDataSource := f.data[dataSource]
 	return &dataForDataSource
 }
