@@ -52,6 +52,28 @@ func BenchmarkDataReading(b *testing.B) {
 	}
 }
 
+func BenchmarkDataWriting(b *testing.B) {
+	storages := BuildStoragesForTesting()
+	log.Close()
+
+	ds := "whatever"
+	for _, storage := range storages {
+		benchmarkName := "DataWrite on " + storage.String()
+		println("Starting " + benchmarkName)
+		b.Run(benchmarkName, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				dataFrom := i
+				dataTo := dataFrom + 1000
+				tagsCount := 100
+				data := buildDummyDataForBenchmark(tagsCount, uint64(dataFrom), uint64(dataTo))
+				storage.Save(ds, data, 0)
+			}
+		})
+
+		println("Finished for storage " + storage.String() + "\n\n")
+	}
+}
+
 func buildDummyDataForBenchmark(tagsCount int, tsFrom uint64, tsTo uint64) map[string]*proto.TSPoints {
 	tags := make([]string, tagsCount)
 	for i := 0; i < tagsCount; i++ {
