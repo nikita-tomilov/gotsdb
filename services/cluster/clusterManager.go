@@ -25,7 +25,7 @@ func (m *Manager) getGrpcServer() *GrpcClusterServer {
 }
 
 func (m *Manager) StartClustering() {
-	m.getGrpcServer().manager = m
+	m.getGrpcServer().clusterManager = m
 	m.getGrpcServer().Start()
 
 	m.MyUUID = uuid.New().String()

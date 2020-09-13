@@ -10,14 +10,14 @@ import (
 )
 
 type GrpcClusterServer struct{
-	ListenAddress                    string       `summer.property:"cluster.listenAddress|:5300"`
-	ClusteredStorageManagerAutowired *interface{} `summer:"*cluster.ClusteredStorageManager"`
-	manager                          *Manager
-	storageManager                   *ClusteredStorageManager
+	ListenAddress           string       `summer.property:"cluster.listenAddress|:5300"`
+	StorageManagerAutowired *interface{} `summer:"StorageManager"`
+	clusterManager          *Manager
+	storageManager          *ClusteredStorageManager
 }
 
 func (s *GrpcClusterServer) getStorageManager() *ClusteredStorageManager {
-	sm := *s.ClusteredStorageManagerAutowired
+	sm := *s.StorageManagerAutowired
 	sm2 := (sm).(*ClusteredStorageManager)
 	return sm2
 }
@@ -34,7 +34,7 @@ func (s *GrpcClusterServer) Start() {
 	grpcServer := grpc.NewServer(opts...)
 
 	s.storageManager = s.getStorageManager()
-	s.storageManager.clusterManager = s.manager
+	s.storageManager.clusterManager = s.clusterManager
 	pb.RegisterClusterServer(grpcServer, &clusterServer{parent:s})
 	go grpcServer.Serve(listener)
 }
@@ -46,8 +46,8 @@ type clusterServer struct{
 }
 
 func (s *clusterServer) Hello(c context.Context, rq *pb.HelloRequest) (*pb.AliveNodesResponse, error) {
-	s.parent.manager.AddKnownNode(rq.Iam)
-	return &pb.AliveNodesResponse{AliveNodes:s.parent.manager.GetKnownNodes()}, nil
+	s.parent.clusterManager.AddKnownNode(rq.Iam)
+	return &pb.AliveNodesResponse{AliveNodes:s.parent.clusterManager.GetKnownNodes()}, nil
 }
 
 func (s *clusterServer) Ping(c context.Context, rq *pb.PingRequest) (*pb.PingResponse, error) {
@@ -56,7 +56,7 @@ func (s *clusterServer) Ping(c context.Context, rq *pb.PingRequest) (*pb.PingRes
 }
 
 func (s *clusterServer) GetAliveNodes(c context.Context, v *pb.Void) (*pb.AliveNodesResponse, error) {
-	return &pb.AliveNodesResponse{AliveNodes:s.parent.manager.GetKnownNodes()}, nil
+	return &pb.AliveNodesResponse{AliveNodes:s.parent.clusterManager.GetKnownNodes()}, nil
 }
 
 func (s *clusterServer) KvsSave(c context.Context, req *pb.KvsStoreRequest) (*pb.KvsStoreResponse, error) {

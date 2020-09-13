@@ -3,7 +3,7 @@ package servers
 import (
 	log "github.com/jeanphorn/log4go"
 	pb "github.com/nikita-tomilov/gotsdb/proto"
-	"github.com/nikita-tomilov/gotsdb/services/cluster"
+	"github.com/nikita-tomilov/gotsdb/services/storage"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
@@ -11,14 +11,14 @@ import (
 )
 
 type GrpcUserServer struct {
-	ClusteredStorageManager *interface{} `summer:"*cluster.ClusteredStorageManager"`
+	StorageManager *interface{} `summer:"StorageManager"`
 	ListenAddress           string       `summer.property:"grpc.listenAddress|:5300"`
 }
 
-func (s *GrpcUserServer) getStorageManager() *cluster.ClusteredStorageManager {
-	sm := *s.ClusteredStorageManager
-	sm2 := (sm).(*cluster.ClusteredStorageManager)
-	return sm2
+func (s *GrpcUserServer) getStorageManager() *storage.Manager {
+	sm := *s.StorageManager
+	sm2 := (sm).(storage.Manager)
+	return &sm2
 }
 
 func (s *GrpcUserServer) BeginListening() {
@@ -39,37 +39,37 @@ func (s *GrpcUserServer) BeginListening() {
 //TODO: pass errors from storageManager level to grpc level?
 
 type server struct {
-	storageManager *cluster.ClusteredStorageManager
+	storageManager *storage.Manager
 }
 
 func (s *server) KvsSave(c context.Context, req *pb.KvsStoreRequest) (*pb.KvsStoreResponse, error) {
-	return s.storageManager.KvsSave(c, req)
+	return s.KvsSave(c, req)
 }
 
 func (s *server) KvsKeyExists(c context.Context, req *pb.KvsKeyExistsRequest) (*pb.KvsKeyExistsResponse, error) {
-	return s.storageManager.KvsKeyExists(c, req)
+	return s.KvsKeyExists(c, req)
 }
 
 func (s *server) KvsRetrieve(c context.Context, req *pb.KvsRetrieveRequest) (*pb.KvsRetrieveResponse, error) {
-	return s.storageManager.KvsRetrieve(c, req)
+	return s.KvsRetrieve(c, req)
 }
 
 func (s *server) KvsDelete(c context.Context, req *pb.KvsDeleteRequest) (*pb.KvsDeleteResponse, error) {
-	return s.storageManager.KvsDelete(c, req)
+	return s.KvsDelete(c, req)
 }
 
 func (s *server) KvsGetKeys(c context.Context, req *pb.KvsAllKeysRequest) (*pb.KvsAllKeysResponse, error) {
-	return s.storageManager.KvsGetKeys(c, req)
+	return s.KvsGetKeys(c, req)
 }
 
 func (s *server) TSSave(c context.Context, req *pb.TSStoreRequest) (*pb.TSStoreResponse, error) {
-	return s.storageManager.TSSave(c, req)
+	return s.TSSave(c, req)
 }
 
 func (s *server) TSRetrieve(c context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {
-	return s.storageManager.TSRetrieve(c, req)
+	return s.TSRetrieve(c, req)
 }
 
 func (s *server) TSAvailability(c context.Context, req *pb.TSAvailabilityRequest) (*pb.TSAvailabilityResponse, error) {
-	return s.storageManager.TSAvailability(c, req)
+	return s.TSAvailability(c, req)
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/nikita-tomilov/gotsdb/services"
 	"github.com/nikita-tomilov/gotsdb/services/cluster"
 	"github.com/nikita-tomilov/gotsdb/services/servers"
+	"github.com/nikita-tomilov/gotsdb/services/storage"
 	"github.com/nikita-tomilov/gotsdb/services/storage/kvs"
 	"github.com/nikita-tomilov/gotsdb/services/storage/tss"
 	"github.com/nikita-tomilov/summer/summer"
@@ -24,7 +25,7 @@ const applicationBeanName = "Application"
 const grpcUserServerBeanName = "GrpcUserServer"
 const grpcClusterServerBeanName = "GrpcClusterServer"
 const clusterManagerBeanName = "ClusterManager"
-const clusteredStorageManagerBeanName = "ClusteredStorageManagerAutowired"
+const storageManagerBeanName = "StorageManager"
 
 const kvsEnginePropertyKey = "kvs.engine"
 const kvsEnginePropertyFileValue = "file"
@@ -34,6 +35,9 @@ const tssEnginePropertyKey = "tss.engine"
 const tssEnginePropertyFileValue = "file"
 const tssEnginePropertyInMemValue = "inmem"
 const tssEnginePropertyLSMValue = "lsm"
+
+const serverModePropertyKey = "server.mode"
+const serverModePropertyClusterValue = "cluster"
 
 func setupDI() {
 	propertiesOverride, propertiesOverridePresent:= os.LookupEnv(propertiesOverrideEnvironmentVariable)
@@ -46,9 +50,14 @@ func setupDI() {
 	summer.RegisterBean(applicationBeanName, services.Application{})
 	summer.RegisterBean(grpcUserServerBeanName, servers.GrpcUserServer{})
 
-	summer.RegisterBean(grpcClusterServerBeanName, cluster.GrpcClusterServer{})
-	summer.RegisterBean(clusterManagerBeanName, cluster.Manager{})
-	summer.RegisterBean(clusteredStorageManagerBeanName, cluster.ClusteredStorageManager{})
+	mode, _ := summer.GetPropertyValue(serverModePropertyKey)
+	if mode == serverModePropertyClusterValue {
+		summer.RegisterBean(grpcClusterServerBeanName, cluster.GrpcClusterServer{})
+		summer.RegisterBean(clusterManagerBeanName, cluster.Manager{})
+		summer.RegisterBean(storageManagerBeanName, cluster.ClusteredStorageManager{})
+	} else {
+		summer.RegisterBean(storageManagerBeanName, storage.SingleNodeStorageManager{})
+	}
 
 	kvsEngine, _ := summer.GetPropertyValue(kvsEnginePropertyKey)
 	switch kvsEngine {
@@ -79,6 +88,6 @@ func main() {
 
 	setupDI()
 
-	app := summer.GetBean("Application").(*services.Application)
+	app := (*summer.GetBean("Application")).(*services.Application)
 	app.Startup()
 }

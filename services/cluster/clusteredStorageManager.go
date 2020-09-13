@@ -33,6 +33,7 @@ func (c *ClusteredStorageManager) getTsStorage() tss.TimeSeriesStorage {
 }
 
 func (c *ClusteredStorageManager) InitStorage() {
+	log.Warn("Using ClusteredStorageManager")
 	c.kvsStorage = c.getKvsStorage()
 	c.kvsStorage.InitStorage()
 	log.Warn("Using '%s' as KeyValue storage backend", c.kvsStorage.String())
