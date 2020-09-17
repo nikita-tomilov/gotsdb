@@ -32,8 +32,9 @@ func buildQlStorage() *QlBasedPersistentTSS {
 
 func buildLSMStorage() *LSMTSS {
 	idx += 1
-	s := LSMTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), CommitlogFlushPeriodSeconds:1, MemtExpirationPeriodSeconds:1}
+	s := LSMTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), CommitlogFlushPeriodSeconds: 1, CommitlogMaxEntries: 10, MemtExpirationPeriodSeconds: 1, MemtMaxEntriesPerTag: 100}
 	s.InitStorage()
 	return &s
 }
+
 var idx = 0

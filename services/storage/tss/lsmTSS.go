@@ -16,9 +16,11 @@ type StoragesForDatasource struct {
 }
 
 type LSMTSS struct {
-	Path                        string `summer.property:"ts.filePath|/tmp/gotsdb/tss"`
-	CommitlogFlushPeriodSeconds int    `summer.property:"tslsm.commitlogFlushPeriodSeconds|10"`
-	MemtExpirationPeriodSeconds int    `summer.property:"tslsm.memtExpirationPeriodSeconds|10"`
+	Path                        string `summer.property:"tss.filePath|/tmp/gotsdb/tss"`
+	CommitlogFlushPeriodSeconds int    `summer.property:"tsslsm.commitlogFlushPeriodSeconds|10"`
+	CommitlogMaxEntries			int    `summer.property:"tsslsm.commitlogMaxEntries|10"`
+	MemtExpirationPeriodSeconds int    `summer.property:"tsslsm.memtExpirationPeriodSeconds|10"`
+	MemtMaxEntriesPerTag        int    `summer.property:"tsslsm.memtMaxEntriesPerTag|100"`
 	forDatasource               map[string]StoragesForDatasource
 	mutex                       *sync.Mutex
 }
@@ -39,11 +41,11 @@ func (lsm *LSMTSS) getOrInitStorage(datasource string) StoragesForDatasource {
 	rootPath := lsm.Path + "/" + datasource
 	storageReader, storageWriter := golsm.InitStorage(
 		rootPath+"/commitlog",
-		10,
+		lsm.CommitlogMaxEntries,
 		time.Duration(lsm.CommitlogFlushPeriodSeconds)*time.Second,
 		time.Duration(lsm.MemtExpirationPeriodSeconds)*time.Second,
 		rootPath+"/sst",
-		100)
+		lsm.MemtMaxEntriesPerTag)
 	lsm.forDatasource[datasource] = StoragesForDatasource{storageReader: storageReader, storageWriter: storageWriter}
 
 	lsm.mutex.Unlock()

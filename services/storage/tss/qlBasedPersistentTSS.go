@@ -16,7 +16,7 @@ import (
 type QlBasedPersistentTSS struct {
 	ctx  *ql.TCtx
 	db   *ql.DB
-	Path string `summer.property:"ts.filePath|/tmp/gotsdb/tss"`
+	Path string `summer.property:"tss.filePath|/tmp/gotsdb/tss"`
 	dbFilePath string
 	periodBetweenWipes time.Duration
 	isRunning bool
