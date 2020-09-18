@@ -12,13 +12,21 @@ import (
 )
 
 type ClusteredStorageManager struct {
-	KvsStorageAutowired *interface{} `summer:"*kvs.KeyValueStorage"`
-	kvsStorage          kvs.KeyValueStorage
-	TssStorageAutowired *interface{} `summer:"*tss.TimeSeriesStorage"`
-	tssStorage          tss.TimeSeriesStorage
-	clusterManager      *Manager
-	proxiedCommands     *storage.TTLSet
+	KvsStorageAutowired   *interface{} `summer:"*kvs.KeyValueStorage"`
+	kvsStorage            kvs.KeyValueStorage
+	TssStorageAutowired   *interface{} `summer:"*tss.TimeSeriesStorage"`
+	tssStorage            tss.TimeSeriesStorage
+	clusterManager        *Manager
+	proxiedCommands       *storage.TTLSet
+	ReadingConsistencyStr string `summer.property:"*cluster.readingConsistency|none"`
+	WritingConsistencyStr string `summer.property:"*cluster.writingConsistency|none"`
+	readingConsistency    int
+	writingConsistency    int
 }
+
+const NONE = 0
+const ANY = 1
+const ALL = 2
 
 func (c *ClusteredStorageManager) getKvsStorage() kvs.KeyValueStorage {
 	ks := *c.KvsStorageAutowired
@@ -40,7 +48,38 @@ func (c *ClusteredStorageManager) InitStorage() {
 	c.tssStorage = c.getTsStorage()
 	c.tssStorage.InitStorage()
 	log.Warn("Using '%s' as TimeSeries storage backend", c.tssStorage.String())
+	c.parseConsistencies()
 	c.proxiedCommands = storage.NewTTLSet(10000, 10)
+}
+
+func (c *ClusteredStorageManager) parseConsistencies() {
+	switch c.ReadingConsistencyStr {
+	case "none": {
+		c.readingConsistency = NONE
+	}
+	case "any": {
+		c.readingConsistency = ANY
+	}
+	case "all": {
+		c.readingConsistency = ALL
+	}
+	default:
+		log.Critical("Unknown reading consistency %s", c.ReadingConsistencyStr)
+	}
+	switch c.WritingConsistencyStr {
+	case "none": {
+		c.writingConsistency = NONE
+	}
+	case "any": {
+		c.writingConsistency = ANY
+	}
+	case "all": {
+		c.writingConsistency = ALL
+	}
+	default:
+		log.Critical("Unknown writing consistency %s", c.WritingConsistencyStr)
+	}
+	log.Warn("Reading consistency is set to '%s', writing consistency is set to '%s'", c.ReadingConsistencyStr, c.WritingConsistencyStr)
 }
 
 func (c *ClusteredStorageManager) KvsSave(ctx context.Context, req *pb.KvsStoreRequest) (*pb.KvsStoreResponse, error) {
@@ -59,7 +98,7 @@ func (c *ClusteredStorageManager) KvsSave(ctx context.Context, req *pb.KvsStoreR
 func (c *ClusteredStorageManager) KvsKeyExists(ctx context.Context, req *pb.KvsKeyExistsRequest) (*pb.KvsKeyExistsResponse, error) {
 	exists := c.kvsStorage.KeyExists(req.Key)
 
-	if !exists && !c.proxiedCommands.Contains(req.MsgId) {
+	if !exists && !c.proxiedCommands.Contains(req.MsgId) && (c.readingConsistency != NONE) {
 		c.proxiedCommands.Put(req.MsgId)
 		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
 			existsOnAnotherNode, _ := o.GetGrpcChannel().KvsKeyExists(ctx, req)
@@ -76,15 +115,17 @@ func (c *ClusteredStorageManager) KvsKeyExists(ctx context.Context, req *pb.KvsK
 func (c *ClusteredStorageManager) KvsRetrieve(ctx context.Context, req *pb.KvsRetrieveRequest) (*pb.KvsRetrieveResponse, error) {
 	exists := c.kvsStorage.KeyExists(req.Key)
 	value := c.kvsStorage.Retrieve(req.Key)
-
-	if !exists && !c.proxiedCommands.Contains(req.MsgId) {
+	//TODO: refactor this
+	if !exists && !c.proxiedCommands.Contains(req.MsgId) && (c.readingConsistency != NONE) {
 		c.proxiedCommands.Put(req.MsgId)
 		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
 			existsOnAnotherNode, _ := o.GetGrpcChannel().KvsKeyExists(ctx, &pb.KvsKeyExistsRequest{MsgId: req.MsgId + 1, Key: req.Key})
 			if existsOnAnotherNode.Exists {
 				ans, err := o.GetGrpcChannel().KvsRetrieve(ctx, &pb.KvsRetrieveRequest{MsgId: req.MsgId + 1, Key: req.Key})
 				if err == nil {
-					c.kvsStorage.Save(req.Key, ans.Value)
+					if c.readingConsistency == ALL {
+						c.kvsStorage.Save(req.Key, ans.Value)
+					}
 					return &pb.KvsRetrieveResponse{MsgId: req.MsgId, Value: ans.Value}, nil
 				}
 				return &pb.KvsRetrieveResponse{MsgId: req.MsgId, Value: value}, err
@@ -98,7 +139,7 @@ func (c *ClusteredStorageManager) KvsRetrieve(ctx context.Context, req *pb.KvsRe
 func (c *ClusteredStorageManager) KvsDelete(ctx context.Context, req *pb.KvsDeleteRequest) (*pb.KvsDeleteResponse, error) {
 	c.kvsStorage.Delete(req.Key)
 
-	if !c.proxiedCommands.Contains(req.MsgId) {
+	if !c.proxiedCommands.Contains(req.MsgId) && (c.readingConsistency != NONE) {
 		c.proxiedCommands.Put(req.MsgId)
 		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
 			o.GetGrpcChannel().KvsDelete(ctx, req)
@@ -124,7 +165,7 @@ func (c *ClusteredStorageManager) KvsGetKeys(ctx context.Context, req *pb.KvsAll
 		mapOfKnownKeys.Put(knownKeyOnThisNode)
 	}
 
-	if !c.proxiedCommands.Contains(req.MsgId) {
+	if !c.proxiedCommands.Contains(req.MsgId) && (c.readingConsistency != NONE) {
 		c.proxiedCommands.Put(req.MsgId)
 		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
 			knownKeysOnAnotherNode, err := o.GetGrpcChannel().KvsGetKeys(ctx, req)
