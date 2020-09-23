@@ -54,83 +54,116 @@ func (c *ClusteredStorageManager) InitStorage() {
 
 func (c *ClusteredStorageManager) parseConsistencies() {
 	switch c.ReadingConsistencyStr {
-	case "none": {
-		c.readingConsistency = NONE
-	}
-	case "any": {
-		c.readingConsistency = ANY
-	}
-	case "all": {
-		c.readingConsistency = ALL
-	}
+	case "none":
+		{
+			c.readingConsistency = NONE
+		}
+	case "any":
+		{
+			c.readingConsistency = ANY
+		}
+	case "all":
+		{
+			c.readingConsistency = ALL
+		}
 	default:
 		log.Critical("Unknown reading consistency %s", c.ReadingConsistencyStr)
 	}
 	switch c.WritingConsistencyStr {
-	case "none": {
-		c.writingConsistency = NONE
-	}
-	case "any": {
-		c.writingConsistency = ANY
-	}
-	case "all": {
-		c.writingConsistency = ALL
-	}
+	case "none":
+		{
+			c.writingConsistency = NONE
+		}
+	case "any":
+		{
+			c.writingConsistency = ANY
+		}
+	case "all":
+		{
+			c.writingConsistency = ALL
+		}
 	default:
 		log.Critical("Unknown writing consistency %s", c.WritingConsistencyStr)
 	}
 	log.Warn("Reading consistency is set to '%s', writing consistency is set to '%s'", c.ReadingConsistencyStr, c.WritingConsistencyStr)
 }
 
+type MessageWithId interface {
+	GetMsgId() uint32
+}
+
+func (c *ClusteredStorageManager) shouldSaveDataOnAllNodes() bool { return c.writingConsistency == ALL }
+
+func (c *ClusteredStorageManager) proxyIfNeeded(id uint32, callback func(pb.ClusterClient) bool) {
+	if !c.proxiedCommands.Contains(id) {
+		c.proxiedCommands.Put(id)
+		shouldContinue := true
+		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
+			shouldContinue = callback(o.GetGrpcChannel())
+			if !shouldContinue {
+				break
+			}
+		}
+	}
+}
+
 func (c *ClusteredStorageManager) KvsSave(ctx context.Context, req *pb.KvsStoreRequest) (*pb.KvsStoreResponse, error) {
 	c.kvsStorage.Save(req.Key, req.Value)
 
-	if (c.writingConsistency == ALL) && !c.proxiedCommands.Contains(req.MsgId) {
-		c.proxiedCommands.Put(req.MsgId)
-		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
-			o.GetGrpcChannel().KvsSave(ctx, req)
-		}
+	if c.shouldSaveDataOnAllNodes() {
+		c.proxyIfNeeded(req.MsgId, func (otherNode pb.ClusterClient) bool {
+			otherNode.KvsSave(ctx, req)
+			return true
+		})
 	}
 
 	return &pb.KvsStoreResponse{MsgId: req.MsgId, Ok: true}, nil
 }
 
+func (c *ClusteredStorageManager) shouldReadDataFromOtherNodes() bool { return c.readingConsistency != NONE }
+
 func (c *ClusteredStorageManager) KvsKeyExists(ctx context.Context, req *pb.KvsKeyExistsRequest) (*pb.KvsKeyExistsResponse, error) {
 	exists := c.kvsStorage.KeyExists(req.Key)
 
-	if !exists && (c.readingConsistency != NONE) && !c.proxiedCommands.Contains(req.MsgId) {
-		c.proxiedCommands.Put(req.MsgId)
-		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
-			existsOnAnotherNode, _ := o.GetGrpcChannel().KvsKeyExists(ctx, req)
+	if !exists && c.shouldReadDataFromOtherNodes() {
+		c.proxyIfNeeded(req.MsgId, func (otherNode pb.ClusterClient) bool {
+			existsOnAnotherNode, _ := otherNode.KvsKeyExists(ctx, req)
 			if existsOnAnotherNode.Exists {
 				exists = true
-				break
+				return !exists
 			}
-		}
+			return true
+		})
 	}
 
 	return &pb.KvsKeyExistsResponse{MsgId: req.MsgId, Exists: exists}, nil
 }
 
+func (c *ClusteredStorageManager) shouldSaveDataRetrievedFromOthers() bool { return c.writingConsistency == ANY }
+
 func (c *ClusteredStorageManager) KvsRetrieve(ctx context.Context, req *pb.KvsRetrieveRequest) (*pb.KvsRetrieveResponse, error) {
 	exists := c.kvsStorage.KeyExists(req.Key)
-	value := c.kvsStorage.Retrieve(req.Key)
-	//TODO: refactor this
-	if !exists && (c.readingConsistency != NONE) && !c.proxiedCommands.Contains(req.MsgId) {
-		c.proxiedCommands.Put(req.MsgId)
-		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
-			existsOnAnotherNode, _ := o.GetGrpcChannel().KvsKeyExists(ctx, &pb.KvsKeyExistsRequest{MsgId: req.MsgId + 1, Key: req.Key})
-			if existsOnAnotherNode.Exists {
-				ans, err := o.GetGrpcChannel().KvsRetrieve(ctx, &pb.KvsRetrieveRequest{MsgId: req.MsgId + 1, Key: req.Key})
-				if err == nil {
-					if c.writingConsistency == ALL {
-						c.kvsStorage.Save(req.Key, ans.Value)
-					}
-					return &pb.KvsRetrieveResponse{MsgId: req.MsgId, Value: ans.Value}, nil //TODO: return only on "ANY", otherwise ASK OTHERS AND MERGE
-				}
-			}
-		}
+	value := make([]byte, 0)
+	if exists {
+		value = c.kvsStorage.Retrieve(req.Key)
+		return &pb.KvsRetrieveResponse{MsgId: req.MsgId, Value: value}, nil
 	}
+
+	c.proxyIfNeeded(req.MsgId, func (otherNode pb.ClusterClient) bool {
+		existsOnAnotherNode, _ := otherNode.KvsKeyExists(ctx, &pb.KvsKeyExistsRequest{MsgId: req.MsgId + 1, Key: req.Key})
+		if existsOnAnotherNode.Exists {
+			ans, err := otherNode.KvsRetrieve(ctx, &pb.KvsRetrieveRequest{MsgId: req.MsgId + 2, Key: req.Key})
+			if err != nil {
+				log.Error("Error in KvsRetrieve %s", err)
+				return true
+			}
+			if c.shouldSaveDataRetrievedFromOthers() {
+				c.kvsStorage.Save(req.Key, ans.Value)
+			}
+			return false
+		}
+		return true
+	})
 
 	return &pb.KvsRetrieveResponse{MsgId: req.MsgId, Value: value}, nil
 }
@@ -138,11 +171,11 @@ func (c *ClusteredStorageManager) KvsRetrieve(ctx context.Context, req *pb.KvsRe
 func (c *ClusteredStorageManager) KvsDelete(ctx context.Context, req *pb.KvsDeleteRequest) (*pb.KvsDeleteResponse, error) {
 	c.kvsStorage.Delete(req.Key)
 
-	if  (c.readingConsistency != NONE) && !c.proxiedCommands.Contains(req.MsgId) {
-		c.proxiedCommands.Put(req.MsgId)
-		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
-			o.GetGrpcChannel().KvsDelete(ctx, req)
-		}
+	if c.shouldSaveDataOnAllNodes() {
+		c.proxyIfNeeded(req.MsgId, func (otherNode pb.ClusterClient) bool {
+			otherNode.KvsDelete(ctx, req)
+			return true
+		})
 	}
 
 	return &pb.KvsDeleteResponse{MsgId: req.MsgId, Ok: true}, nil
@@ -164,16 +197,19 @@ func (c *ClusteredStorageManager) KvsGetKeys(ctx context.Context, req *pb.KvsAll
 		mapOfKnownKeys.Put(knownKeyOnThisNode)
 	}
 
-	if (c.readingConsistency != NONE) && !c.proxiedCommands.Contains(req.MsgId) {
-		c.proxiedCommands.Put(req.MsgId)
-		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
-			knownKeysOnAnotherNode, err := o.GetGrpcChannel().KvsGetKeys(ctx, req)
-			if err == nil {
-				for _, knownKeyOnAnotherNode := range knownKeysOnAnotherNode.Keys {
-					mapOfKnownKeys.Put(knownKeyOnAnotherNode)
-				}
+
+	if c.shouldReadDataFromOtherNodes() {
+		c.proxyIfNeeded(req.MsgId, func (otherNode pb.ClusterClient) bool {
+			knownKeysOnAnotherNode, err := otherNode.KvsGetKeys(ctx, &pb.KvsAllKeysRequest{MsgId: req.MsgId + 1})
+			if err != nil {
+				log.Error("Error in KvsGetKeys %s", err)
+				return true
 			}
-		}
+			for _, knownKeyOnAnotherNode := range knownKeysOnAnotherNode.Keys {
+				mapOfKnownKeys.Put(knownKeyOnAnotherNode)
+			}
+			return true
+		})
 	}
 
 	var ans [][]byte
@@ -185,48 +221,110 @@ func (c *ClusteredStorageManager) KvsGetKeys(ctx context.Context, req *pb.KvsAll
 }
 
 func (c *ClusteredStorageManager) TSSave(ctx context.Context, req *pb.TSStoreRequest) (*pb.TSStoreResponse, error) {
-	//TODO: cluster mode
 	c.tssStorage.Save(req.DataSource, req.Values, req.ExpirationMillis)
-	if (c.writingConsistency == ALL) && !c.proxiedCommands.Contains(req.MsgId) {
-		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
-			_, err := o.GetGrpcChannel().TSSave(ctx, req)
+
+	if c.shouldSaveDataOnAllNodes() {
+		c.proxyIfNeeded(req.MsgId,  func (otherNode pb.ClusterClient) bool {
+			_, err := otherNode.TSSave(ctx, req)
 			if err != nil {
-				log.Error(err)
+				log.Error("Error in TSSave %s", err)
 			}
-		}
+			return true
+		})
 	}
+
 	return &pb.TSStoreResponse{MsgId: req.MsgId, Ok: true}, nil
 }
 
-func (c *ClusteredStorageManager) TSRetrieve(ctx context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {
-	//TODO: merge with others, not only when "nothing on my node"
-	ans := c.tssStorage.Retrieve(req.DataSource, req.Tags, req.FromTimestamp, req.ToTimestamp)
-	if (len(ans) == 0) && (c.readingConsistency != NONE) && !c.proxiedCommands.Contains(req.MsgId) {
-		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
-			ansFromOtherNode, err := o.GetGrpcChannel().TSRetrieve(ctx, req)
-			if (err == nil) && (len(ansFromOtherNode.Values) != 0) {
-				if c.writingConsistency == ALL {
-					c.tssStorage.Save(ansFromOtherNode.DataSource, ansFromOtherNode.Values, 0) //TODO: FIX EXPIRATION, RETURN IT IN TSRetrieveResponse
-				}
-				//TODO: return only on "ANY", otherwise ASK OTHERS AND MERGE
-				return &pb.TSRetrieveResponse{MsgId: req.MsgId, DataSource: req.DataSource, FromTimestamp: req.FromTimestamp, ToTimestamp: req.ToTimestamp, Values: ansFromOtherNode.Values}, nil
+func mergeData(a map[string]*pb.TSPoints, b map[string]*pb.TSPoints) map[string]*pb.TSPoints {
+	ans := make(map[string]*pb.TSPoints)
+	for k, v := range a {
+		existingData, exists := ans[k]
+		if !exists {
+			ans[k] = v
+		} else {
+			for ts, val := range v.Points {
+				existingData.Points[ts] = val
 			}
 		}
 	}
+	for k, v := range b {
+		existingData, exists := ans[k]
+		if !exists {
+			ans[k] = v
+		} else {
+			for ts, val := range v.Points {
+				existingData.Points[ts] = val
+			}
+		}
+	}
+	return ans
+}
+
+func mergeAvail(a []*pb.TSAvailabilityChunk, b []*pb.TSAvailabilityChunk) []*pb.TSAvailabilityChunk {
+	//TODO do something like Guava RangeSet
+	min := (^uint64(0)) >> 1
+	max := uint64(0)
+	for _, c := range a {
+		if min > c.FromTimestamp {
+			min = c.FromTimestamp
+		}
+		if max < c.ToTimestamp {
+			max = c.ToTimestamp
+		}
+	}
+	for _, c := range b {
+		if min > c.FromTimestamp {
+			min = c.FromTimestamp
+		}
+		if max < c.ToTimestamp {
+			max = c.ToTimestamp
+		}
+	}
+	if min > max {
+		return make([]*pb.TSAvailabilityChunk, 0)
+	}
+	return []*pb.TSAvailabilityChunk{{FromTimestamp: min, ToTimestamp: max}}
+}
+
+func (c *ClusteredStorageManager) shouldReadDataFromAllOtherNodes() bool { return c.readingConsistency == ALL }
+
+func (c *ClusteredStorageManager) TSRetrieve(ctx context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {
+	ans := c.tssStorage.Retrieve(req.DataSource, req.Tags, req.FromTimestamp, req.ToTimestamp)
+
+	if c.shouldReadDataFromOtherNodes() {
+		c.proxyIfNeeded(req.MsgId, func (otherNode pb.ClusterClient) bool {
+			ansFromOtherNode, err := otherNode.TSRetrieve(ctx, req)
+			if err != nil {
+				log.Error("Error in TSRetrieve %s", err)
+				return true
+			}
+			ans = mergeData(ans, ansFromOtherNode.Values)
+			if c.shouldSaveDataRetrievedFromOthers() {
+				//TODO: FIX EXPIRATION, RETURN IT IN TSRetrieveResponse
+				c.tssStorage.Save(ansFromOtherNode.DataSource, ansFromOtherNode.Values, 0)
+			}
+			return c.shouldReadDataFromAllOtherNodes()
+		})
+	}
+
 	return &pb.TSRetrieveResponse{MsgId: req.MsgId, DataSource: req.DataSource, FromTimestamp: req.FromTimestamp, ToTimestamp: req.ToTimestamp, Values: ans}, nil
 }
 
 func (c *ClusteredStorageManager) TSAvailability(ctx context.Context, req *pb.TSAvailabilityRequest) (*pb.TSAvailabilityResponse, error) {
-	//TODO: fix
 	ans := c.tssStorage.Availability(req.DataSource, req.FromTimestamp, req.ToTimestamp)
-	if (len(ans) == 0) && (c.readingConsistency != NONE) && !c.proxiedCommands.Contains(req.MsgId) {
-		for _, o := range c.clusterManager.GetKnownOutboundConnections() {
-			ansFromOtherNode, err := o.GetGrpcChannel().TSAvailability(ctx, req)
-			if (err == nil) && (len(ansFromOtherNode.Availability) != 0) {
-				//TODO: return only on "ANY", otherwise ASK OTHERS AND MERGE
-				return &pb.TSAvailabilityResponse{MsgId: req.MsgId,Availability: ansFromOtherNode.Availability}, nil
+
+	if c.shouldReadDataFromOtherNodes() {
+		c.proxyIfNeeded(req.MsgId, func (otherNode pb.ClusterClient) bool {
+			ansFromOtherNode, err := otherNode.TSAvailability(ctx, req)
+			if err != nil {
+				log.Error("Error in TSAvailability %s", err)
+				return true
 			}
-		}
+			ans = mergeAvail(ans, ansFromOtherNode.Availability)
+			return c.shouldReadDataFromAllOtherNodes()
+		})
 	}
+
 	return &pb.TSAvailabilityResponse{MsgId: req.MsgId, Availability: ans}, nil
 }
