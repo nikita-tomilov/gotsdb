@@ -12,10 +12,11 @@ import (
 	"os"
 )
 
-const logSettingsFile = "./log4go.json"
-const defaultPropertiesFile = "./app.properties"
+const defaultLogSettingsFile = "./config/log4go.json"
+const defaultPropertiesFile = "./config/app.properties"
 
 const propertiesOverrideEnvironmentVariable = "GOTSDB_PROPERTY_FILE"
+const logSettingsOverrideEnvironmentVariable = "GOTSDB_LOG_SETTINGS_FILE"
 
 const kvsStorageBeanName = "KeyValueStorage"
 const kvsStorageBeanType = "*kvs.KeyValueStorage"
@@ -83,6 +84,12 @@ func setupDI() {
 }
 
 func main() {
+	logSettingsFile := defaultLogSettingsFile
+	logSettingsOverride, logSettingsOverridePresent:= os.LookupEnv(logSettingsOverrideEnvironmentVariable)
+	if logSettingsOverridePresent {
+		logSettingsFile = logSettingsOverride
+	}
+
 	log.LoadConfiguration(logSettingsFile)
 	defer log.Close()
 
