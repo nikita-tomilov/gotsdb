@@ -10,7 +10,8 @@ func BuildStoragesForTesting() []TimeSeriesStorage {
 	inMem := buildInMemStorage()
 	qL := buildQlStorage()
 	lsm := buildLSMStorage()
-	return toArray(inMem, qL, lsm)
+	sQ := buildSqliteStorage()
+	return toArray(inMem, qL, lsm, sQ)
 }
 
 func toArray(items ...TimeSeriesStorage) []TimeSeriesStorage {
@@ -33,6 +34,13 @@ func buildQlStorage() *QlBasedPersistentTSS {
 func buildLSMStorage() *LSMTSS {
 	idx += 1
 	s := LSMTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), CommitlogFlushPeriodSeconds: 1, CommitlogMaxEntries: 10, MemtExpirationPeriodSeconds: 1, MemtMaxEntriesPerTag: 100}
+	s.InitStorage()
+	return &s
+}
+
+func buildSqliteStorage() *SqliteTSS {
+	idx += 1
+	s := SqliteTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), periodBetweenWipes: time.Second * 1}
 	s.InitStorage()
 	return &s
 }
