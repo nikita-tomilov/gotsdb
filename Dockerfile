@@ -31,5 +31,8 @@ FROM scratch
 
 COPY --from=builder /dist/server /
 
+EXPOSE 5300
+EXPOSE 5123
+
 # Command to run when starting the container
 CMD ["/server"]
