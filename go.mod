@@ -16,8 +16,9 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/jeanphorn/log4go v0.0.0-20190526082429-7dbb8deb9468
 	github.com/mattn/go-sqlite3 v1.14.4
-	github.com/nikita-tomilov/golsm v0.0.0-20200910183546-2a1c6bd23a1f
+	github.com/nikita-tomilov/golsm v0.0.0-20201011102545-f814d65a666a
 	github.com/nikita-tomilov/summer v1.0.0
+	github.com/pkg/profile v1.5.0
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/net v0.0.0-20200925080053-05aa5d4ee321
 	google.golang.org/grpc v1.32.0
