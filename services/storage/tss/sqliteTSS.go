@@ -25,8 +25,7 @@ type SqliteTSS struct {
 }
 
 type Measurement struct {
-	DataSource string `gorm:"index"`
-	Tag        string `gorm:"index"`
+	Key        string `gorm:"index"`
 	Ts         uint64 `gorm:"index"`
 	Value      float64
 	ExpireAt   uint64
@@ -73,11 +72,15 @@ func (sq *SqliteTSS) CloseStorage() {
 	sq.isRunning = false
 }
 
+func (sq *SqliteTSS) keyByDsAndTag(ds string, key string) string {
+	return ds + "¿" + key
+}
+
 func (sq *SqliteTSS) saveBatch(batch []Measurement) {
 	sb := strings.Builder{}
 	sb.WriteString("BEGIN TRANSACTION;")
 	for _, entry := range batch {
-		sb.WriteString(fmt.Sprintf("INSERT INTO measurements VALUES(\"%s\", \"%s\", %d, %f, %d);", entry.DataSource, entry.Tag, entry.Ts, entry.Value, entry.ExpireAt))
+		sb.WriteString(fmt.Sprintf("INSERT INTO measurements VALUES(\"%s\", %d, %f, %d);", entry.Key, entry.Ts, entry.Value, entry.ExpireAt))
 	}
 	sb.WriteString("COMMIT;")
 	rq := sb.String()
@@ -92,7 +95,7 @@ func (sq *SqliteTSS) toBatches(total []Measurement, batchSize int) [][]Measureme
 	i := 0
 	ans := make([][]Measurement, 0)
 	for i < len(total) {
-		j := utils.MinInt(i + batchSize, len(total))
+		j := utils.MinInt(i+batchSize, len(total))
 		ans = append(ans, total[i:j])
 		i = i + batchSize
 	}
@@ -110,7 +113,7 @@ func (sq *SqliteTSS) Save(dataSource string, data map[string]*proto.TSPoints, ex
 		measurementsForTag := make([]Measurement, len(values.Points))
 		i := 0
 		for ts, value := range values.Points {
-			meas := Measurement{DataSource: dataSource, Tag: tag, Ts: ts, Value: value, ExpireAt: expireAt}
+			meas := Measurement{Key: sq.keyByDsAndTag(dataSource, tag), Ts: ts, Value: value, ExpireAt: expireAt}
 			measurementsForTag[i] = meas
 			i += 1
 		}
@@ -126,7 +129,7 @@ func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp ui
 
 	for _, tag := range tags {
 		ansForTag := make(map[uint64]float64)
-		rq := fmt.Sprintf("SELECT ts, value FROM measurements WHERE data_source = \"%s\" AND tag = \"%s\" AND ts >= %d AND ts <= %d", dataSource, tag, fromTimestamp, toTimestamp)
+		rq := fmt.Sprintf("SELECT ts, value FROM measurements WHERE key = \"%s\" AND ts >= %d AND ts <= %d", sq.keyByDsAndTag(dataSource, tag), fromTimestamp, toTimestamp)
 
 		db, _ := sq.db.DB()
 		rows, err := db.Query(rq)
@@ -152,7 +155,7 @@ func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp ui
 }
 
 func (sq *SqliteTSS) Availability(dataSource string, fromTimestamp uint64, toTimestamp uint64) []*proto.TSAvailabilityChunk {
-	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM measurements WHERE data_source = \"%s\";", dataSource)
+	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM measurements WHERE key LIKE \"%s%%\";", dataSource)
 	res, err := sq.db.Raw(rq).Rows()
 	min := uint64(math.MaxUint64)
 	max := uint64(0)

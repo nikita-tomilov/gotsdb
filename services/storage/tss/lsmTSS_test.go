@@ -41,8 +41,8 @@ func TestLSMTSS_CanReadAlreasySavedFiles(t *testing.T) {
 	log.Close()
 }
 
-//func TestLSMTSS_CanCloneAlreasySavedFiles(t *testing.T) {
-func LSMTSS_CanCloneAlreasySavedFiles(t *testing.T) {
+func TestLSMTSS_CanCloneAlreasySavedFiles(t *testing.T) {
+//func LSMTSS_CanCloneAlreasySavedFiles(t *testing.T) {
 	//given
 	log.LoadConfiguration("../../../config/log4go.json")
 	s := LSMTSS{Path: fmt.Sprintf("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata"), CommitlogFlushPeriodSeconds: 1, CommitlogMaxEntries: 10, MemtExpirationPeriodSeconds: 1, MemtMaxEntriesPerTag: 100, MemtPrefetchSeconds: 120}
