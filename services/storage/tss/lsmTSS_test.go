@@ -13,11 +13,10 @@ func unixTsToString(ts uint64) string {
 	return tm.String()
 }
 
-//func TestLSMTSS_CanReadAlreasySavedFiles(t *testing.T) {
-func LSMTSS_CanReadAlreasySavedFiles(t *testing.T) {
+func TestLSMTSS_CanReadAlreasySavedFiles(t *testing.T) {
 	//given
 	log.LoadConfiguration("../../../config/log4go.json")
-	s := LSMTSS{Path: fmt.Sprintf("/home/hotaro/saved-data-for-benchmark-lsm"), CommitlogFlushPeriodSeconds: 1, CommitlogMaxEntries: 10, MemtExpirationPeriodSeconds: 1, MemtMaxEntriesPerTag: 100, MemtPrefetchSeconds: 120}
+	s := LSMTSS{Path: fmt.Sprintf("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata"), CommitlogFlushPeriodSeconds: 1, CommitlogMaxEntries: 10, MemtExpirationPeriodSeconds: 1, MemtMaxEntriesPerTag: 100, MemtPrefetchSeconds: 120}
 	const dataSource = "whatever"
 	s.InitStorage()
 	func() {

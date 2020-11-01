@@ -124,11 +124,24 @@ func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp ui
 	for _, tag := range tags {
 		ansForTag := make(map[uint64]float64)
 		rq := fmt.Sprintf("SELECT ts, value FROM measurements WHERE data_source = \"%s\" AND tag = \"%s\" AND ts >= %d AND ts <= %d", dataSource, tag, fromTimestamp, toTimestamp)
-		measurements := make([]Measurement, 0)
-		sq.db.Raw(rq).Find(&measurements)
-		for _, meas := range measurements {
-			ansForTag[meas.Ts] = meas.Value
+
+		db, _ := sq.db.DB()
+		rows, err := db.Query(rq)
+		if err != nil {
+			log.Error("Error in DB in Retrieve: " + err.Error())
+		} else {
+			ts := uint64(0)
+			val := 0.0
+			for rows.Next() {
+				err := rows.Scan(&ts, &val)
+				if err != nil {
+					log.Error(err)
+				} else {
+					ansForTag[ts] = val
+				}
+			}
 		}
+
 		ans[tag] = &pb.TSPoints{Points: ansForTag}
 	}
 

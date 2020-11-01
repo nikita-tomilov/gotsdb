@@ -65,30 +65,19 @@ func BenchmarkDataReading(b *testing.B) {
 }
 
 func BenchmarkDataReading_LSMvsSQLite(b *testing.B) {
-	storages := BuildStoragesForBenchmarkLSMvsSQLite()
+	storages := BuildStoragesForBenchmarkLSMvsSQLite("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata")
 	log.Close()
 
-	dataFrom := utils.GetNowMillis()
-	millisInHour := 60 * 60 * 1000
-	dataTo := dataFrom + uint64(millisInHour)
-	tagsCount := 10
-	data := buildDummyDataForBenchmark(tagsCount, dataFrom, dataTo)
 	ds := "whatever"
-	requestSizes := []time.Duration{time.Second * 10, time.Second * 60, time.Minute * 2, time.Minute * 5, time.Minute * 10, time.Minute * 30}
+	requestSizes := []time.Duration{time.Second * 10, time.Second * 20, time.Second * 30, time.Second * 45, time.Second * 60, time.Minute * 2, time.Minute * 3, time.Minute * 4, time.Minute * 5, time.Minute * 10, time.Minute * 15}
 
 	for _, storage := range storages {
-
-		saveToStorage(storage, ds, data)
+		avail := storage.Availability(ds, 0, utils.GetNowMillis())
+		dataFrom := avail[0].FromTimestamp
+		dataTo := avail[0].ToTimestamp
 
 		for _, requestSize := range requestSizes {
-
-			avail := storage.Availability(ds, dataFrom, dataTo)
-			fmt.Printf("Expected avail: %d to %d\nActual avail:\n", dataFrom, dataTo)
-			for _, chunk := range avail {
-				fmt.Printf("- %d to %d\n", chunk.FromTimestamp, chunk.ToTimestamp)
-			}
-
-			benchmarkName := "DataRead on " + storage.String() + " for " + requestSize.String()
+			benchmarkName := fmt.Sprintf("DataRead on %s for %s |%d|", storage.String(), requestSize.String(), requestSize.Milliseconds())
 			b.Run(benchmarkName, func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					from, to := randomTimeRange(dataFrom, dataTo, uint64(requestSize.Milliseconds()))
@@ -96,11 +85,13 @@ func BenchmarkDataReading_LSMvsSQLite(b *testing.B) {
 					if len(d) != 3 {
 						panic("tags mismatch")
 					}
-					//for tag, values := range d {
-					//	if !withinDelta(float64(len(values.Points)), float64(requestSize.Milliseconds()/1000), 0.1) {
-					//		print(fmt.Sprintf("count mismatch for %s: expected about %d, got %d\n", tag, requestSize.Milliseconds()/1000, len(values.Points)))
-					//	}
-					//}
+					for tag, dataForTag := range d {
+						expected :=  int(requestSize.Milliseconds() / 1000)
+						actual := len(dataForTag.Points)
+						if !withinDelta(expected, actual, 0.1) {
+							fmt.Printf("mismatch on tag %s; expected %d got %d on timerange %s - %s\n", tag, expected, actual, unixTsToString(from), unixTsToString(to))
+						}
+					}
 				}
 			})
 
@@ -163,12 +154,12 @@ func randomTs(from uint64, to uint64) uint64 {
 }
 
 func randomTimeRange(from uint64, to uint64, width uint64) (uint64, uint64) {
-	fromAns := randomTs(from, to-2*width)
-	toAns := from + width
+	fromAns := randomTs(from, to-width)
+	toAns := fromAns + width
 	return fromAns, toAns
 }
 
-func withinDelta(a float64, b float64, percentage float64) bool {
-	epsilon := (a + b) / 2 * percentage
-	return math.Abs(a-b) < epsilon
+func withinDelta(a int, b int, percentage float64) bool {
+	epsilon := float64(a + b) / 2 * percentage
+	return math.Abs(float64(a) - float64(b)) < epsilon
 }

@@ -1,6 +1,6 @@
 module github.com/nikita-tomilov/gotsdb
 
-go 1.13
+go 1.15
 
 // replace github.com/nikita-tomilov/golsm  => /home/hotaro/go/src/github.com/nikita-tomilov/golsm
 
