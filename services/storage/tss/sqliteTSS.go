@@ -8,24 +8,33 @@ import (
 	"github.com/nikita-tomilov/gotsdb/proto"
 	pb "github.com/nikita-tomilov/gotsdb/proto"
 	"github.com/nikita-tomilov/gotsdb/utils"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 	"math"
 	"os"
-	"strings"
 	"time"
 )
 
 type SqliteTSS struct {
-	db                 *sql.DB
+	db                 *gorm.DB
 	Path               string `summer.property:"tss.filePath|/tmp/gotsdb/tss"`
 	dbFilePath         string
 	periodBetweenWipes time.Duration
 	isRunning          bool
 }
 
+type Measurement struct {
+	DataSource string `gorm:"index"`
+	Tag        string `gorm:"index"`
+	Ts         uint64 `gorm:"index"`
+	Value      float64
+	ExpireAt   uint64
+}
+
 func (sq *SqliteTSS) InitStorage() {
 	_ = os.MkdirAll(sq.Path, os.ModePerm)
 	sq.dbFilePath = sq.Path + "/db.bin"
-	db, err := sql.Open("sqlite3", sq.dbFilePath)
+	db, err := gorm.Open(sqlite.Open(sq.dbFilePath), &gorm.Config{})
 	if err != nil {
 		panic("Unable to instantiate db " + err.Error())
 	}
@@ -37,6 +46,7 @@ func (sq *SqliteTSS) InitStorage() {
 		sq.periodBetweenWipes = time.Second * 5
 	}
 	go func(sq *SqliteTSS) {
+		time.Sleep(sq.periodBetweenWipes)
 		for sq.isRunning {
 			sq.expirationCycle()
 			time.Sleep(sq.periodBetweenWipes)
@@ -45,15 +55,7 @@ func (sq *SqliteTSS) InitStorage() {
 }
 
 func (sq *SqliteTSS) createTableIfNotExists() {
-	_, err := sq.db.Exec(`
-		BEGIN TRANSACTION;
-			CREATE TABLE IF NOT EXISTS RawData (ds string, tag string, ts uint64, value float64, expat uint64);
-			CREATE INDEX IF NOT EXISTS RawDataTag ON RawData (tag);
-			CREATE INDEX IF NOT EXISTS RawDataDs ON RawData (ds);
-			CREATE INDEX IF NOT EXISTS RawDataTs ON RawData (ts);
-			CREATE INDEX IF NOT EXISTS RawDataExpAt ON RawData (expat);
-		COMMIT;
-	`)
+	err := sq.db.AutoMigrate(&Measurement{})
 	if err != nil {
 		log.Error("Error in DB: " + err.Error())
 		panic(err)
@@ -61,28 +63,27 @@ func (sq *SqliteTSS) createTableIfNotExists() {
 }
 
 func (sq *SqliteTSS) CloseStorage() {
-	sq.db.Close()
+	sqlDb, err := sq.db.DB()
+	if err != nil {
+		log.Error("Error in DB Close: " + err.Error())
+	} else {
+		sqlDb.Close()
+	}
 	sq.isRunning = false
 }
 
 func (sq *SqliteTSS) Save(dataSource string, data map[string]*proto.TSPoints, expirationMillis uint64) {
-	sb := strings.Builder{}
 	now := utils.GetNowMillis()
 	expireAt := now + expirationMillis
 
-	sb.WriteString("BEGIN TRANSACTION;")
+	sq.db.Begin()
 	for tag, values := range data {
 		for ts, value := range values.Points {
-			sb.WriteString(fmt.Sprintf("INSERT INTO RawData VALUES(\"%s\", \"%s\", %d, %f, %d);", dataSource, tag, ts, value, expireAt))
+			meas := Measurement{DataSource:dataSource, Tag:tag, Ts:ts, Value:value, ExpireAt:expireAt}
+			sq.db.Create(&meas)
 		}
 	}
-	sb.WriteString("COMMIT;")
-
-	rq := sb.String()
-	_, err := sq.db.Exec(rq)
-	if err != nil {
-		log.Error("Error in DB in Save: " + err.Error())
-	}
+	sq.db.Commit()
 }
 
 func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*proto.TSPoints {
@@ -90,12 +91,16 @@ func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp ui
 
 	for _, tag := range tags {
 		ansForTag := make(map[uint64]float64)
-		rq := fmt.Sprintf("SELECT ts, value FROM RawData WHERE ds = \"%s\" AND tag = \"%s\" AND ts >= %d AND ts <= %d", dataSource, tag, fromTimestamp, toTimestamp)
-		rows, err := sq.db.Query(rq)
-		if err != nil {
-			log.Error("Error in DB in Retrieve: " + err.Error())
-		} else {
-			ts := uint64(0)
+		rq := fmt.Sprintf("SELECT ts, value FROM measurements WHERE data_source = \"%s\" AND tag = \"%s\" AND ts >= %d AND ts <= %d", dataSource, tag, fromTimestamp, toTimestamp)
+		measurements := make([]Measurement, 0)
+		sq.db.Raw(rq).Find(&measurements)
+		for _, meas := range measurements {
+			ansForTag[meas.Ts] = meas.Value
+		}
+		//if err != nil {
+		//	log.Error("Error in DB in Retrieve: " + err.Error())
+		//} else {
+			/*ts := uint64(0)
 			val := 0.0
 			for rows.Next() {
 				err := rows.Scan(&ts, &val)
@@ -104,8 +109,8 @@ func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp ui
 				} else {
 					ansForTag[ts] = val
 				}
-			}
-		}
+			}*/
+		//}
 		ans[tag] = &pb.TSPoints{Points: ansForTag}
 	}
 
@@ -113,8 +118,8 @@ func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp ui
 }
 
 func (sq *SqliteTSS) Availability(dataSource string, fromTimestamp uint64, toTimestamp uint64) []*proto.TSAvailabilityChunk {
-	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM RawData WHERE ds = \"%s\";", dataSource)
-	res, err := sq.db.Query(rq)
+	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM measurements WHERE data_source = \"%s\";", dataSource)
+	res, err := sq.db.Raw(rq).Rows()
 	min := uint64(math.MaxUint64)
 	max := uint64(0)
 	if err != nil {
@@ -153,10 +158,10 @@ func (sq *SqliteTSS) String() string {
 
 func (sq *SqliteTSS) expirationCycle() {
 	now := utils.GetNowMillis()
-	rq := fmt.Sprintf("BEGIN TRANSACTION;DELETE FROM RawData WHERE expat <= %d;COMMIT;", now)
-	_, err := sq.db.Exec(rq)
+	err := sq.db.Begin().Delete(Measurement{}, "expire_at <= ?", now).Commit().Error
 
 	if err != nil {
 		log.Error("Error in DB in expirationCycle: " + err.Error())
+		sq.isRunning = false
 	}
 }

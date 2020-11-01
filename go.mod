@@ -22,5 +22,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/net v0.0.0-20200925080053-05aa5d4ee321
 	google.golang.org/grpc v1.32.0
+	gorm.io/driver/sqlite v1.1.3
+	gorm.io/gorm v1.20.5
 	modernc.org/ql v1.1.0
 )
