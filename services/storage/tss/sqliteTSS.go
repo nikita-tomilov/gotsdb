@@ -102,6 +102,9 @@ func (sq *SqliteTSS) toBatches(total []Measurement, batchSize int) [][]Measureme
 func (sq *SqliteTSS) Save(dataSource string, data map[string]*proto.TSPoints, expirationMillis uint64) {
 	now := utils.GetNowMillis()
 	expireAt := now + expirationMillis
+	if expirationMillis == 0 {
+		expireAt = 0
+	}
 	measurements := make([]Measurement, 0)
 	for tag, values := range data {
 		measurementsForTag := make([]Measurement, len(values.Points))
@@ -189,7 +192,7 @@ func (sq *SqliteTSS) String() string {
 
 func (sq *SqliteTSS) expirationCycle() {
 	now := utils.GetNowMillis()
-	err := sq.db.Begin().Delete(Measurement{}, "expire_at <= ?", now).Commit().Error
+	err := sq.db.Begin().Delete(Measurement{}, "expire_at > 0 AND expire_at <= ?", now).Commit().Error
 
 	if err != nil {
 		log.Error("Error in DB in expirationCycle: " + err.Error())
