@@ -108,6 +108,14 @@ func Min(a uint64, b uint64) uint64 {
 	return b
 }
 
+func MinInt(a int, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+
 func Max(a uint64, b uint64) uint64 {
 	if a > b {
 		return a

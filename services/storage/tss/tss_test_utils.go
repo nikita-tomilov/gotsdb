@@ -48,14 +48,14 @@ func buildQlStorage() *QlBasedPersistentTSS {
 
 func buildLSMStorage() *LSMTSS {
 	idx += 1
-	s := LSMTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), CommitlogFlushPeriodSeconds: 1, CommitlogMaxEntries: 10, MemtExpirationPeriodSeconds: 1, MemtMaxEntriesPerTag: 100}
+	s := LSMTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), CommitlogFlushPeriodSeconds: 1, CommitlogMaxEntries: 10, MemtExpirationPeriodSeconds: 1, MemtMaxEntriesPerTag: 100, MemtPrefetchSeconds:120}
 	s.InitStorage()
 	return &s
 }
 
 func buildLSMStorageForBenchmark() *LSMTSS {
 	idx += 1
-	s := LSMTSS{Path: fmt.Sprintf("/home/hotaro/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), CommitlogFlushPeriodSeconds: 5, CommitlogMaxEntries: 1000, MemtExpirationPeriodSeconds: 30, MemtMaxEntriesPerTag: 1000}
+	s := LSMTSS{Path: fmt.Sprintf("/home/hotaro/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), CommitlogFlushPeriodSeconds: 5, CommitlogMaxEntries: 100, MemtExpirationPeriodSeconds: 3000, MemtMaxEntriesPerTag: 1000, MemtPrefetchSeconds:120}
 	s.InitStorage()
 	return &s
 }
@@ -69,7 +69,7 @@ func buildSqliteStorage() *SqliteTSS {
 
 func buildSqliteStorageForBenchmark() *SqliteTSS {
 	idx += 1
-	s := SqliteTSS{Path: fmt.Sprintf("/home/hotaro/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), periodBetweenWipes: time.Second * 1}
+	s := SqliteTSS{Path: fmt.Sprintf("/home/hotaro/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), periodBetweenWipes: time.Hour * 1024}
 	s.InitStorage()
 	return &s
 }

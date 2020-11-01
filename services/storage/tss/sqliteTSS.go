@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 	"math"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -72,18 +73,49 @@ func (sq *SqliteTSS) CloseStorage() {
 	sq.isRunning = false
 }
 
+func (sq *SqliteTSS) saveBatch(batch []Measurement) {
+	sb := strings.Builder{}
+	sb.WriteString("BEGIN TRANSACTION;")
+	for _, entry := range batch {
+		sb.WriteString(fmt.Sprintf("INSERT INTO measurements VALUES(\"%s\", \"%s\", %d, %f, %d);", entry.DataSource, entry.Tag, entry.Ts, entry.Value, entry.ExpireAt))
+	}
+	sb.WriteString("COMMIT;")
+	rq := sb.String()
+	db, _ := sq.db.DB()
+	_, err := db.Exec(rq)
+	if err != nil {
+		log.Error("Error in DB in SaveBatch: " + err.Error())
+	}
+}
+
+func (sq *SqliteTSS) toBatches(total []Measurement, batchSize int) [][]Measurement {
+	i := 0
+	ans := make([][]Measurement, 0)
+	for i < len(total) {
+		j := utils.MinInt(i + batchSize, len(total))
+		ans = append(ans, total[i:j])
+		i = i + batchSize
+	}
+	return ans
+}
+
 func (sq *SqliteTSS) Save(dataSource string, data map[string]*proto.TSPoints, expirationMillis uint64) {
 	now := utils.GetNowMillis()
 	expireAt := now + expirationMillis
-
-	sq.db.Begin()
+	measurements := make([]Measurement, 0)
 	for tag, values := range data {
+		measurementsForTag := make([]Measurement, len(values.Points))
+		i := 0
 		for ts, value := range values.Points {
-			meas := Measurement{DataSource:dataSource, Tag:tag, Ts:ts, Value:value, ExpireAt:expireAt}
-			sq.db.Create(&meas)
+			meas := Measurement{DataSource: dataSource, Tag: tag, Ts: ts, Value: value, ExpireAt: expireAt}
+			measurementsForTag[i] = meas
+			i += 1
 		}
+		measurements = append(measurements, measurementsForTag...)
 	}
-	sq.db.Commit()
+	for _, batch := range sq.toBatches(measurements, 100) {
+		sq.saveBatch(batch)
+	}
 }
 
 func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*proto.TSPoints {
@@ -97,20 +129,6 @@ func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp ui
 		for _, meas := range measurements {
 			ansForTag[meas.Ts] = meas.Value
 		}
-		//if err != nil {
-		//	log.Error("Error in DB in Retrieve: " + err.Error())
-		//} else {
-			/*ts := uint64(0)
-			val := 0.0
-			for rows.Next() {
-				err := rows.Scan(&ts, &val)
-				if err != nil {
-					log.Error(err)
-				} else {
-					ansForTag[ts] = val
-				}
-			}*/
-		//}
 		ans[tag] = &pb.TSPoints{Points: ansForTag}
 	}
 

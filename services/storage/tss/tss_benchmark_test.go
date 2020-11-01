@@ -60,6 +60,7 @@ func BenchmarkDataReading(b *testing.B) {
 		})
 
 		println("Finished for storage " + storage.String() + "\n\n")
+		storage.CloseStorage()
 	}
 }
 
@@ -69,11 +70,11 @@ func BenchmarkDataReading_LSMvsSQLite(b *testing.B) {
 
 	dataFrom := utils.GetNowMillis()
 	millisInHour := 60 * 60 * 1000
-	dataTo := dataFrom + uint64(millisInHour*24)
+	dataTo := dataFrom + uint64(millisInHour)
 	tagsCount := 10
 	data := buildDummyDataForBenchmark(tagsCount, dataFrom, dataTo)
 	ds := "whatever"
-	requestSizes := []time.Duration{time.Second * 10, time.Second * 60, time.Minute * 2, time.Minute * 5, time.Minute * 10, time.Minute * 30, time.Minute * 60, time.Hour, time.Hour * 2, time.Hour * 3}
+	requestSizes := []time.Duration{time.Second * 10, time.Second * 60, time.Minute * 2, time.Minute * 5, time.Minute * 10, time.Minute * 30}
 
 	for _, storage := range storages {
 
@@ -95,11 +96,11 @@ func BenchmarkDataReading_LSMvsSQLite(b *testing.B) {
 					if len(d) != 3 {
 						panic("tags mismatch")
 					}
-					/*for tag, values := range d {
-						if !withinDelta(float64(len(values.Points)), float64(requestSize.Milliseconds()/1000), 0.1) {
-							print(fmt.Sprintf("count mismatch for %s: expected about %d, got %d\n", tag, requestSize.Milliseconds()/1000, len(values.Points)))
-						}
-					}*/
+					//for tag, values := range d {
+					//	if !withinDelta(float64(len(values.Points)), float64(requestSize.Milliseconds()/1000), 0.1) {
+					//		print(fmt.Sprintf("count mismatch for %s: expected about %d, got %d\n", tag, requestSize.Milliseconds()/1000, len(values.Points)))
+					//	}
+					//}
 				}
 			})
 

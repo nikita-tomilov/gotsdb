@@ -2,6 +2,8 @@ module github.com/nikita-tomilov/gotsdb
 
 go 1.13
 
+// replace github.com/nikita-tomilov/golsm  => /home/hotaro/go/src/github.com/nikita-tomilov/golsm
+
 require (
 	github.com/abiosoft/ishell v2.0.0+incompatible
 	github.com/abiosoft/readline v0.0.0-20180607040430-155bce2042db // indirect
@@ -12,11 +14,11 @@ require (
 	github.com/flynn-archive/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
 	github.com/golang/protobuf v1.4.2
 	github.com/golang/snappy v0.0.2 // indirect
-	github.com/google/btree v1.0.0 // indirect
 	github.com/google/uuid v1.1.2
 	github.com/jeanphorn/log4go v0.0.0-20190526082429-7dbb8deb9468
-	github.com/mattn/go-sqlite3 v1.14.4
-	github.com/nikita-tomilov/golsm v0.0.0-20201011102545-f814d65a666a
+	github.com/kr/pretty v0.2.1 // indirect
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/nikita-tomilov/golsm v0.0.1-beta
 	github.com/nikita-tomilov/summer v1.0.0
 	github.com/pkg/profile v1.5.0
 	github.com/stretchr/testify v1.6.1

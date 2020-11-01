@@ -18,9 +18,10 @@ type StoragesForDatasource struct {
 type LSMTSS struct {
 	Path                        string `summer.property:"tss.filePath|/tmp/gotsdb/tss"`
 	CommitlogFlushPeriodSeconds int    `summer.property:"tsslsm.commitlogFlushPeriodSeconds|10"`
-	CommitlogMaxEntries			int    `summer.property:"tsslsm.commitlogMaxEntries|10"`
+	CommitlogMaxEntries         int    `summer.property:"tsslsm.commitlogMaxEntries|10"`
 	MemtExpirationPeriodSeconds int    `summer.property:"tsslsm.memtExpirationPeriodSeconds|10"`
 	MemtMaxEntriesPerTag        int    `summer.property:"tsslsm.memtMaxEntriesPerTag|100"`
+	MemtPrefetchSeconds         int    `summer.property:"tsslsm.memtPrefetchSeconds|120"`
 	forDatasource               map[string]StoragesForDatasource
 	mutex                       *sync.Mutex
 }
@@ -44,6 +45,7 @@ func (lsm *LSMTSS) getOrInitStorage(datasource string) StoragesForDatasource {
 		lsm.CommitlogMaxEntries,
 		time.Duration(lsm.CommitlogFlushPeriodSeconds)*time.Second,
 		time.Duration(lsm.MemtExpirationPeriodSeconds)*time.Second,
+		time.Duration(lsm.MemtPrefetchSeconds)*time.Second,
 		rootPath+"/sst",
 		lsm.MemtMaxEntriesPerTag)
 	lsm.forDatasource[datasource] = StoragesForDatasource{storageReader: storageReader, storageWriter: storageWriter}
@@ -110,4 +112,8 @@ func (lsm *LSMTSS) Availability(dataSource string, fromTimestamp uint64, toTimes
 
 func (lsm *LSMTSS) String() string {
 	return fmt.Sprintf("LSM-based storage over the root dir %s", lsm.Path)
+}
+
+func (lsm *LSMTSS) GetTags(dataSource string) []string {
+	return lsm.getOrInitStorage(dataSource).storageReader.GetTags()
 }
