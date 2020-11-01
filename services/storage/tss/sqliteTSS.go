@@ -24,8 +24,14 @@ type SqliteTSS struct {
 	isRunning          bool
 }
 
+type MeasurementMeta struct {
+	Id  uint `gorm:"primaryKey"`
+	Key string
+}
+
 type Measurement struct {
-	Key        string `gorm:"index"`
+	DataSource string
+	Key        uint   `gorm:"index"`
 	Ts         uint64 `gorm:"index"`
 	Value      float64
 	ExpireAt   uint64
@@ -60,6 +66,11 @@ func (sq *SqliteTSS) createTableIfNotExists() {
 		log.Error("Error in DB: " + err.Error())
 		panic(err)
 	}
+	err = sq.db.AutoMigrate(&MeasurementMeta{})
+	if err != nil {
+		log.Error("Error in DB: " + err.Error())
+		panic(err)
+	}
 }
 
 func (sq *SqliteTSS) CloseStorage() {
@@ -72,15 +83,35 @@ func (sq *SqliteTSS) CloseStorage() {
 	sq.isRunning = false
 }
 
-func (sq *SqliteTSS) keyByDsAndTag(ds string, key string) string {
-	return ds + "¿" + key
+func (sq *SqliteTSS) insertKeyByDsAndTag(key string) {
+	sb := strings.Builder{}
+	sb.WriteString("BEGIN TRANSACTION;")
+	sb.WriteString(fmt.Sprintf("INSERT INTO measurement_meta (key) VALUES(\"%s\");", key))
+	sb.WriteString("COMMIT;")
+	rq := sb.String()
+	db, _ := sq.db.DB()
+	_, err := db.Exec(rq)
+	if err != nil {
+		log.Error("Error in DB in insertKeyByDsAndTag: " + err.Error())
+	}
+}
+
+func (sq *SqliteTSS) getKeyByDsAndTag(ds string, tag string) uint {
+	var meta MeasurementMeta
+	k := ds + "¿" + tag
+	_ = sq.db.Where("key = ?", k).Find(&meta).Error
+	if meta.Key != k {
+		sq.insertKeyByDsAndTag(k)
+		return sq.getKeyByDsAndTag(ds, tag)
+	}
+	return meta.Id
 }
 
 func (sq *SqliteTSS) saveBatch(batch []Measurement) {
 	sb := strings.Builder{}
 	sb.WriteString("BEGIN TRANSACTION;")
 	for _, entry := range batch {
-		sb.WriteString(fmt.Sprintf("INSERT INTO measurements VALUES(\"%s\", %d, %f, %d);", entry.Key, entry.Ts, entry.Value, entry.ExpireAt))
+		sb.WriteString(fmt.Sprintf("INSERT INTO measurements VALUES(\"%s\", %d, %d, %f, %d);", entry.DataSource, entry.Key, entry.Ts, entry.Value, entry.ExpireAt))
 	}
 	sb.WriteString("COMMIT;")
 	rq := sb.String()
@@ -111,9 +142,10 @@ func (sq *SqliteTSS) Save(dataSource string, data map[string]*proto.TSPoints, ex
 	measurements := make([]Measurement, 0)
 	for tag, values := range data {
 		measurementsForTag := make([]Measurement, len(values.Points))
+		key := sq.getKeyByDsAndTag(dataSource, tag)
 		i := 0
 		for ts, value := range values.Points {
-			meas := Measurement{Key: sq.keyByDsAndTag(dataSource, tag), Ts: ts, Value: value, ExpireAt: expireAt}
+			meas := Measurement{DataSource: dataSource, Key: key, Ts: ts, Value: value, ExpireAt: expireAt}
 			measurementsForTag[i] = meas
 			i += 1
 		}
@@ -129,7 +161,7 @@ func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp ui
 
 	for _, tag := range tags {
 		ansForTag := make(map[uint64]float64)
-		rq := fmt.Sprintf("SELECT ts, value FROM measurements WHERE key = \"%s\" AND ts >= %d AND ts <= %d", sq.keyByDsAndTag(dataSource, tag), fromTimestamp, toTimestamp)
+		rq := fmt.Sprintf("SELECT ts, value FROM measurements WHERE key = %d AND ts >= %d AND ts <= %d", sq.getKeyByDsAndTag(dataSource, tag), fromTimestamp, toTimestamp)
 
 		db, _ := sq.db.DB()
 		rows, err := db.Query(rq)
@@ -155,7 +187,7 @@ func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp ui
 }
 
 func (sq *SqliteTSS) Availability(dataSource string, fromTimestamp uint64, toTimestamp uint64) []*proto.TSAvailabilityChunk {
-	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM measurements WHERE key LIKE \"%s%%\";", dataSource)
+	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM measurements WHERE data_source LIKE \"%s%%\";", dataSource)
 	res, err := sq.db.Raw(rq).Rows()
 	min := uint64(math.MaxUint64)
 	max := uint64(0)
