@@ -20,8 +20,13 @@ func BuildStoragesForBenchmark() []TimeSeriesStorage {
 	lsm := buildLSMStorageForBenchmark()
 	sQ := buildSqliteStorage()
 	return toArray(inMem, qL, lsm, sQ)
-	//return toArray(lsm, sQ)
-	//return toArray(lsm)
+}
+
+
+func BuildStoragesForBenchmarkLSMvsSQLite() []TimeSeriesStorage {
+	lsm := buildLSMStorageForBenchmark()
+	sQ := buildSqliteStorageForBenchmark()
+	return toArray(lsm, sQ)
 }
 
 func toArray(items ...TimeSeriesStorage) []TimeSeriesStorage {
@@ -50,7 +55,7 @@ func buildLSMStorage() *LSMTSS {
 
 func buildLSMStorageForBenchmark() *LSMTSS {
 	idx += 1
-	s := LSMTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), CommitlogFlushPeriodSeconds: 2, CommitlogMaxEntries: 30, MemtExpirationPeriodSeconds: 5, MemtMaxEntriesPerTag: 100}
+	s := LSMTSS{Path: fmt.Sprintf("/home/hotaro/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), CommitlogFlushPeriodSeconds: 5, CommitlogMaxEntries: 1000, MemtExpirationPeriodSeconds: 30, MemtMaxEntriesPerTag: 1000}
 	s.InitStorage()
 	return &s
 }
@@ -58,6 +63,13 @@ func buildLSMStorageForBenchmark() *LSMTSS {
 func buildSqliteStorage() *SqliteTSS {
 	idx += 1
 	s := SqliteTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), periodBetweenWipes: time.Second * 1}
+	s.InitStorage()
+	return &s
+}
+
+func buildSqliteStorageForBenchmark() *SqliteTSS {
+	idx += 1
+	s := SqliteTSS{Path: fmt.Sprintf("/home/hotaro/gotsdb_test/test%d%d", utils.GetNowMillis(), idx), periodBetweenWipes: time.Second * 1}
 	s.InitStorage()
 	return &s
 }
