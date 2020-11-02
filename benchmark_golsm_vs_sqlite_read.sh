@@ -9,8 +9,10 @@ LOGSSQL=/tmp/logs_sqlite.txt
 grep 'LSM-based' < $LOGSALL > $LOGSLSM
 grep 'SqliteTSS' < $LOGSALL > $LOGSSQL
 
-echo "LSM"
-cat $LOGSLSM
+LOGSLSMCLEAR=/tmp/logs_lsm_clear.txt
+LOGSSQLCLEAR=/tmp/logs_sqlite_clear.txt
+cat $LOGSLSM | sed 's/.*_|//g' | sed 's/|-6//g' | awk '{print($1,$3)}' > $LOGSLSMCLEAR
+cat $LOGSSQL | sed 's/.*_|//g' | sed 's/|-6//g' | awk '{print($3)}' > $LOGSSQLCLEAR
 
-echo "SQLITE"
-cat $LOGSSQL
+echo "s LSM SQLITE"
+pr -t -m $LOGSLSMCLEAR $LOGSSQLCLEAR

@@ -69,15 +69,35 @@ func BenchmarkDataReading_LSMvsSQLite(b *testing.B) {
 	log.Close()
 
 	ds := "whatever"
-	requestSizes := []time.Duration{time.Second * 10, time.Second * 20, time.Second * 30, time.Second * 45, time.Second * 60, time.Minute * 2, time.Minute * 3, time.Minute * 4, time.Minute * 5, time.Minute * 10, time.Minute * 15}
+	requestSizes := []time.Duration{time.Second * 10,
+		time.Second * 20,
+		time.Second * 30,
+		time.Second * 45,
+		time.Second * 60,
+		time.Minute * 2,
+		time.Minute * 3,
+		time.Minute * 4,
+		time.Minute * 5,
+		time.Minute * 10,
+		time.Minute * 15,
+		time.Minute * 20,
+		time.Minute * 25,
+		time.Minute * 30,
+		time.Minute * 45,
+		time.Minute * 60,
+		time.Minute * 75,
+		time.Minute * 90,
+		time.Minute * 105,
+		time.Minute * 120,
+		time.Minute * 135}
 
 	for _, storage := range storages {
-		avail := storage.Availability(ds, 0, utils.GetNowMillis())
+		avail := storage.Availability(ds, 0, 2 * utils.GetNowMillis())
 		dataFrom := avail[0].FromTimestamp
 		dataTo := avail[0].ToTimestamp
 
 		for _, requestSize := range requestSizes {
-			benchmarkName := fmt.Sprintf("DataRead on %s for %s |%d|", storage.String(), requestSize.String(), requestSize.Milliseconds())
+			benchmarkName := fmt.Sprintf("DataRead on %s for %s |%d|", storage.String(), requestSize.String(), int(requestSize.Seconds()))
 			b.Run(benchmarkName, func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					from, to := randomTimeRange(dataFrom, dataTo, uint64(requestSize.Milliseconds()))
