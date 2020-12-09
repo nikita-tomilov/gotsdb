@@ -2,7 +2,7 @@ module github.com/nikita-tomilov/gotsdb
 
 go 1.15
 
-// replace github.com/nikita-tomilov/golsm  => /home/hotaro/go/src/github.com/nikita-tomilov/golsm
+replace github.com/nikita-tomilov/golsm  => /home/hotaro/go/src/github.com/nikita-tomilov/golsm
 
 require (
 	github.com/abiosoft/ishell v2.0.0+incompatible

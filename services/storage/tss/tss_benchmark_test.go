@@ -144,7 +144,7 @@ func BenchmarkLatestDataReading_LSMvsSQLite(b *testing.B) {
 		dataTo := avail[0].ToTimestamp
 		dataFrom := dataTo - 3*60*1000
 		for _, requestSize := range requestSizes {
-			benchmarkName := fmt.Sprintf("DataRead on %s for %s |%d|", storage.String(), requestSize.String(), int(requestSize.Seconds()))
+			benchmarkName := fmt.Sprintf("LatestDataRead on %s for %s |%d|", storage.String(), requestSize.String(), int(requestSize.Seconds()))
 			b.Run(benchmarkName, func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					from, to := randomTimeRange(dataFrom, dataTo, uint64(requestSize.Milliseconds()))
@@ -187,6 +187,86 @@ func BenchmarkDataWriting(b *testing.B) {
 		})
 
 		println("Finished for storage " + storage.String() + "\n\n")
+	}
+}
+
+func BenchmarkLinearDataWriting_LSMvsSQLite(b *testing.B) {
+	storages := BuildStoragesForBenchmarkLSMvsSQLite("/tmp/gotsdb/testdata")
+	log.Close()
+
+	ds := "whatever"
+	requestSizes := []time.Duration{
+		time.Second * 5,
+		time.Second * 10,
+		time.Second * 15,
+		time.Second * 20,
+		time.Second * 25,
+		time.Second * 30,
+		time.Second * 45,
+		time.Second * 60,
+		time.Minute * 2,
+		time.Minute * 3,
+		time.Minute * 4,
+		time.Minute * 5,
+		time.Minute * 10,
+		time.Minute * 15,
+		time.Minute * 20,
+		time.Minute * 25,
+		time.Minute * 30,
+	}
+	for _, storage := range storages {
+		var timeFrom = uint64(0)
+		for _, requestSize := range requestSizes {
+			benchmarkName := fmt.Sprintf("LinearDataWrite on %s for %s |%d|", storage.String(), requestSize.String(), int(requestSize.Seconds()))
+			b.Run(benchmarkName, func(b *testing.B) {
+				for i := 0; i < b.N; i++ {
+					timeTo := timeFrom + uint64(requestSize.Milliseconds())
+					randomData := buildDummyDataForBenchmark(10, timeFrom, timeTo)
+					storage.Save(ds, randomData, 0)
+					timeFrom += 2 * uint64(requestSize.Milliseconds())
+				}
+			})
+		}
+	}
+}
+
+func BenchmarkRandomDataWriting_LSMvsSQLite(b *testing.B) {
+	storages := BuildStoragesForBenchmarkLSMvsSQLite("/tmp/gotsdb/testdata")
+	log.Close()
+
+	ds := "whatever"
+	requestSizes := []time.Duration{
+		time.Second * 5,
+		time.Second * 10,
+		time.Second * 15,
+		time.Second * 20,
+		time.Second * 25,
+		time.Second * 30,
+		time.Second * 45,
+		time.Second * 60,
+		time.Minute * 2,
+		time.Minute * 3,
+		time.Minute * 4,
+		time.Minute * 5,
+		time.Minute * 10,
+		time.Minute * 15,
+		time.Minute * 20,
+		time.Minute * 25,
+		time.Minute * 30,
+	}
+	for _, storage := range storages {
+		now := utils.GetNowMillis()
+		for _, requestSize := range requestSizes {
+			benchmarkName := fmt.Sprintf("RandomDataWrite on %s for %s |%d|", storage.String(), requestSize.String(), int(requestSize.Seconds()))
+			b.Run(benchmarkName, func(b *testing.B) {
+				for i := 0; i < b.N; i++ {
+					timeFrom := randomTs(0, now)
+					timeTo := timeFrom + uint64(requestSize.Milliseconds())
+					randomData := buildDummyDataForBenchmark(10, timeFrom, timeTo)
+					storage.Save(ds, randomData, 0)
+				}
+			})
+		}
 	}
 }
 
