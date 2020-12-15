@@ -2,8 +2,6 @@ module github.com/nikita-tomilov/gotsdb
 
 go 1.15
 
-replace github.com/nikita-tomilov/golsm  => /home/hotaro/go/src/github.com/nikita-tomilov/golsm
-
 require (
 	github.com/abiosoft/ishell v2.0.0+incompatible
 	github.com/abiosoft/readline v0.0.0-20180607040430-155bce2042db // indirect
