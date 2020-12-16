@@ -35,7 +35,7 @@ const kvsEnginePropertyInMemValue = "inmem"
 const tssEnginePropertyKey = "tss.engine"
 const tssEnginePropertyFileValue = "file"
 const tssEnginePropertyInMemValue = "inmem"
-const tssEnginePropertyLSMValue = "lsm"
+const tssEnginePropertyLSMValue = "sqlite"
 
 const serverModePropertyKey = "server.mode"
 const serverModePropertyClusterValue = "cluster"

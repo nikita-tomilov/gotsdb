@@ -65,7 +65,7 @@ func BenchmarkDataReading(b *testing.B) {
 }
 
 func BenchmarkDataReading_LSMvsSQLite(b *testing.B) {
-	storages := BuildStoragesForBenchmarkLSMvsSQLite("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata")
+	storages := BuildStoragesForBenchmarkLSMvsSQLite("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read")
 	log.Close()
 
 	ds := "whatever"
@@ -124,7 +124,7 @@ func BenchmarkDataReading_LSMvsSQLite(b *testing.B) {
 }
 
 func BenchmarkLatestDataReading_LSMvsSQLite(b *testing.B) {
-	storages := BuildStoragesForBenchmarkLSMvsSQLite("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata")
+	storages := BuildStoragesForBenchmarkLSMvsSQLite("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read")
 	log.Close()
 
 	ds := "whatever"

@@ -1,37 +1,41 @@
 package tss
 
-import (
+/*import (
 	"fmt"
 	log "github.com/jeanphorn/log4go"
 	"github.com/nikita-tomilov/gotsdb/utils"
 	"testing"
 )
 
-func TestSQLiteTSS_CanReadAlreasySavedFiles(t *testing.T) {
+func TestStorageConverter_CloneAlreasySavedFiles(t *testing.T) {
 	//given
 	log.LoadConfiguration("../../../config/log4go.json")
-	s := SqliteTSS{Path:"/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read/sqlite/"}
+	s := LSMTSS{Path: fmt.Sprintf("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata"), CommitlogFlushPeriodSeconds: 1, CommitlogMaxEntries: 10, MemtExpirationPeriodSeconds: 1, MemtMaxEntriesPerTag: 100, MemtPrefetchSeconds: 120}
+	s2 := SqliteTSS{Path:"/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata"}
 	const dataSource = "whatever"
 	s.InitStorage()
+	s2.InitStorage()
 	func() {
 		defer s.CloseStorage()
+		defer s2.CloseStorage()
 		//when
-		availChunks := s.Availability(dataSource, 0, utils.GetNowMillis() * 2)
+		availChunks := s.Availability(dataSource, 0, utils.GetNowMillis())
 		//then
 		for _, chunk := range availChunks {
 			fmt.Printf(" - %s to %s\n", unixTsToString(chunk.FromTimestamp), unixTsToString(chunk.ToTimestamp))
 		}
 		avail := availChunks[0]
-		print(avail)
 		//when
-		tags := []string{"tag1", "tag2", "tag3"}
+		tags := s.GetTags(dataSource)
 		//then
 		for _, tag := range tags {
 			//when
 			data := s.Retrieve(dataSource, []string{tag}, avail.FromTimestamp, avail.ToTimestamp)
 			//then
 			fmt.Printf("tag '%s' has %d points\n", tag, len(data[tag].Points))
+			s2.Save(dataSource, data, 0)
 		}
 	}()
 	log.Close()
 }
+*/

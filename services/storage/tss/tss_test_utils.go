@@ -26,8 +26,8 @@ func BuildStoragesForBenchmark() []TimeSeriesStorage {
 
 
 func BuildStoragesForBenchmarkLSMvsSQLite(path string) []TimeSeriesStorage {
-	lsm := buildLSMStorageForBenchmark(path)
-	sQ := buildSqliteStorageForBenchmark(path)
+	lsm := buildLSMStorageForBenchmark(path + "/lsm")
+	sQ := buildSqliteStorageForBenchmark(path + "/sqlite")
 	return toArray(lsm, sQ)
 }
 

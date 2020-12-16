@@ -14,19 +14,13 @@ require (
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/flynn-archive/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
 	github.com/golang/protobuf v1.4.3
-	github.com/golang/snappy v0.0.2 // indirect
 	github.com/google/uuid v1.1.2
 	github.com/jeanphorn/log4go v0.0.0-20190526082429-7dbb8deb9468
-	github.com/kr/pretty v0.2.1 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/nikita-tomilov/golsm v0.0.2
 	github.com/nikita-tomilov/summer v1.0.0
 	github.com/pkg/profile v1.5.0
 	github.com/stretchr/testify v1.6.1
-	gitlab.com/cznic/ebnf2y v1.0.0 // indirect
-	gitlab.com/cznic/golex v1.0.0 // indirect
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
-	golang.org/x/exp v0.0.0-20190411193353-0480eff6dd7c // indirect
 	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11
 	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e // indirect
 	golang.org/x/text v0.3.4 // indirect
@@ -36,7 +30,6 @@ require (
 	gorm.io/gorm v1.20.8
 	modernc.org/b v1.0.1 // indirect
 	modernc.org/db v1.0.1 // indirect
-	modernc.org/ebnfutil v1.0.0 // indirect
 	modernc.org/file v1.0.2 // indirect
 	modernc.org/golex v1.0.1 // indirect
 	modernc.org/lldb v1.0.1 // indirect
