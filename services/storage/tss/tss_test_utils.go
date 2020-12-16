@@ -17,13 +17,13 @@ func BuildStoragesForTesting() []TimeSeriesStorage {
 }
 
 func BuildStoragesForBenchmark(path string) []TimeSeriesStorage {
-	//inmem := buildInMemStorageForBenchmark()
+	inmem := buildInMemStorageForBenchmark()
 	lsm := buildLSMStorageForBenchmark(path + "/lsm")
-	//CloneAlreadySavedFiles(lsm, inmem, "whatever", lsm.GetTags("whatever"))
+	CloneAlreadySavedFiles(lsm, inmem, "whatever", lsm.GetTags("whatever"))
 	sQ := buildSqliteStorageForBenchmark(path + "/sqlite")
 	//ql := buildQlStorageForBenchmark(path + "/ql")
 	csv := buildCSVStorageForBenchmark(path + "/csv")
-	return toArray(csv, lsm, sQ)
+	return toArray(inmem, csv, lsm, sQ)
 }
 
 func toArray(items ...TimeSeriesStorage) []TimeSeriesStorage {

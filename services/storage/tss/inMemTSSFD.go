@@ -11,10 +11,11 @@ import (
 type TSforDatasource struct {
 	memt               *memt.Manager
 	PeriodBetweenWipes time.Duration
+	MaxEntriesPerTag   int
 }
 
 func (dataSourceData *TSforDatasource) Init() {
-	dataSourceData.memt = &memt.Manager{PerformExpirationEvery: dataSourceData.PeriodBetweenWipes}
+	dataSourceData.memt = &memt.Manager{PerformExpirationEvery: dataSourceData.PeriodBetweenWipes, MaxEntriesPerTag: dataSourceData.MaxEntriesPerTag}
 	dataSourceData.memt.InitStorage()
 }
 
@@ -53,12 +54,11 @@ func convertTSPtoEntries(points *pb.TSPoints, tag string, expireAt uint64) []com
 	ans := make([]commitlog.Entry, len(points.Points))
 	i := 0
 	for ts, val := range points.Points {
-		ans[i] = commitlog.Entry{Key: []byte(tag), Timestamp: ts, Value: utils.Float64ToByte(val), ExpiresAt:expireAt}
+		ans[i] = commitlog.Entry{Key: []byte(tag), Timestamp: ts, Value: utils.Float64ToByte(val), ExpiresAt: expireAt}
 		i++
 	}
 	return ans
 }
-
 
 func (dataSourceData *TSforDatasource) Availability(fromTimestamp uint64, toTimestamp uint64) []*pb.TSAvailabilityChunk {
 	ansMin, ansMax := dataSourceData.memt.Availability()

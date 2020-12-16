@@ -7,16 +7,20 @@ import (
 )
 
 type InMemTSS struct {
-	isRunning bool
-	data map[string]TSforDatasource
-	lock sync.Mutex
+	isRunning          bool
+	data               map[string]TSforDatasource
+	lock               sync.Mutex
 	periodBetweenWipes time.Duration
+	maxEntriesPerTag   int
 }
 
 func (f *InMemTSS) InitStorage() {
 	f.isRunning = true
-	if f.periodBetweenWipes == 0 * time.Second {
+	if f.periodBetweenWipes == 0*time.Second {
 		f.periodBetweenWipes = time.Second * 5
+	}
+	if f.maxEntriesPerTag == 0 {
+		f.maxEntriesPerTag = 21600
 	}
 	f.data = make(map[string]TSforDatasource)
 }
@@ -28,7 +32,7 @@ func (f *InMemTSS) CloseStorage() {
 func (f *InMemTSS) Save(dataSource string, data map[string]*pb.TSPoints, expirationMillis uint64) {
 	f.lock.Lock()
 	if !f.contains(dataSource) {
-		dataForDataSource := TSforDatasource{PeriodBetweenWipes: f.periodBetweenWipes}
+		dataForDataSource := TSforDatasource{PeriodBetweenWipes: f.periodBetweenWipes, MaxEntriesPerTag: f.maxEntriesPerTag}
 		dataForDataSource.Init()
 		f.data[dataSource] = dataForDataSource
 	}
