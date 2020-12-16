@@ -19,7 +19,7 @@ func TestSQLiteTSS_CanReadAlreasySavedFiles(t *testing.T) {
 		availChunks := s.Availability(dataSource, 0, utils.GetNowMillis() * 2)
 		//then
 		for _, chunk := range availChunks {
-			fmt.Printf(" - %s to %s\n", unixTsToString(chunk.FromTimestamp), unixTsToString(chunk.ToTimestamp))
+			fmt.Printf(" - %s to %s\n", utils.UnixTsToString(chunk.FromTimestamp), utils.UnixTsToString(chunk.ToTimestamp))
 		}
 		avail := availChunks[0]
 		print(avail)

@@ -2,6 +2,7 @@ package tss
 
 import (
 	"github.com/nikita-tomilov/gotsdb/proto"
+	"io/ioutil"
 	"sync"
 	"time"
 )
@@ -20,6 +21,10 @@ func (c *CSVTSS) InitStorage() {
 		c.periodBetweenWipes = time.Second * 5
 	}
 	c.data = make(map[string]CSVTSforDatasource)
+	datasources := c.getAllDirectories()
+	for _, ds := range datasources {
+		c.initDataSource(ds)
+	}
 	go func(c *CSVTSS) {
 		time.Sleep(c.periodBetweenWipes)
 		for c.isRunning {
@@ -36,9 +41,7 @@ func (c *CSVTSS) CloseStorage() {
 func (c *CSVTSS) Save(dataSource string, data map[string]*proto.TSPoints, expirationMillis uint64) {
 	c.lock.Lock()
 	if !c.contains(dataSource) {
-		dataForDataSource := CSVTSforDatasource{DatasourcePath: c.Path + "/" + dataSource}
-		dataForDataSource.Init()
-		c.data[dataSource] = dataForDataSource
+		c.initDataSource(dataSource)
 	}
 	c.dataForDataSource(dataSource).SaveData(data, expirationMillis)
 	c.lock.Unlock()
@@ -80,10 +83,30 @@ func (c *CSVTSS) dataForDataSource(dataSource string) *CSVTSforDatasource {
 	return &dataForDataSource
 }
 
+func (c *CSVTSS) initDataSource(dataSource string) {
+	dataForDataSource := CSVTSforDatasource{DatasourcePath: c.Path + "/" + dataSource}
+	dataForDataSource.Init()
+	c.data[dataSource] = dataForDataSource
+}
+
 func (c *CSVTSS) expirationCycle() {
 	c.lock.Lock()
 	for _, fords := range c.data {
 		fords.ExpirationCycle()
 	}
 	c.lock.Unlock()
+}
+
+func (c *CSVTSS) getAllDirectories() []string {
+	var ans []string
+	files, err := ioutil.ReadDir(c.Path)
+	if err != nil {
+		panic(err)
+	}
+	for _, path := range files {
+		if path.IsDir() {
+			ans = append(ans, path.Name())
+		}
+	}
+	return ans
 }

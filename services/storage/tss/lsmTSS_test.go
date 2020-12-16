@@ -5,13 +5,7 @@ import (
 	log "github.com/jeanphorn/log4go"
 	"github.com/nikita-tomilov/gotsdb/utils"
 	"testing"
-	"time"
 )
-
-func unixTsToString(ts uint64) string {
-	tm := time.Unix(int64(ts/1000), 0)
-	return tm.String()
-}
 
 func TestLSMTSS_CanReadAlreasySavedFiles(t *testing.T) {
 	//given
@@ -25,7 +19,7 @@ func TestLSMTSS_CanReadAlreasySavedFiles(t *testing.T) {
 		availChunks := s.Availability(dataSource, 0, utils.GetNowMillis())
 		//then
 		for _, chunk := range availChunks {
-			fmt.Printf(" - %s to %s\n", unixTsToString(chunk.FromTimestamp), unixTsToString(chunk.ToTimestamp))
+			fmt.Printf(" - %s to %s\n", utils.UnixTsToString(chunk.FromTimestamp), utils.UnixTsToString(chunk.ToTimestamp))
 		}
 		avail := availChunks[0]
 		//when

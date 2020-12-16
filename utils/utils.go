@@ -140,3 +140,8 @@ func ByteToFloat64(b []byte) float64 {
 	bits := binary.LittleEndian.Uint64(b)
 	return math.Float64frombits(bits)
 }
+
+func UnixTsToString(ts uint64) string {
+	tm := time.Unix(int64(ts/1000), 0)
+	return tm.String()
+}
