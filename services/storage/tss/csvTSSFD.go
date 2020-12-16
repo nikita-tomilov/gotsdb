@@ -113,7 +113,7 @@ func (dsd *CSVTSforDatasource) getDataFromFile(filePath string, from uint64, to 
 	for scanner.Scan() {
 		ts, val, expAt := dsd.decodeCSVLine(scanner.Text())
 		withinRange := (from <= ts) && (ts <= to)
-		if withinRange && (expAt > now) {
+		if withinRange && ((expAt > now) || (expAt == 0)) {
 			values[ts] = val
 			expAts[ts] = expAt
 		}
@@ -138,7 +138,7 @@ func (dsd *CSVTSforDatasource) getAllFiles() []string {
 
 func (dsd *CSVTSforDatasource) ExpirationCycle() {
 	for _, file := range dsd.getAllFiles() {
-		data, expAts := dsd.getDataFromFile(file, 0, 0)
+		data, expAts := dsd.getDataFromFile(file, 0, math.MaxUint64)
 		timestamps := make([]uint64, 0, len(data))
 		for k := range data {
 			timestamps = append(timestamps, k)

@@ -1,4 +1,4 @@
 #!/bin/bash
 set -x
 echo Launching tests
-go test -v ./...
+go test -v ./... && echo "tests OK" || echo "test FAILURE"
