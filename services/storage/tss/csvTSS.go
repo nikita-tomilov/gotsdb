@@ -16,6 +16,7 @@ type CSVTSS struct {
 }
 
 func (c *CSVTSS) InitStorage() {
+
 	c.isRunning = true
 	if c.periodBetweenWipes == 0*time.Second {
 		c.periodBetweenWipes = time.Second * 5

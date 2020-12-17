@@ -12,7 +12,7 @@ import (
 )
 
 func BenchmarkDataReading(b *testing.B) {
-	storages := BuildStoragesForBenchmark("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read")
+	storages := BuildStoragesForBenchmark("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read", true)
 	log.Close()
 
 	ds := "whatever"
@@ -72,8 +72,8 @@ func BenchmarkDataReading(b *testing.B) {
 	}
 }
 
-func BenchmarkLatestDataReading_LSMvsSQLite(b *testing.B) {
-	storages := BuildStoragesForBenchmark("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read")
+func BenchmarkLatestDataReading(b *testing.B) {
+	storages := BuildStoragesForBenchmark("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read", true)
 	log.Close()
 
 	ds := "whatever"
@@ -117,6 +117,88 @@ func BenchmarkLatestDataReading_LSMvsSQLite(b *testing.B) {
 	}
 }
 
+func BenchmarkLinearDataWriting(b *testing.B) {
+	storages := BuildStoragesForBenchmark(fmt.Sprintf("/tmp/gotsdb/benchdata%d", utils.GetNowMillis()), false)
+	log.Close()
+
+	ds := "whatever"
+	requestSizes := []time.Duration{
+		time.Second * 5,
+		time.Second * 10,
+		time.Second * 15,
+		time.Second * 20,
+		time.Second * 25,
+		time.Second * 30,
+		time.Second * 45,
+		time.Second * 60,
+		time.Minute * 2,
+		time.Minute * 3,
+		time.Minute * 4,
+		time.Minute * 5,
+		time.Minute * 10,
+		time.Minute * 15,
+		time.Minute * 20,
+		time.Minute * 25,
+		time.Minute * 30,
+	}
+	for _, storage := range storages {
+		var timeFrom = uint64(0)
+		for _, requestSize := range requestSizes {
+			benchmarkName := fmt.Sprintf("LinearDataWrite on %s for %s |%d|", storage.String(), requestSize.String(), int(requestSize.Seconds()))
+			b.Run(benchmarkName, func(b *testing.B) {
+				for i := 0; i < b.N; i++ {
+					timeTo := timeFrom + uint64(requestSize.Milliseconds())
+					randomData := buildDummyDataForBenchmark(10, timeFrom, timeTo)
+					storage.Save(ds, randomData, 0)
+					timeFrom += 2 * uint64(requestSize.Milliseconds())
+				}
+			})
+		}
+		storage.CloseStorage()
+	}
+}
+
+func BenchmarkRandomDataWriting(b *testing.B) {
+	storages := BuildStoragesForBenchmark(fmt.Sprintf("/tmp/gotsdb/benchdata%d", utils.GetNowMillis()), false)
+	log.Close()
+
+	ds := "whatever"
+	requestSizes := []time.Duration{
+		time.Second * 5,
+		time.Second * 10,
+		time.Second * 15,
+		time.Second * 20,
+		time.Second * 25,
+		time.Second * 30,
+		time.Second * 45,
+		time.Second * 60,
+		time.Minute * 2,
+		time.Minute * 3,
+		time.Minute * 4,
+		time.Minute * 5,
+		time.Minute * 10,
+		time.Minute * 15,
+		time.Minute * 20,
+		time.Minute * 25,
+		time.Minute * 30,
+	}
+	for _, storage := range storages {
+		now := utils.GetNowMillis()
+		for _, requestSize := range requestSizes {
+			benchmarkName := fmt.Sprintf("RandomDataWrite on %s for %s |%d|", storage.String(), requestSize.String(), int(requestSize.Seconds()))
+			b.Run(benchmarkName, func(b *testing.B) {
+				for i := 0; i < b.N; i++ {
+					timeFrom := randomTs(0, now)
+					timeTo := timeFrom + uint64(requestSize.Milliseconds())
+					randomData := buildDummyDataForBenchmark(10, timeFrom, timeTo)
+					storage.Save(ds, randomData, 0)
+				}
+			})
+		}
+		storage.CloseStorage()
+	}
+}
+
 func buildDummyDataForBenchmark(tagsCount int, tsFrom uint64, tsTo uint64) map[string]*proto.TSPoints {
 	tags := make([]string, tagsCount)
 	for i := 0; i < tagsCount; i++ {
@@ -131,16 +213,6 @@ func buildDummyDataForBenchmark(tagsCount int, tsFrom uint64, tsTo uint64) map[s
 		ans[tag] = &proto.TSPoints{Points: data}
 	}
 	return ans
-}
-
-func saveToStorage(storage TimeSeriesStorage, ds string, data map[string]*proto.TSPoints) {
-	println("=============\n\nSaving data to " + storage.String())
-	saveStarted := time.Now()
-	storage.Save(ds, data, 0)
-	saveWas := time.Since(saveStarted)
-
-	println("Saving data was for " + saveWas.String())
-	time.Sleep(15 * time.Second)
 }
 
 func randomTs(from uint64, to uint64) uint64 {

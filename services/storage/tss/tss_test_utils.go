@@ -3,6 +3,7 @@ package tss
 import (
 	"fmt"
 	"github.com/nikita-tomilov/gotsdb/utils"
+	"os"
 	"time"
 )
 
@@ -15,10 +16,18 @@ func BuildStoragesForTesting() []TimeSeriesStorage {
 	return toArray(inMem, qL, lsm, sQ, csv)
 }
 
-func BuildStoragesForBenchmark(path string) []TimeSeriesStorage {
+func BuildStoragesForBenchmark(path string, readBenchmark bool) []TimeSeriesStorage {
+	if !readBenchmark {
+		os.MkdirAll(path + "/sqlite", os.ModePerm)
+		os.MkdirAll(path + "/csv", os.ModePerm)
+		os.MkdirAll(path + "/ql", os.ModePerm)
+		os.MkdirAll(path + "/lsm", os.ModePerm)
+	}
 	inmem := buildInMemStorageForBenchmark()
 	lsm := buildLSMStorageForBenchmark(path + "/lsm")
-	CloneAlreadySavedFiles(lsm, inmem, "whatever", lsm.GetTags("whatever"))
+	if readBenchmark {
+		CloneAlreadySavedFiles(lsm, inmem, "whatever", lsm.GetTags("whatever"))
+	}
 	sQ := buildSqliteStorageForBenchmark(path + "/sqlite")
 	csv := buildCSVStorageForBenchmark(path + "/csv")
 	qL := buildQlStorageForBenchmark(path + "/ql")
