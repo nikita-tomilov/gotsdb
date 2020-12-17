@@ -1,6 +1,6 @@
 package tss
-
-/*import (
+/*
+import (
 	"fmt"
 	log "github.com/jeanphorn/log4go"
 	"github.com/nikita-tomilov/gotsdb/utils"
@@ -12,9 +12,9 @@ func TestStorageConverter_CloneAlreadySavedFiles(t *testing.T) {
 	log.LoadConfiguration("../../../config/log4go.json")
 	engineFrom := LSMTSS{Path: fmt.Sprintf("/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read/lsm"),
 		CommitlogFlushPeriodSeconds: 1, CommitlogMaxEntries: 10, MemtExpirationPeriodSeconds: 1, MemtMaxEntriesPerTag: 100, MemtPrefetchSeconds: 120}
-	//engineTo := QlBasedPersistentTSS{Path: "/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read/ql", periodBetweenWipes: time.Second * 10000}
+	engineTo := QlBasedPersistentTSS{Path: "/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read/ql", periodBetweenWipes: time.Second * 10000}
 	//engineTo := CSVTSS{Path: "/home/hotaro/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read/csv", periodBetweenWipes: time.Second * 10000}
-	engineTo := InMemTSS{periodBetweenWipes: time.Second * 10000}
+	//engineTo := InMemTSS{periodBetweenWipes: time.Second * 10000}
 
 	engineFrom.InitStorage()
 	engineTo.InitStorage()
@@ -40,5 +40,4 @@ func TestStorageConverter_CloneAlreadySavedFiles(t *testing.T) {
 
 	engineFrom.CloseStorage()
 	engineTo.CloseStorage()
-}
-*/
+}*/

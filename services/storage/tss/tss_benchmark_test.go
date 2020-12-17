@@ -67,6 +67,8 @@ func BenchmarkDataReading(b *testing.B) {
 			})
 
 		}
+
+		storage.CloseStorage()
 	}
 }
 
@@ -110,6 +112,8 @@ func BenchmarkLatestDataReading_LSMvsSQLite(b *testing.B) {
 			})
 
 		}
+
+		storage.CloseStorage()
 	}
 }
 
