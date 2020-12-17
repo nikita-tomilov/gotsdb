@@ -22,10 +22,14 @@ type QlBasedPersistentTSS struct {
 	isRunning bool
 }
 
+/*
+~/go/src/github.com/nikita-tomilov/gotsdb/testdata/benchmark_read/ql$ ql -db db.bin -fld 'select min(ts), max(ts) from RawData;'
+ */
+
 func (qp *QlBasedPersistentTSS) InitStorage() {
 	_ = os.MkdirAll(qp.Path, os.ModePerm)
 	qp.dbFilePath = qp.Path+"/db.bin"
-	db, err := ql.OpenFile(qp.dbFilePath, &ql.Options{CanCreate: true, FileFormat: 1})
+	db, err := ql.OpenFile(qp.dbFilePath, &ql.Options{CanCreate: true, FileFormat: 2, RemoveEmptyWAL:true})
 	if err != nil {
 		panic("Unable to instantiate db " + err.Error())
 	}
@@ -70,16 +74,32 @@ func (qp *QlBasedPersistentTSS) Save(dataSource string, data map[string]*proto.T
 	sb := strings.Builder{}
 	now := utils.GetNowMillis()
 	expireAt := now + expirationMillis
+	if expirationMillis == 0 {
+		expireAt = 0
+	}
 
 	sb.WriteString("BEGIN TRANSACTION;")
 	for tag, values := range data {
+		idx := 0
 		for ts, value := range values.Points {
 			sb.WriteString(fmt.Sprintf("INSERT INTO RawData VALUES(\"%s\", \"%s\", %d, %f, %d);", dataSource, tag, ts, value, expireAt))
+			idx += 1
+
+			if idx % 100 == 0 {
+				sb.WriteString("COMMIT;")
+				rq := sb.String()
+				qp.saveBatch(rq)
+				sb = strings.Builder{}
+				sb.WriteString("BEGIN TRANSACTION;")
+			}
 		}
 	}
 	sb.WriteString("COMMIT;")
+	rq := sb.String()
+	qp.saveBatch(rq)
+}
 
-	rq := sb.String();
+func (qp *QlBasedPersistentTSS) saveBatch(rq string) {
 	_, _, err := qp.db.Run(qp.ctx, rq)
 	if err != nil {
 		log.Error("Error in DB in Save: " + err.Error())
@@ -112,7 +132,7 @@ func (qp *QlBasedPersistentTSS) Retrieve(dataSource string, tags []string, fromT
 }
 
 func (qp *QlBasedPersistentTSS) Availability(dataSource string, fromTimestamp uint64, toTimestamp uint64) []*proto.TSAvailabilityChunk {
-	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM RawData WHERE ds = \"%s\";", dataSource)
+	rq := "SELECT min(ts), max(ts) FROM RawData WHERE ds = \"" + dataSource + "\";"
 	res, _, err := qp.db.Run(qp.ctx, rq)
 	min := uint64(math.MaxUint64)
 	max := uint64(0)
@@ -148,7 +168,7 @@ func (qp *QlBasedPersistentTSS) String() string {
 
 func (qp *QlBasedPersistentTSS) expirationCycle() {
 	now := utils.GetNowMillis()
-	rq := fmt.Sprintf("BEGIN TRANSACTION;DELETE FROM RawData WHERE expat <= %d;COMMIT;", now)
+	rq := fmt.Sprintf("BEGIN TRANSACTION;DELETE FROM RawData WHERE (expat != 0) AND (expat < %d);COMMIT;", now)
 	_, _, err := qp.db.Run(qp.ctx, rq)
 
 	if err != nil {
