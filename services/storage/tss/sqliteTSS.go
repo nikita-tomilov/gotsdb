@@ -24,18 +24,6 @@ type SqliteTSS struct {
 	isRunning          bool
 }
 
-type MeasurementMeta struct {
-	Id  uint `gorm:"primaryKey"`
-	Key string
-}
-
-type Measurement struct {
-	DataSource string
-	Key        uint   `gorm:"index"`
-	Ts         uint64 `gorm:"index"`
-	Value      float64
-	ExpireAt   uint64
-}
 
 func (sq *SqliteTSS) InitStorage() {
 	_ = os.MkdirAll(sq.Path, os.ModePerm)

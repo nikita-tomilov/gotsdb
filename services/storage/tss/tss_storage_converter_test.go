@@ -22,7 +22,7 @@ func TestStorageConverter_CloneAlreadySavedFiles(t *testing.T) {
 	const dataSource = "whatever"
 	CloneAlreadySavedFiles(&engineFrom, &engineTo, dataSource, engineFrom.GetTags(dataSource))
 
-	availChunks := engineFrom.Availability(dataSource, 0, utils.GetNowMillis() * 2)
+	availChunks := engineFrom.Availability(dataSource, 0, utils.GetNowMillis()*2)
 	avail := availChunks[0]
 	tags := engineFrom.GetTags(dataSource)
 
@@ -38,6 +38,13 @@ func TestStorageConverter_CloneAlreadySavedFiles(t *testing.T) {
 		}
 	}
 
+	availChunks2 := engineTo.Availability(dataSource, 0, utils.GetNowMillis()*2)
+	//then
+	for _, chunk := range availChunks2 {
+		fmt.Printf(" - Avail chunk saved: %s to %s\n", utils.UnixTsToString(chunk.FromTimestamp), utils.UnixTsToString(chunk.ToTimestamp))
+	}
+
 	engineFrom.CloseStorage()
 	engineTo.CloseStorage()
-}*/
+}
+*/
