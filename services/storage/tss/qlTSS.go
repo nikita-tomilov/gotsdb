@@ -27,8 +27,8 @@ func (qp *QlBasedPersistentTSS) InitStorage() {
 		qp.periodBetweenWipes = time.Second * 5
 	}
 
-	dbFilePath := qp.Path + "/db.bin"
-	db, err := ql.OpenFile(dbFilePath, &ql.Options{CanCreate: true, FileFormat: 2, RemoveEmptyWAL: true})
+	qp.dbFilePath = qp.Path + "/db.bin"
+	db, err := ql.OpenFile(qp.dbFilePath, &ql.Options{CanCreate: true, FileFormat: 2, RemoveEmptyWAL: true})
 	if err != nil {
 		panic("Unable to instantiate db " + err.Error())
 	}
@@ -145,6 +145,7 @@ func (q *QlWrapperImpl) GetTwoTimestamps(query string) (uint64, uint64) {
 func (q *QlWrapperImpl) GetMeasurementsForTag(query string) map[uint64]float64 {
 	ansForTag := make(map[uint64]float64)
 	res, _, err := q.db.Run(q.ctx, query)
+	now := utils.GetNowMillis()
 	if err != nil {
 		log.Error("Error in DB in Retrieve: " + err.Error())
 	} else {
@@ -153,7 +154,10 @@ func (q *QlWrapperImpl) GetMeasurementsForTag(query string) map[uint64]float64 {
 			for _, row := range rows {
 				ts := row[0].(uint64)
 				val := row[1].(float64)
-				ansForTag[ts] = val
+				expAt := row[2].(uint64)
+				if (expAt == 0) || (expAt > now) {
+					ansForTag[ts] = val
+				}
 			}
 		}
 	}
@@ -162,7 +166,7 @@ func (q *QlWrapperImpl) GetMeasurementsForTag(query string) map[uint64]float64 {
 
 func (q *QlWrapperImpl) DeleteOnExpiration() {
 	now := utils.GetNowMillis()
-	rq := fmt.Sprintf("BEGIN TRANSACTION;DELETE FROM RawData WHERE (expat != 0) AND (expat < %d);COMMIT;", now)
+	rq := fmt.Sprintf("BEGIN TRANSACTION;DELETE FROM measurements WHERE (expire_at != 0) AND (expire_at < %d);COMMIT;", now)
 	_, _, err := q.db.Run(q.ctx, rq)
 
 	if err != nil {

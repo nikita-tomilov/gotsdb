@@ -107,7 +107,7 @@ func (sq *AbstractSQLTSS) Save(dataSource string, data map[string]*pb.TSPoints, 
 func (sq *AbstractSQLTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*pb.TSPoints {
 	ans := make(map[string]*pb.TSPoints)
 	for _, tag := range tags {
-		rq := fmt.Sprintf("SELECT ts, value FROM measurements WHERE meta_key = %d AND ts >= %d AND ts <= %d", sq.getKeyByDsAndTag(dataSource, tag), fromTimestamp, toTimestamp)
+		rq := fmt.Sprintf("SELECT ts, value, expire_at FROM measurements WHERE meta_key = %d AND ts >= %d AND ts <= %d", sq.getKeyByDsAndTag(dataSource, tag), fromTimestamp, toTimestamp)
 		ansForTag := sq.sqlWrapper.GetMeasurementsForTag(rq)
 		ans[tag] = &pb.TSPoints{Points: ansForTag}
 	}
@@ -115,7 +115,8 @@ func (sq *AbstractSQLTSS) Retrieve(dataSource string, tags []string, fromTimesta
 }
 
 func (sq *AbstractSQLTSS) Availability(dataSource string, fromTimestamp uint64, toTimestamp uint64) []*pb.TSAvailabilityChunk {
-	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM measurements WHERE data_source IN (\"%s\");", dataSource)
+	now := utils.GetNowMillis()
+	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM measurements WHERE data_source IN (\"%s\") AND (expire_at == 0 OR expire_at > %d);", dataSource, now)
 	min, max := sq.sqlWrapper.GetTwoTimestamps(rq)
 	if min >= max {
 		ans := make([]*pb.TSAvailabilityChunk, 0)
