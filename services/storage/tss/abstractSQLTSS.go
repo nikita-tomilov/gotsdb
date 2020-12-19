@@ -13,12 +13,17 @@ type MeasurementMeta struct {
 	Tag string
 }
 
-type Measurement struct {
+type MeasurementDataSource struct {
+	Id         uint `gorm:"primaryKey"`
 	DataSource string
-	MetaKey    uint   `gorm:"index"`
-	Ts         uint64 `gorm:"index"`
-	Value      float64
-	ExpireAt   uint64
+}
+
+type Measurement struct {
+	DataSourceKey uint   `gorm:"index"`
+	MetaKey       uint   `gorm:"index"`
+	Ts            uint64 `gorm:"index"`
+	Value         float64
+	ExpireAt      uint64 `gorm:"index"`
 }
 
 type SqlWrapper interface {
@@ -27,6 +32,8 @@ type SqlWrapper interface {
 	DeleteOnExpiration()
 	CreateMetaKey(tag string)
 	GetMetaKey(tag string) (uint, error)
+	CreateDataSourceKey(dataSource string)
+	GetDataSourceKey(dataSource string) (uint, error)
 	GetTwoTimestamps(query string) (uint64, uint64)
 	GetMeasurementsForTag(query string) map[uint64]float64
 	Close()
@@ -54,12 +61,20 @@ func (sq *AbstractSQLTSS) Close() {
 	sq.isRunning = false
 }
 
-func (sq *AbstractSQLTSS) getKeyByDsAndTag(ds string, tag string) uint {
-	k := ds + "_" + tag
-	key, err := sq.sqlWrapper.GetMetaKey(k)
+func (sq *AbstractSQLTSS) getMetaKey(tag string) uint {
+	key, err := sq.sqlWrapper.GetMetaKey(tag)
 	if err != nil {
-		sq.sqlWrapper.CreateMetaKey(k)
-		return sq.getKeyByDsAndTag(ds, tag)
+		sq.sqlWrapper.CreateMetaKey(tag)
+		return sq.getMetaKey(tag)
+	}
+	return key
+}
+
+func (sq *AbstractSQLTSS) getDataSourceKey(ds string) uint {
+	key, err := sq.sqlWrapper.GetDataSourceKey(ds)
+	if err != nil {
+		sq.sqlWrapper.CreateDataSourceKey(ds)
+		return sq.getDataSourceKey(ds)
 	}
 	return key
 }
@@ -70,7 +85,7 @@ func (sq *AbstractSQLTSS) saveBatch(batch []Measurement, actualLen int) {
 	i := 0
 	for i < actualLen {
 		entry := batch[i]
-		sb.WriteString(fmt.Sprintf("INSERT INTO measurements VALUES(\"%s\", %d, %d, %f, %d);", entry.DataSource, entry.MetaKey, entry.Ts, entry.Value, entry.ExpireAt))
+		sb.WriteString(fmt.Sprintf("INSERT INTO measurements VALUES(%d, %d, %d, %f, %d);", entry.DataSourceKey, entry.MetaKey, entry.Ts, entry.Value, entry.ExpireAt))
 		i++
 	}
 	sb.WriteString("COMMIT;")
@@ -88,9 +103,10 @@ func (sq *AbstractSQLTSS) Save(dataSource string, data map[string]*pb.TSPoints, 
 	i := 0
 	measurements := make([]Measurement, batchLength)
 	for tag, values := range data {
-		key := sq.getKeyByDsAndTag(dataSource, tag)
+		metaKey := sq.getMetaKey(tag)
+		dsKey := sq.getDataSourceKey(dataSource)
 		for ts, value := range values.Points {
-			meas := Measurement{DataSource: dataSource, MetaKey: key, Ts: ts, Value: value, ExpireAt: expireAt}
+			meas := Measurement{DataSourceKey: dsKey, MetaKey: metaKey, Ts: ts, Value: value, ExpireAt: expireAt}
 			measurements[i] = meas
 			i += 1
 			if i == batchLength {
@@ -107,7 +123,7 @@ func (sq *AbstractSQLTSS) Save(dataSource string, data map[string]*pb.TSPoints, 
 func (sq *AbstractSQLTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*pb.TSPoints {
 	ans := make(map[string]*pb.TSPoints)
 	for _, tag := range tags {
-		rq := fmt.Sprintf("SELECT ts, value, expire_at FROM measurements WHERE meta_key = %d AND ts >= %d AND ts <= %d", sq.getKeyByDsAndTag(dataSource, tag), fromTimestamp, toTimestamp)
+		rq := fmt.Sprintf("SELECT ts, value, expire_at FROM measurements WHERE data_source_key = %d AND meta_key = %d AND ts >= %d AND ts <= %d", sq.getDataSourceKey(dataSource), sq.getMetaKey(tag), fromTimestamp, toTimestamp)
 		ansForTag := sq.sqlWrapper.GetMeasurementsForTag(rq)
 		ans[tag] = &pb.TSPoints{Points: ansForTag}
 	}
@@ -116,7 +132,7 @@ func (sq *AbstractSQLTSS) Retrieve(dataSource string, tags []string, fromTimesta
 
 func (sq *AbstractSQLTSS) Availability(dataSource string, fromTimestamp uint64, toTimestamp uint64) []*pb.TSAvailabilityChunk {
 	now := utils.GetNowMillis()
-	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM measurements WHERE data_source IN (\"%s\") AND (expire_at == 0 OR expire_at > %d);", dataSource, now)
+	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM measurements WHERE data_source_key = %d AND (expire_at == 0 OR expire_at > %d);", sq.getDataSourceKey(dataSource), now)
 	min, max := sq.sqlWrapper.GetTwoTimestamps(rq)
 	if min >= max {
 		ans := make([]*pb.TSAvailabilityChunk, 0)

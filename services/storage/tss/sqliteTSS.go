@@ -76,6 +76,11 @@ func (s *SqliteWrapperImpl) InitDatabase() {
 		log.Error("Error in DB: " + err.Error())
 		panic(err)
 	}
+	err = s.db.AutoMigrate(&MeasurementDataSource{})
+	if err != nil {
+		log.Error("Error in DB: " + err.Error())
+		panic(err)
+	}
 }
 
 func (s *SqliteWrapperImpl) Execute(query string) {
@@ -115,6 +120,28 @@ func (s *SqliteWrapperImpl) GetMetaKey(tag string) (uint, error) {
 		return 0, errors.New("not found")
 	}
 	return meta.Id, nil
+}
+
+func (s *SqliteWrapperImpl) CreateDataSourceKey(dataSource string) {
+	sb := strings.Builder{}
+	sb.WriteString("BEGIN TRANSACTION;")
+	sb.WriteString(fmt.Sprintf("INSERT INTO measurement_data_sources (data_source) VALUES(\"%s\");", dataSource))
+	sb.WriteString("COMMIT;")
+	rq := sb.String()
+	db, _ := s.db.DB()
+	_, err := db.Exec(rq)
+	if err != nil {
+		log.Error("Error in DB in insertKeyByDsAndTag: " + err.Error())
+	}
+}
+
+func (s *SqliteWrapperImpl) GetDataSourceKey(dataSource string) (uint, error) {
+	var ds MeasurementDataSource
+	_ = s.db.Where("data_source = ?", dataSource).Find(&ds).Error
+	if ds.DataSource != dataSource {
+		return 0, errors.New("not found")
+	}
+	return ds.Id, nil
 }
 
 func (s *SqliteWrapperImpl) GetTwoTimestamps(query string) (uint64, uint64) {

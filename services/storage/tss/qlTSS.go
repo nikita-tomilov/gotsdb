@@ -74,9 +74,12 @@ func (q *QlWrapperImpl) InitDatabase() {
 	q.Execute(`
 		BEGIN TRANSACTION;
 			CREATE TABLE IF NOT EXISTS measurement_meta (id int, tag string);
-			CREATE TABLE IF NOT EXISTS measurements (data_source string, meta_key int, ts uint64, value float64, expire_at uint64);
-			CREATE INDEX IF NOT EXISTS idx_measurements_key ON measurements(meta_key);
+			CREATE TABLE IF NOT EXISTS measurement_data_sources (id int, data_source string);
+			CREATE TABLE IF NOT EXISTS measurements (data_source_key int, meta_key int, ts uint64, value float64, expire_at uint64);
+			CREATE INDEX IF NOT EXISTS idx_measurements_meta_key ON measurements(meta_key);
+			CREATE INDEX IF NOT EXISTS idx_measurements_ds_key ON measurements(data_source_key);
 			CREATE INDEX IF NOT EXISTS idx_measurements_ts ON measurements(ts);
+			CREATE INDEX IF NOT EXISTS idx_measurements_expire_at ON measurements(expire_at);
 		COMMIT;
 	`)
 }
@@ -99,7 +102,40 @@ func (q *QlWrapperImpl) CreateMetaKey(tag string) {
 }
 
 func (q *QlWrapperImpl) GetMetaKey(query string) (uint, error) {
-	rq := fmt.Sprintf("SELECT id() FROM measurement_meta WHERE tag IN (\"%s\")", query)
+	rq := fmt.Sprintf("SELECT id() FROM measurement_meta WHERE tag = \"%s\"", query)
+	res, _, err := q.db.Run(q.ctx, rq)
+	if err != nil {
+		log.Error("Error in DB: " + err.Error())
+		panic(err)
+	}
+	key := uint(0)
+
+	for _, ress := range res {
+		rows, _ := ress.Rows(math.MaxInt64, 0)
+		if rows == nil {
+			return key, errors.New("not found")
+		}
+		for _, row := range rows {
+			if row[0] != nil {
+				key = uint(row[0].(int64))
+			}
+		}
+	}
+
+	return key, nil
+}
+
+func (q *QlWrapperImpl) CreateDataSourceKey(dataSource string) {
+	sb := strings.Builder{}
+	sb.WriteString("BEGIN TRANSACTION;")
+	sb.WriteString(fmt.Sprintf("INSERT INTO measurement_data_sources (data_source) VALUES(\"%s\");", dataSource))
+	sb.WriteString("COMMIT;")
+	rq := sb.String()
+	q.Execute(rq)
+}
+
+func (q *QlWrapperImpl) GetDataSourceKey(query string) (uint, error) {
+	rq := fmt.Sprintf("SELECT id() FROM measurement_data_sources WHERE data_source = \"%s\"", query)
 	res, _, err := q.db.Run(q.ctx, rq)
 	if err != nil {
 		log.Error("Error in DB: " + err.Error())
