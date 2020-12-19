@@ -10,12 +10,12 @@ import (
 
 type MeasurementMeta struct {
 	Id  uint `gorm:"primaryKey"`
-	Key string
+	Tag string
 }
 
 type Measurement struct {
 	DataSource string
-	Key        uint   `gorm:"index"`
+	MetaKey    uint   `gorm:"index"`
 	Ts         uint64 `gorm:"index"`
 	Value      float64
 	ExpireAt   uint64
@@ -70,7 +70,7 @@ func (sq *AbstractSQLTSS) saveBatch(batch []Measurement, actualLen int) {
 	i := 0
 	for i < actualLen {
 		entry := batch[i]
-		sb.WriteString(fmt.Sprintf("INSERT INTO measurements VALUES(\"%s\", %d, %d, %f, %d);", entry.DataSource, entry.Key, entry.Ts, entry.Value, entry.ExpireAt))
+		sb.WriteString(fmt.Sprintf("INSERT INTO measurements VALUES(\"%s\", %d, %d, %f, %d);", entry.DataSource, entry.MetaKey, entry.Ts, entry.Value, entry.ExpireAt))
 		i++
 	}
 	sb.WriteString("COMMIT;")
@@ -90,7 +90,7 @@ func (sq *AbstractSQLTSS) Save(dataSource string, data map[string]*pb.TSPoints, 
 	for tag, values := range data {
 		key := sq.getKeyByDsAndTag(dataSource, tag)
 		for ts, value := range values.Points {
-			meas := Measurement{DataSource: dataSource, Key: key, Ts: ts, Value: value, ExpireAt: expireAt}
+			meas := Measurement{DataSource: dataSource, MetaKey: key, Ts: ts, Value: value, ExpireAt: expireAt}
 			measurements[i] = meas
 			i += 1
 			if i == batchLength {

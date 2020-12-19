@@ -2,11 +2,11 @@ package tss
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	log "github.com/jeanphorn/log4go"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/nikita-tomilov/gotsdb/proto"
-	pb "github.com/nikita-tomilov/gotsdb/proto"
 	"github.com/nikita-tomilov/gotsdb/utils"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -17,208 +17,156 @@ import (
 )
 
 type SqliteTSS struct {
-	db                 *gorm.DB
 	Path               string `summer.property:"tss.filePath|/tmp/gotsdb/tss"`
 	dbFilePath         string
 	periodBetweenWipes time.Duration
-	isRunning          bool
+	commonImpl         AbstractSQLTSS
 }
-
 
 func (sq *SqliteTSS) InitStorage() {
 	_ = os.MkdirAll(sq.Path, os.ModePerm)
+
+	if sq.periodBetweenWipes == 0*time.Second {
+		sq.periodBetweenWipes = time.Second * 5
+	}
+
 	sq.dbFilePath = sq.Path + "/db.bin"
 	db, err := gorm.Open(sqlite.Open(sq.dbFilePath), &gorm.Config{})
 	if err != nil {
 		panic("Unable to instantiate db " + err.Error())
 	}
-	sq.db = db
-	sq.createTableIfNotExists()
 
-	sq.isRunning = true
-	if sq.periodBetweenWipes == 0*time.Second {
-		sq.periodBetweenWipes = time.Second * 5
-	}
-	go func(sq *SqliteTSS) {
-		time.Sleep(sq.periodBetweenWipes)
-		for sq.isRunning {
-			sq.expirationCycle()
-			time.Sleep(sq.periodBetweenWipes)
-		}
-	}(sq)
-}
-
-func (sq *SqliteTSS) createTableIfNotExists() {
-	err := sq.db.AutoMigrate(&Measurement{})
-	if err != nil {
-		log.Error("Error in DB: " + err.Error())
-		panic(err)
-	}
-	err = sq.db.AutoMigrate(&MeasurementMeta{})
-	if err != nil {
-		log.Error("Error in DB: " + err.Error())
-		panic(err)
-	}
+	sqlWrapper := SqliteWrapperImpl{db: db}
+	sq.commonImpl = AbstractSQLTSS{sqlWrapper: &sqlWrapper, periodBetweenWipes: sq.periodBetweenWipes}
+	sq.commonImpl.Init()
 }
 
 func (sq *SqliteTSS) CloseStorage() {
-	sqlDb, err := sq.db.DB()
-	if err != nil {
-		log.Error("Error in DB Close: " + err.Error())
-	} else {
-		sqlDb.Close()
-	}
-	sq.isRunning = false
-}
-
-func (sq *SqliteTSS) insertKeyByDsAndTag(key string) {
-	sb := strings.Builder{}
-	sb.WriteString("BEGIN TRANSACTION;")
-	sb.WriteString(fmt.Sprintf("INSERT INTO measurement_meta (key) VALUES(\"%s\");", key))
-	sb.WriteString("COMMIT;")
-	rq := sb.String()
-	db, _ := sq.db.DB()
-	_, err := db.Exec(rq)
-	if err != nil {
-		log.Error("Error in DB in insertKeyByDsAndTag: " + err.Error())
-	}
-}
-
-func (sq *SqliteTSS) getKeyByDsAndTag(ds string, tag string) uint {
-	var meta MeasurementMeta
-	k := ds + "¿" + tag
-	_ = sq.db.Where("key = ?", k).Find(&meta).Error
-	if meta.Key != k {
-		sq.insertKeyByDsAndTag(k)
-		return sq.getKeyByDsAndTag(ds, tag)
-	}
-	return meta.Id
-}
-
-func (sq *SqliteTSS) saveBatch(batch []Measurement) {
-	sb := strings.Builder{}
-	sb.WriteString("BEGIN TRANSACTION;")
-	for _, entry := range batch {
-		sb.WriteString(fmt.Sprintf("INSERT INTO measurements VALUES(\"%s\", %d, %d, %f, %d);", entry.DataSource, entry.Key, entry.Ts, entry.Value, entry.ExpireAt))
-	}
-	sb.WriteString("COMMIT;")
-	rq := sb.String()
-	db, _ := sq.db.DB()
-	_, err := db.Exec(rq)
-	if err != nil {
-		log.Error("Error in DB in SaveBatch: " + err.Error())
-	}
-}
-
-func (sq *SqliteTSS) toBatches(total []Measurement, batchSize int) [][]Measurement {
-	i := 0
-	ans := make([][]Measurement, 0)
-	for i < len(total) {
-		j := utils.MinInt(i+batchSize, len(total))
-		ans = append(ans, total[i:j])
-		i = i + batchSize
-	}
-	return ans
+	sq.commonImpl.Close()
 }
 
 func (sq *SqliteTSS) Save(dataSource string, data map[string]*proto.TSPoints, expirationMillis uint64) {
-	now := utils.GetNowMillis()
-	expireAt := now + expirationMillis
-	if expirationMillis == 0 {
-		expireAt = 0
-	}
-	measurements := make([]Measurement, 0)
-	for tag, values := range data {
-		measurementsForTag := make([]Measurement, len(values.Points))
-		key := sq.getKeyByDsAndTag(dataSource, tag)
-		i := 0
-		for ts, value := range values.Points {
-			meas := Measurement{DataSource: dataSource, Key: key, Ts: ts, Value: value, ExpireAt: expireAt}
-			measurementsForTag[i] = meas
-			i += 1
-		}
-		measurements = append(measurements, measurementsForTag...)
-	}
-	for _, batch := range sq.toBatches(measurements, 100) {
-		sq.saveBatch(batch)
-	}
+	sq.commonImpl.Save(dataSource, data, expirationMillis)
 }
 
 func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*proto.TSPoints {
-	ans := make(map[string]*proto.TSPoints)
-
-	for _, tag := range tags {
-		ansForTag := make(map[uint64]float64)
-		rq := fmt.Sprintf("SELECT ts, value FROM measurements WHERE key = %d AND ts >= %d AND ts <= %d", sq.getKeyByDsAndTag(dataSource, tag), fromTimestamp, toTimestamp)
-
-		db, _ := sq.db.DB()
-		rows, err := db.Query(rq)
-		if err != nil {
-			log.Error("Error in DB in Retrieve: " + err.Error())
-		} else {
-			ts := uint64(0)
-			val := 0.0
-			for rows.Next() {
-				err := rows.Scan(&ts, &val)
-				if err != nil {
-					log.Error(err)
-				} else {
-					ansForTag[ts] = val
-				}
-			}
-		}
-
-		ans[tag] = &pb.TSPoints{Points: ansForTag}
-	}
-
-	return ans
+	return sq.commonImpl.Retrieve(dataSource, tags, fromTimestamp, toTimestamp)
 }
 
 func (sq *SqliteTSS) Availability(dataSource string, fromTimestamp uint64, toTimestamp uint64) []*proto.TSAvailabilityChunk {
-	rq := fmt.Sprintf("SELECT min(ts), max(ts) FROM measurements WHERE data_source LIKE \"%s%%\";", dataSource)
-	res, err := sq.db.Raw(rq).Rows()
-	min := uint64(math.MaxUint64)
-	max := uint64(0)
-	if err != nil {
-		log.Error("Error in DB in Availability: " + err.Error())
-		ans := make([]*proto.TSAvailabilityChunk, 0)
-		return ans
-	} else {
-		for res.Next() {
-			min2 := sql.NullInt64{}
-			max2 := sql.NullInt64{}
-			err := res.Scan(&min2, &max2)
-			if err != nil {
-				log.Error(err)
-			} else {
-				if min2.Valid && max2.Valid {
-					min = utils.Min(min, uint64(min2.Int64))
-					max = utils.Max(max, uint64(max2.Int64))
-				}
-			}
-		}
-	}
-	if min >= max {
-		ans := make([]*proto.TSAvailabilityChunk, 0)
-		return ans
-	}
-	min = utils.Max(fromTimestamp, min)
-	max = utils.Min(toTimestamp, max)
-	ans := make([]*proto.TSAvailabilityChunk, 1)
-	ans[0] = &proto.TSAvailabilityChunk{FromTimestamp: min, ToTimestamp: max}
-	return ans
+	return sq.commonImpl.Availability(dataSource, fromTimestamp, toTimestamp)
 }
 
 func (sq *SqliteTSS) String() string {
 	return fmt.Sprintf("SqliteTSS on file %s", sq.dbFilePath)
 }
 
-func (sq *SqliteTSS) expirationCycle() {
+type SqliteWrapperImpl struct {
+	db *gorm.DB
+}
+
+func (s *SqliteWrapperImpl) InitDatabase() {
+	err := s.db.AutoMigrate(&Measurement{})
+	if err != nil {
+		log.Error("Error in DB: " + err.Error())
+		panic(err)
+	}
+	err = s.db.AutoMigrate(&MeasurementMeta{})
+	if err != nil {
+		log.Error("Error in DB: " + err.Error())
+		panic(err)
+	}
+}
+
+func (s *SqliteWrapperImpl) Execute(query string) {
+	db, _ := s.db.DB()
+	_, err := db.Exec(query)
+	if err != nil {
+		log.Error("Error in DB in insertKeyByDsAndTag: " + err.Error())
+	}
+}
+
+func (s *SqliteWrapperImpl) DeleteOnExpiration() {
 	now := utils.GetNowMillis()
-	err := sq.db.Begin().Delete(Measurement{}, "expire_at > 0 AND expire_at <= ?", now).Commit().Error
+	err := s.db.Begin().Delete(Measurement{}, "expire_at > 0 AND expire_at <= ?", now).Commit().Error
 
 	if err != nil {
 		log.Error("Error in DB in expirationCycle: " + err.Error())
-		sq.isRunning = false
 	}
+}
+
+func (s *SqliteWrapperImpl) CreateMetaKey(tag string) {
+	sb := strings.Builder{}
+	sb.WriteString("BEGIN TRANSACTION;")
+	sb.WriteString(fmt.Sprintf("INSERT INTO measurement_meta (tag) VALUES(\"%s\");", tag))
+	sb.WriteString("COMMIT;")
+	rq := sb.String()
+	db, _ := s.db.DB()
+	_, err := db.Exec(rq)
+	if err != nil {
+		log.Error("Error in DB in insertKeyByDsAndTag: " + err.Error())
+	}
+}
+
+func (s *SqliteWrapperImpl) GetMetaKey(tag string) (uint, error) {
+	var meta MeasurementMeta
+	_ = s.db.Where("tag = ?", tag).Find(&meta).Error
+	if meta.Tag != tag {
+		return 0, errors.New("not found")
+	}
+	return meta.Id, nil
+}
+
+func (s *SqliteWrapperImpl) GetTwoTimestamps(query string) (uint64, uint64) {
+	res, err := s.db.Raw(query).Rows()
+	min := uint64(math.MaxUint64)
+	max := uint64(0)
+	if err != nil {
+		log.Error("Error in DB in Availability: " + err.Error())
+		return min, max
+	}
+	for res.Next() {
+		min2 := sql.NullInt64{}
+		max2 := sql.NullInt64{}
+		err := res.Scan(&min2, &max2)
+		if err != nil {
+			log.Error(err)
+		} else {
+			if min2.Valid && max2.Valid {
+				min = utils.Min(min, uint64(min2.Int64))
+				max = utils.Max(max, uint64(max2.Int64))
+			}
+		}
+	}
+	return min, max
+}
+
+func (s *SqliteWrapperImpl) GetMeasurementsForTag(query string) map[uint64]float64 {
+	ansForTag := make(map[uint64]float64)
+	db, _ := s.db.DB()
+	rows, err := db.Query(query)
+	now := utils.GetNowMillis()
+	if err != nil {
+		log.Error("Error in DB in Retrieve: " + err.Error())
+	} else {
+		ts := uint64(0)
+		val := 0.0
+		expAt := uint64(0)
+		for rows.Next() {
+			err := rows.Scan(&ts, &val, &expAt)
+			if err != nil {
+				log.Error(err)
+			} else {
+				if (expAt == 0) || (expAt > now) {
+					ansForTag[ts] = val
+				}
+			}
+		}
+	}
+	return ansForTag
+}
+
+func (s *SqliteWrapperImpl) Close() {
+	db, _ := s.db.DB()
+	db.Close()
 }
