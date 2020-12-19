@@ -13,7 +13,8 @@ func BuildStoragesForTesting() []TimeSeriesStorage {
 	lsm := buildLSMStorage()
 	sQ := buildSqliteStorage()
 	csv := buildCSVStorage()
-	return toArray(inMem, qL, lsm, sQ, csv)
+	bbolt := buildBboltStorage()
+	return toArray(inMem, qL, lsm, sQ, csv, bbolt)
 }
 
 func BuildStoragesForBenchmark(path string, readBenchmark bool) []TimeSeriesStorage {
@@ -102,6 +103,13 @@ func buildCSVStorage() *CSVTSS {
 func buildCSVStorageForBenchmark(path string) *CSVTSS {
 	idx += 1
 	s := CSVTSS{Path: path, periodBetweenWipes: time.Hour * 1024}
+	s.InitStorage()
+	return &s
+}
+
+func buildBboltStorage() *BboltTSS {
+	idx += 1
+	s := BboltTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/bbolttest%d%d", utils.GetNowMillis(), idx), periodBetweenWipes: time.Second * 1}
 	s.InitStorage()
 	return &s
 }

@@ -19,9 +19,8 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/nikita-tomilov/golsm v0.0.2
 	github.com/nikita-tomilov/summer v1.0.0
-	github.com/pkg/profile v1.5.0
 	github.com/stretchr/testify v1.6.1
-	github.com/toolkits/file v0.0.0-20160325033739-a5b3c5147e07
+	go.etcd.io/bbolt v1.3.5
 	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11
 	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e // indirect
 	golang.org/x/text v0.3.4 // indirect
