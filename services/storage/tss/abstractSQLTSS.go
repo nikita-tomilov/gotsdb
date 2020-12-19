@@ -43,10 +43,14 @@ type AbstractSQLTSS struct {
 	sqlWrapper         SqlWrapper
 	periodBetweenWipes time.Duration
 	isRunning          bool
+	dataSourceCache    map[string]uint
+	metaCache          map[string]uint
 }
 
 func (sq *AbstractSQLTSS) Init() {
 	sq.sqlWrapper.InitDatabase()
+	sq.metaCache = make(map[string]uint)
+	sq.dataSourceCache = make(map[string]uint)
 	go func(sq *AbstractSQLTSS) {
 		time.Sleep(sq.periodBetweenWipes)
 		for sq.isRunning {
@@ -62,20 +66,30 @@ func (sq *AbstractSQLTSS) Close() {
 }
 
 func (sq *AbstractSQLTSS) getMetaKey(tag string) uint {
+	cached, existsInCache := sq.metaCache[tag]
+	if existsInCache {
+		return cached
+	}
 	key, err := sq.sqlWrapper.GetMetaKey(tag)
 	if err != nil {
 		sq.sqlWrapper.CreateMetaKey(tag)
 		return sq.getMetaKey(tag)
 	}
+	sq.metaCache[tag] = key
 	return key
 }
 
 func (sq *AbstractSQLTSS) getDataSourceKey(ds string) uint {
+	cached, existsInCache := sq.dataSourceCache[ds]
+	if existsInCache {
+		return cached
+	}
 	key, err := sq.sqlWrapper.GetDataSourceKey(ds)
 	if err != nil {
 		sq.sqlWrapper.CreateDataSourceKey(ds)
 		return sq.getDataSourceKey(ds)
 	}
+	sq.dataSourceCache[ds] = key
 	return key
 }
 
