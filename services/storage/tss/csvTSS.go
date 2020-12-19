@@ -3,6 +3,7 @@ package tss
 import (
 	"github.com/nikita-tomilov/gotsdb/proto"
 	"io/ioutil"
+	"os"
 	"sync"
 	"time"
 )
@@ -16,7 +17,7 @@ type CSVTSS struct {
 }
 
 func (c *CSVTSS) InitStorage() {
-
+	os.MkdirAll(c.Path, os.ModePerm)
 	c.isRunning = true
 	if c.periodBetweenWipes == 0*time.Second {
 		c.periodBetweenWipes = time.Second * 5
