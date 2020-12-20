@@ -23,6 +23,7 @@ func BuildStoragesForBenchmark(path string, readBenchmark bool) []TimeSeriesStor
 		os.MkdirAll(path + "/csv", os.ModePerm)
 		os.MkdirAll(path + "/ql", os.ModePerm)
 		os.MkdirAll(path + "/lsm", os.ModePerm)
+		os.MkdirAll(path + "/bbolt", os.ModePerm)
 	}
 	inmem := buildInMemStorageForBenchmark()
 	lsm := buildLSMStorageForBenchmark(path + "/lsm")
@@ -32,7 +33,8 @@ func BuildStoragesForBenchmark(path string, readBenchmark bool) []TimeSeriesStor
 	sQ := buildSqliteStorageForBenchmark(path + "/sqlite")
 	csv := buildCSVStorageForBenchmark(path + "/csv")
 	qL := buildQlStorageForBenchmark(path + "/ql")
-	return toArray(inmem, csv, lsm, sQ, qL)
+	bbolt := buildBboltStorageForBenchmark(path + "/bbolt")
+	return toArray(inmem, csv, lsm, sQ, qL, bbolt)
 }
 
 func toArray(items ...TimeSeriesStorage) []TimeSeriesStorage {
@@ -110,6 +112,13 @@ func buildCSVStorageForBenchmark(path string) *CSVTSS {
 func buildBboltStorage() *BboltTSS {
 	idx += 1
 	s := BboltTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/bbolttest%d%d", utils.GetNowMillis(), idx), periodBetweenWipes: time.Second * 1}
+	s.InitStorage()
+	return &s
+}
+
+func buildBboltStorageForBenchmark(path string) *BboltTSS {
+	idx += 1
+	s := BboltTSS{Path: path, periodBetweenWipes: time.Hour * 1024}
 	s.InitStorage()
 	return &s
 }
