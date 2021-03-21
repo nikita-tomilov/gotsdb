@@ -35,7 +35,10 @@ const kvsEnginePropertyInMemValue = "inmem"
 const tssEnginePropertyKey = "tss.engine"
 const tssEnginePropertyFileValue = "file"
 const tssEnginePropertyInMemValue = "inmem"
-const tssEnginePropertyLSMValue = "sqlite"
+const tssEnginePropertyLSMValue = "lsm"
+const tssEnginePropertySQLiteValue = "sqlite"
+const tssEnginePropertyQLValue = "ql"
+const tssEnginePropertyBboltValue = "bbolt"
 
 const serverModePropertyKey = "server.mode"
 const serverModePropertyClusterValue = "cluster"
@@ -66,6 +69,8 @@ func setupDI() {
 		summer.RegisterBeanWithTypeAlias(kvsStorageBeanName, kvs.FileKVS{}, kvsStorageBeanType)
 	case kvsEnginePropertyInMemValue:
 		summer.RegisterBeanWithTypeAlias(kvsStorageBeanName, kvs.InMemKVS{}, kvsStorageBeanType)
+	default:
+		panic("unrecognized kv storage engine '" + kvsEngine + "'; exiting")
 	}
 
 	tssEngine, _ := summer.GetPropertyValue(tssEnginePropertyKey)
@@ -76,6 +81,14 @@ func setupDI() {
 		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.QlBasedPersistentTSS{}, tssStorageBeanType)
 	case tssEnginePropertyLSMValue:
 		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.LSMTSS{}, tssStorageBeanType)
+	case tssEnginePropertySQLiteValue:
+		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.SqliteTSS{}, tssStorageBeanType)
+	case tssEnginePropertyQLValue:
+		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.QlBasedPersistentTSS{}, tssStorageBeanType)
+	case tssEnginePropertyBboltValue:
+		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.BboltTSS{}, tssStorageBeanType)
+	default:
+		panic("unrecognized ts storage engine '" + tssEngine + "'; exiting")
 	}
 
 	summer.PerformDependencyInjection()
