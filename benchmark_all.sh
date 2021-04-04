@@ -45,5 +45,6 @@ run_benchmark BenchmarkDataReading
 run_benchmark BenchmarkLatestDataReading
 run_benchmark BenchmarkLinearDataWriting
 run_benchmark BenchmarkRandomDataWriting
+run_benchmark BenchmarkBatchDataWriting
 
 times

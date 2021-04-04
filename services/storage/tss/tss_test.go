@@ -70,7 +70,7 @@ func TestTSS_BatchSaveWorks(t *testing.T) {
 		func() {
 			defer s.CloseStorage()
 			dataToStore := buildData()
-			dataBatch := convertToBatch(dataToStore)
+			dataBatch := ConvertToBatch(dataToStore)
 			//when
 			s.SaveBatch(testDataSource, dataBatch, 15000)
 			retrievedData := s.Retrieve(testDataSource, []string{testTag1, testTag2}, may040520, may050520)
@@ -140,16 +140,6 @@ func buildData() map[string]*pb.TSPoints {
 	dataForTag2[may050520+2000] = 69.0
 	m[testTag2] = &pb.TSPoints{Points: dataForTag2}
 
-	return m
-}
-
-func convertToBatch(d map[string]*pb.TSPoints) []*pb.TSPoint {
-	m := make([]*pb.TSPoint, 0)
-	for tag, values := range d {
-		for ts, val := range values.Points {
-			m = append(m, &pb.TSPoint{Tag:tag, Timestamp:ts, Value:val})
-		}
-	}
 	return m
 }
 

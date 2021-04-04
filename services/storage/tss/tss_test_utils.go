@@ -2,6 +2,7 @@ package tss
 
 import (
 	"fmt"
+	pb "github.com/nikita-tomilov/gotsdb/proto"
 	"github.com/nikita-tomilov/gotsdb/utils"
 	"os"
 	"time"
@@ -141,4 +142,15 @@ func CloneAlreadySavedFiles(s TimeSeriesStorage, s2 TimeSeriesStorage, dataSourc
 		fmt.Printf("tag '%s' has %d points\n", tag, len(data[tag].Points))
 		s2.Save(dataSource, data, 0)
 	}
+}
+
+
+func ConvertToBatch(d map[string]*pb.TSPoints) []*pb.TSPoint {
+	m := make([]*pb.TSPoint, 0)
+	for tag, values := range d {
+		for ts, val := range values.Points {
+			m = append(m, &pb.TSPoint{Tag:tag, Timestamp:ts, Value:val})
+		}
+	}
+	return m
 }

@@ -52,7 +52,9 @@ func BenchmarkDataReading(b *testing.B) {
 			b.Run(benchmarkName, func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					from, to := randomTimeRange(dataFrom, dataTo, uint64(requestSize.Milliseconds()))
+					b.StartTimer()
 					d := storage.Retrieve(ds, []string{"tag1", "tag2", "tag3"}, from, to)
+					b.StopTimer()
 					if len(d) != 3 {
 						panic("tags mismatch")
 					}
@@ -97,7 +99,9 @@ func BenchmarkLatestDataReading(b *testing.B) {
 			b.Run(benchmarkName, func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					from, to := randomTimeRange(dataFrom, dataTo, uint64(requestSize.Milliseconds()))
+					b.StartTimer()
 					d := storage.Retrieve(ds, []string{"tag1", "tag2", "tag3"}, from, to)
+					b.StopTimer()
 					if len(d) != 3 {
 						panic("tags mismatch")
 					}
@@ -149,7 +153,9 @@ func BenchmarkLinearDataWriting(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					timeTo := timeFrom + uint64(requestSize.Milliseconds())
 					randomData := buildDummyDataForBenchmark(10, timeFrom, timeTo)
+					b.StartTimer()
 					storage.Save(ds, randomData, 0)
+					b.StopTimer()
 					timeFrom += 2 * uint64(requestSize.Milliseconds())
 				}
 			})
@@ -191,7 +197,52 @@ func BenchmarkRandomDataWriting(b *testing.B) {
 					timeFrom := randomTs(0, now)
 					timeTo := timeFrom + uint64(requestSize.Milliseconds())
 					randomData := buildDummyDataForBenchmark(10, timeFrom, timeTo)
+					b.StartTimer()
 					storage.Save(ds, randomData, 0)
+					b.StopTimer()
+				}
+			})
+		}
+		storage.CloseStorage()
+	}
+}
+
+func BenchmarkBatchDataWriting(b *testing.B) {
+	storages := BuildStoragesForBenchmark(fmt.Sprintf("/tmp/gotsdb/benchdata%d", utils.GetNowMillis()), false)
+	log.Close()
+
+	ds := "whatever"
+	requestSizes := []time.Duration{
+		time.Second * 5,
+		time.Second * 10,
+		time.Second * 15,
+		time.Second * 20,
+		time.Second * 25,
+		time.Second * 30,
+		time.Second * 45,
+		time.Second * 60,
+		time.Minute * 2,
+		time.Minute * 3,
+		time.Minute * 4,
+		time.Minute * 5,
+		time.Minute * 10,
+		time.Minute * 15,
+		time.Minute * 20,
+		time.Minute * 25,
+		time.Minute * 30,
+	}
+	for _, storage := range storages {
+		var timeFrom = uint64(0)
+		for _, requestSize := range requestSizes {
+			benchmarkName := fmt.Sprintf("LinearDataWrite on %s for %s |%d|", storage.String(), requestSize.String(), int(requestSize.Seconds()))
+			b.Run(benchmarkName, func(b *testing.B) {
+				for i := 0; i < b.N; i++ {
+					timeTo := timeFrom + uint64(requestSize.Milliseconds())
+					randomData := ConvertToBatch(buildDummyDataForBenchmark(10, timeFrom, timeTo))
+					b.StartTimer()
+					storage.SaveBatch(ds, randomData, 0)
+					b.StopTimer()
+					timeFrom += 2 * uint64(requestSize.Milliseconds())
 				}
 			})
 		}
