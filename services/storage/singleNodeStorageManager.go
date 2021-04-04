@@ -88,6 +88,11 @@ func (c *SingleNodeStorageManager) TSSave(ctx context.Context, req *pb.TSStoreRe
 	return &pb.TSStoreResponse{MsgId: req.MsgId, Ok: true}, nil
 }
 
+func (c *SingleNodeStorageManager) TSSaveBatch(ctx context.Context, req *pb.TSStoreBatchRequest) (*pb.TSStoreResponse, error) {
+	//TODO: IMPLEMENT
+	panic("not implemented")
+}
+
 func (c *SingleNodeStorageManager) TSRetrieve(ctx context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {
 	ans := c.tssStorage.Retrieve(req.DataSource, req.Tags, req.FromTimestamp, req.ToTimestamp)
 	return &pb.TSRetrieveResponse{MsgId: req.MsgId, DataSource: req.DataSource, FromTimestamp: req.FromTimestamp, ToTimestamp: req.ToTimestamp, Values: ans}, nil

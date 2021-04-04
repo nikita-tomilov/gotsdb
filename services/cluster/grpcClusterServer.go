@@ -43,6 +43,7 @@ func (s *GrpcClusterServer) Start() {
 
 type clusterServer struct{
 	parent *GrpcClusterServer
+	pb.UnimplementedClusterServer
 }
 
 func (s *clusterServer) Hello(c context.Context, rq *pb.HelloRequest) (*pb.AliveNodesResponse, error) {
@@ -81,6 +82,10 @@ func (s *clusterServer) KvsGetKeys(c context.Context, req *pb.KvsAllKeysRequest)
 
 func (s *clusterServer) TSSave(c context.Context, req *pb.TSStoreRequest) (*pb.TSStoreResponse, error) {
 	return s.parent.storageManager.TSSave(c, req)
+}
+
+func (s *clusterServer) TSSaveBatch(c context.Context, req *pb.TSStoreBatchRequest) (*pb.TSStoreResponse, error) {
+	return s.parent.storageManager.TSSaveBatch(c, req)
 }
 
 func (s *clusterServer) TSRetrieve(c context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {

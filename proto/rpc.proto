@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package proto;
+option go_package = "./proto";
 
 message void {}
 
@@ -12,6 +13,7 @@ service GoTSDB {
   rpc KvsGetKeys(KvsAllKeysRequest) returns (KvsAllKeysResponse);
 
   rpc TSSave(TSStoreRequest) returns (TSStoreResponse);
+  rpc TSSaveBatch(TSStoreBatchRequest) returns (TSStoreResponse);
   rpc TSRetrieve(TSRetrieveRequest) returns (TSRetrieveResponse);
   rpc TSAvailability(TSAvailabilityRequest) returns (TSAvailabilityResponse);
 }
@@ -70,11 +72,24 @@ message TSPoints {
   map<uint64, double> points = 1;
 }
 
+message TSPoint {
+  string tag = 1;
+  uint64 timestamp = 2;
+  double value = 3;
+}
+
 message TSStoreRequest {
   uint32 msgId = 1;
   string dataSource = 2;
   map<string, TSPoints> values = 3;
   uint64 expirationMillis = 4;
+}
+
+message TSStoreBatchRequest {
+  uint32 msgId = 1;
+  string dataSource = 2;
+  uint64 expirationMillis = 3;
+  repeated TSPoint dataBatch = 4;
 }
 
 message TSStoreResponse {

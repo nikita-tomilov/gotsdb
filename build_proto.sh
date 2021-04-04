@@ -1,8 +1,18 @@
 #!/bin/bash
-cd ./proto/
-# export GO111MODULE=on  # Enable module mode
-# go get github.com/golang/protobuf/protoc-gen-go@v1.3
+export GO111MODULE=on  # Enable module mode
+# go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
+# go get -u google.golang.org/grpc
+# sudo apt install protobuf-c*
 export PATH="$PATH:$(go env GOPATH)/bin"
-protoc -I . rpc.proto --go_out=plugins=grpc:.
-protoc -I . cluster.proto --go_out=plugins=grpc:.
+
+SRC_REL_DIR="."
+PROTO_REL_DIR=$SRC_REL_DIR/proto
+
+for protofile in rpc.proto cluster.proto
+do
+  protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    $PROTO_REL_DIR/$protofile
+done
+
 echo "Done"

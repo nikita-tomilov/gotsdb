@@ -236,6 +236,11 @@ func (c *ClusteredStorageManager) TSSave(ctx context.Context, req *pb.TSStoreReq
 	return &pb.TSStoreResponse{MsgId: req.MsgId, Ok: true}, nil
 }
 
+func (c *ClusteredStorageManager) TSSaveBatch(ctx context.Context, req *pb.TSStoreBatchRequest) (*pb.TSStoreResponse, error) {
+	//TODO: IMPLEMENT
+	panic("not implemented")
+}
+
 func mergeData(a map[string]*pb.TSPoints, b map[string]*pb.TSPoints) map[string]*pb.TSPoints {
 	ans := make(map[string]*pb.TSPoints)
 	for k, v := range a {

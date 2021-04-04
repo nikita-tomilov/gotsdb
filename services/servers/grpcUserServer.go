@@ -13,6 +13,7 @@ import (
 type GrpcUserServer struct {
 	StorageManager *interface{} `summer:"StorageManager"`
 	ListenAddress           string       `summer.property:"grpc.listenAddress|:5300"`
+	pb.UnimplementedGoTSDBServer
 }
 
 func (s *GrpcUserServer) getStorageManager() *storage.Manager {
@@ -40,6 +41,7 @@ func (s *GrpcUserServer) BeginListening() {
 
 type server struct {
 	storageManager storage.Manager
+	pb.UnimplementedGoTSDBServer
 }
 
 func (s *server) KvsSave(c context.Context, req *pb.KvsStoreRequest) (*pb.KvsStoreResponse, error) {
@@ -64,6 +66,10 @@ func (s *server) KvsGetKeys(c context.Context, req *pb.KvsAllKeysRequest) (*pb.K
 
 func (s *server) TSSave(c context.Context, req *pb.TSStoreRequest) (*pb.TSStoreResponse, error) {
 	return s.storageManager.TSSave(c, req)
+}
+
+func (s *server) TSSaveBatch(c context.Context, req *pb.TSStoreBatchRequest) (*pb.TSStoreResponse, error) {
+	return s.storageManager.TSSaveBatch(c, req)
 }
 
 func (s *server) TSRetrieve(c context.Context, req *pb.TSRetrieveRequest) (*pb.TSRetrieveResponse, error) {
