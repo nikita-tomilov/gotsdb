@@ -88,6 +88,10 @@ github.com/mattn/go-sqlite3 v2.0.3+incompatible h1:gXHsfypPkaMZrKbD5209QV9jbUTJK
 github.com/mattn/go-sqlite3 v2.0.3+incompatible/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
 github.com/nikita-tomilov/golsm v0.0.2 h1:oqLIAVGITTy9tQk6rF7xYJfbgc1ShtWQ0BGCzzCbj5M=
 github.com/nikita-tomilov/golsm v0.0.2/go.mod h1:q5BmiYU0Qc43SLUZLmu9uyhqXvaIFCEJRhX4BIXiOp4=
+github.com/nikita-tomilov/golsm v0.0.3 h1:fpP18VKiqzZ6IsDfFAsRuUTLuwjG8gyTronpuVBMSHQ=
+github.com/nikita-tomilov/golsm v0.0.3/go.mod h1:q5BmiYU0Qc43SLUZLmu9uyhqXvaIFCEJRhX4BIXiOp4=
+github.com/nikita-tomilov/golsm v0.0.4 h1:zGjkcx5PoQdx7hYMRPOYQxncAlzdUnL5+1uY2Nps1pQ=
+github.com/nikita-tomilov/golsm v0.0.4/go.mod h1:q5BmiYU0Qc43SLUZLmu9uyhqXvaIFCEJRhX4BIXiOp4=
 github.com/nikita-tomilov/summer v1.0.0 h1:LlnZAu0g0QgYY/PneG0vP4T4xtsmPCiqYjvdeG5taeM=
 github.com/nikita-tomilov/summer v1.0.0/go.mod h1:jtMYIdOXv3Iz5fl+Y+/B0qsGLPF/sTJIDK8bBOhvKnM=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=

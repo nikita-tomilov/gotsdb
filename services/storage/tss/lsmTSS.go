@@ -76,19 +76,15 @@ func (lsm *LSMTSS) Save(dataSource string, data map[string]*proto.TSPoints, expi
 }
 
 func (lsm *LSMTSS) SaveBatch(dataSource string, data []*proto.TSPoint, expirationMillis uint64) {
-	converted := make(map[string][]dto.Measurement)
+	converted := make([]dto.TaggedMeasurement, len(data))
 	expireAt := utils.GetNowMillis() + expirationMillis
 	if expirationMillis == 0 {
 		expireAt = 0
 	}
-	for _, point := range data {
-		_, exists := converted[point.Tag]
-		if !exists {
-			converted[point.Tag] = make([]dto.Measurement, 0)
-		}
-		converted[point.Tag] = append(converted[point.Tag], dto.Measurement{Timestamp: point.Timestamp, Value: utils.Float64ToByte(point.Value)})
+	for i, point := range data {
+		converted[i] = dto.TaggedMeasurement{Tag: point.Tag, Timestamp: point.Timestamp, Value: utils.Float64ToByte(point.Value)}
 	}
-	lsm.getOrInitStorage(dataSource).storageWriter.Store(converted, expireAt)
+	lsm.getOrInitStorage(dataSource).storageWriter.StoreBatch(converted, expireAt)
 }
 
 func (lsm *LSMTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*proto.TSPoints {
