@@ -127,6 +127,7 @@ func GetNowMillis() uint64 {
 	return uint64(time.Now().UnixNano() / 1000000)
 }
 
+//TODO: optimize
 func Float64ToByte(f float64) []byte {
 	var buf bytes.Buffer
 	err := binary.Write(&buf, binary.LittleEndian, f)
