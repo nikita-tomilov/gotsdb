@@ -40,6 +40,17 @@ func (f *InMemTSS) Save(dataSource string, data map[string]*pb.TSPoints, expirat
 	f.lock.Unlock()
 }
 
+func (f *InMemTSS) SaveBatch(dataSource string, data []*pb.TSPoint, expirationMillis uint64) {
+	f.lock.Lock()
+	if !f.contains(dataSource) {
+		dataForDataSource := TSforDatasource{PeriodBetweenWipes: f.periodBetweenWipes, MaxEntriesPerTag: f.maxEntriesPerTag}
+		dataForDataSource.Init()
+		f.data[dataSource] = dataForDataSource
+	}
+	f.dataForDataSource(dataSource).SaveDataBatch(data, expirationMillis)
+	f.lock.Unlock()
+}
+
 func (f *InMemTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*pb.TSPoints {
 	f.lock.Lock()
 	ans := make(map[string]*pb.TSPoints)

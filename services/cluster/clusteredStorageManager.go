@@ -237,8 +237,19 @@ func (c *ClusteredStorageManager) TSSave(ctx context.Context, req *pb.TSStoreReq
 }
 
 func (c *ClusteredStorageManager) TSSaveBatch(ctx context.Context, req *pb.TSStoreBatchRequest) (*pb.TSStoreResponse, error) {
-	//TODO: IMPLEMENT
-	panic("not implemented")
+	c.tssStorage.SaveBatch(req.DataSource, req.DataBatch, req.ExpirationMillis)
+
+	if c.shouldSaveDataOnAllNodes() {
+		c.proxyIfNeeded(req.MsgId,  func (otherNode pb.ClusterClient) bool {
+			_, err := otherNode.TSSaveBatch(ctx, req)
+			if err != nil {
+				log.Error("Error in TSSave %s", err)
+			}
+			return true
+		})
+	}
+
+	return &pb.TSStoreResponse{MsgId: req.MsgId, Ok: true}, nil
 }
 
 func mergeData(a map[string]*pb.TSPoints, b map[string]*pb.TSPoints) map[string]*pb.TSPoints {

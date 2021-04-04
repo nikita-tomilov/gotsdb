@@ -49,6 +49,15 @@ func (c *CSVTSS) Save(dataSource string, data map[string]*proto.TSPoints, expira
 	c.lock.Unlock()
 }
 
+func (c *CSVTSS) SaveBatch(dataSource string, data []*proto.TSPoint, expirationMillis uint64) {
+	c.lock.Lock()
+	if !c.contains(dataSource) {
+		c.initDataSource(dataSource)
+	}
+	c.dataForDataSource(dataSource).SaveDataBatch(data, expirationMillis)
+	c.lock.Unlock()
+}
+
 func (c *CSVTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*proto.TSPoints {
 	c.lock.Lock()
 	ans := make(map[string]*proto.TSPoints)

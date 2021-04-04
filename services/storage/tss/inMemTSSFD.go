@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+//TODO: get rid of memt.Manager, write actually optimized impl
+
 type TSforDatasource struct {
 	memt               *memt.Manager
 	PeriodBetweenWipes time.Duration
@@ -48,6 +50,22 @@ func (dataSourceData *TSforDatasource) SaveData(data map[string]*pb.TSPoints, ex
 		convData := convertTSPtoEntries(values, tag, expireAt)
 		memtFt.MergeWithCommitlog(convData)
 	}
+}
+
+func (dataSourceData *TSforDatasource) SaveDataBatch(data []*pb.TSPoint, expiration uint64) {
+	ans := make(map[string]*pb.TSPoints)
+	converted := make(map[string]map[uint64]float64)
+	for _, point := range data {
+		_, exists := converted[point.Tag]
+		if !exists {
+			converted[point.Tag] = make(map[uint64]float64)
+		}
+		converted[point.Tag][point.Timestamp] = point.Value
+	}
+	for tag, dataForTag := range converted {
+		ans[tag] = &pb.TSPoints{Points:dataForTag}
+	}
+	dataSourceData.SaveData(ans, expiration)
 }
 
 func convertTSPtoEntries(points *pb.TSPoints, tag string, expireAt uint64) []commitlog.Entry {

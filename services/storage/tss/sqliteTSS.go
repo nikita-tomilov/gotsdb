@@ -49,6 +49,10 @@ func (sq *SqliteTSS) Save(dataSource string, data map[string]*proto.TSPoints, ex
 	sq.commonImpl.Save(dataSource, data, expirationMillis)
 }
 
+func (sq *SqliteTSS) SaveBatch(dataSource string, data []*proto.TSPoint, expirationMillis uint64) {
+	sq.commonImpl.SaveBatch(dataSource, data, expirationMillis)
+}
+
 func (sq *SqliteTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*proto.TSPoints {
 	return sq.commonImpl.Retrieve(dataSource, tags, fromTimestamp, toTimestamp)
 }

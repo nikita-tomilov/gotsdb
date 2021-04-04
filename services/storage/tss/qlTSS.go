@@ -47,6 +47,10 @@ func (qp *QlBasedPersistentTSS) Save(dataSource string, data map[string]*proto.T
 	qp.commonImpl.Save(dataSource, data, expirationMillis)
 }
 
+func (qp *QlBasedPersistentTSS) SaveBatch(dataSource string, data []*proto.TSPoint, expirationMillis uint64) {
+	qp.commonImpl.SaveBatch(dataSource, data, expirationMillis)
+}
+
 func (qp *QlBasedPersistentTSS) Retrieve(dataSource string, tags []string, fromTimestamp uint64, toTimestamp uint64) map[string]*proto.TSPoints {
 	return qp.commonImpl.Retrieve(dataSource, tags, fromTimestamp, toTimestamp)
 }

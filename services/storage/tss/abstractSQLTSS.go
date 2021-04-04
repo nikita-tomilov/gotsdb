@@ -93,7 +93,7 @@ func (sq *AbstractSQLTSS) getDataSourceKey(ds string) uint {
 	return key
 }
 
-func (sq *AbstractSQLTSS) saveBatch(batch []Measurement, actualLen int) {
+func (sq *AbstractSQLTSS) internalSaveBatch(batch []Measurement, actualLen int) {
 	sb := strings.Builder{}
 	sb.WriteString("BEGIN TRANSACTION;")
 	i := 0
@@ -105,6 +105,35 @@ func (sq *AbstractSQLTSS) saveBatch(batch []Measurement, actualLen int) {
 	sb.WriteString("COMMIT;")
 	rq := sb.String()
 	sq.sqlWrapper.Execute(rq)
+}
+
+func (sq *AbstractSQLTSS) SaveBatch(dataSource string, data []*pb.TSPoint, expirationMillis uint64) {
+	now := utils.GetNowMillis()
+	expireAt := now + expirationMillis
+	if expirationMillis == 0 {
+		expireAt = 0
+	}
+	const batchLength = 100
+	i := 0
+	measurements := make([]Measurement, batchLength)
+
+	for _, point := range data {
+		tag := point.Tag
+		ts := point.Timestamp
+		value := point.Value
+		metaKey := sq.getMetaKey(tag)
+		dsKey := sq.getDataSourceKey(dataSource)
+		meas := Measurement{DataSourceKey: dsKey, MetaKey: metaKey, Ts: ts, Value: value, ExpireAt: expireAt}
+		measurements[i] = meas
+		i += 1
+		if i == batchLength {
+			sq.internalSaveBatch(measurements, i)
+			i = 0
+		}
+	}
+	if i > 0 {
+		sq.internalSaveBatch(measurements, i)
+	}
 }
 
 func (sq *AbstractSQLTSS) Save(dataSource string, data map[string]*pb.TSPoints, expirationMillis uint64) {
@@ -124,13 +153,13 @@ func (sq *AbstractSQLTSS) Save(dataSource string, data map[string]*pb.TSPoints, 
 			measurements[i] = meas
 			i += 1
 			if i == batchLength {
-				sq.saveBatch(measurements, i)
+				sq.internalSaveBatch(measurements, i)
 				i = 0
 			}
 		}
 	}
 	if i > 0 {
-		sq.saveBatch(measurements, i)
+		sq.internalSaveBatch(measurements, i)
 	}
 }
 

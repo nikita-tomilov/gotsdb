@@ -51,6 +51,22 @@ func (dsd *CSVTSforDatasource) SaveData(data map[string]*pb.TSPoints, expiration
 	}
 }
 
+func (dsd *CSVTSforDatasource) SaveDataBatch(data []*pb.TSPoint, expiration uint64) {
+	ans := make(map[string]*pb.TSPoints)
+	converted := make(map[string]map[uint64]float64)
+	for _, point := range data {
+		_, exists := converted[point.Tag]
+		if !exists {
+			converted[point.Tag] = make(map[uint64]float64)
+		}
+		converted[point.Tag][point.Timestamp] = point.Value
+	}
+	for tag, dataForTag := range converted {
+		ans[tag] = &pb.TSPoints{Points:dataForTag}
+	}
+	dsd.SaveData(ans, expiration)
+}
+
 func (dsd *CSVTSforDatasource) Availability(fromTimestamp uint64, toTimestamp uint64) []*pb.TSAvailabilityChunk {
 	ansMin := uint64(math.MaxUint64)
 	ansMax := uint64(0)

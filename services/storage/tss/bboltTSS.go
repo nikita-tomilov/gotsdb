@@ -69,6 +69,22 @@ func (b *BboltTSS) Save(dataSource string, data map[string]*proto.TSPoints, expi
 	})
 }
 
+func (b *BboltTSS) SaveBatch(dataSource string, data []*proto.TSPoint, expirationMillis uint64) {
+	b.db.Update(func(tx *bolt.Tx) error {
+		bucket, err := tx.CreateBucketIfNotExists([]byte(dataSource))
+		now := utils.GetNowMillis()
+		expireAt := now + expirationMillis
+		if expirationMillis == 0 {
+			expireAt = 0
+		}
+		if err != nil {
+			return fmt.Errorf("create bucket: %s", err)
+		}
+		b.saveBatchToDataSourceBucket(bucket, data, expireAt)
+		return nil
+	})
+}
+
 func (b *BboltTSS) encodeTimestamp(ts uint64) []byte {
 	//return utils.Uint64ToByte(ts) does not work because it will not give you "sortable" byte array
 	seconds := ts / 1000
@@ -87,14 +103,14 @@ func (b *BboltTSS) encodeEntry(entry BboltEntry) []byte {
 	return arr
 }
 
-func (b *BboltTSS) decodeEntry(arr []byte) BboltEntry{
+func (b *BboltTSS) decodeEntry(arr []byte) BboltEntry {
 	timestamp := binary.LittleEndian.Uint64(arr)
 	value := math.Float64frombits(binary.LittleEndian.Uint64(arr[8:]))
 	expiresAt := binary.LittleEndian.Uint64(arr[16:])
 	return BboltEntry{
 		Timestamp: timestamp,
 		Value:     value,
-		ExpireAt: expiresAt,
+		ExpireAt:  expiresAt,
 	}
 }
 
@@ -115,6 +131,29 @@ func (b *BboltTSS) saveToDataSourceBucket(bucket *bolt.Bucket, data map[string]*
 			value := b.encodeEntry(e)
 			bucketForTag.Put(key, value)
 		}
+	}
+}
+
+func (b *BboltTSS) saveBatchToDataSourceBucket(bucket *bolt.Bucket, data []*proto.TSPoint, expireAt uint64) {
+	for _, entry := range data {
+		tag := entry.Tag
+		ts := entry.Timestamp
+		val := entry.Value
+
+		bucketForTag, err := bucket.CreateBucketIfNotExists([]byte(tag))
+		if err != nil {
+			log.Error("error in saveToDataSourceBucket: {}", err)
+			return
+		}
+
+		e := BboltEntry{
+			Timestamp: ts,
+			Value:     val,
+			ExpireAt:  expireAt,
+		}
+		key := b.encodeTimestamp(ts)
+		value := b.encodeEntry(e)
+		bucketForTag.Put(key, value)
 	}
 }
 

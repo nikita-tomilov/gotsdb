@@ -63,6 +63,24 @@ func TestTSS_BasicFunctionsWork3(t *testing.T) {
 	}
 }
 
+func TestTSS_BatchSaveWorks(t *testing.T) {
+	//given
+	storages := BuildStoragesForTesting()
+	for _, s := range storages {
+		func() {
+			defer s.CloseStorage()
+			dataToStore := buildData()
+			dataBatch := convertToBatch(dataToStore)
+			//when
+			s.SaveBatch(testDataSource, dataBatch, 15000)
+			retrievedData := s.Retrieve(testDataSource, []string{testTag1, testTag2}, may040520, may050520)
+			//then
+			assert.Equal(t, dataToStore[testTag1], retrievedData[testTag1], "Data for tag1 for 04.05-05.05 should be same, storage %s", s.String())
+			assert.Equal(t, make(map[uint64]float64), retrievedData[testTag2].Points, "Data for tag2 for 04.05-05.05 should be empty, storage %s", s.String())
+		}()
+	}
+}
+
 func Test_ExpirationWorks1(t *testing.T) {
 	//given
 	storages := BuildStoragesForTesting()
@@ -122,6 +140,16 @@ func buildData() map[string]*pb.TSPoints {
 	dataForTag2[may050520+2000] = 69.0
 	m[testTag2] = &pb.TSPoints{Points: dataForTag2}
 
+	return m
+}
+
+func convertToBatch(d map[string]*pb.TSPoints) []*pb.TSPoint {
+	m := make([]*pb.TSPoint, 0)
+	for tag, values := range d {
+		for ts, val := range values.Points {
+			m = append(m, &pb.TSPoint{Tag:tag, Timestamp:ts, Value:val})
+		}
+	}
 	return m
 }
 
