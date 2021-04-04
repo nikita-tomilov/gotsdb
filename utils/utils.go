@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"math"
@@ -127,14 +126,18 @@ func GetNowMillis() uint64 {
 	return uint64(time.Now().UnixNano() / 1000000)
 }
 
-//TODO: optimize
 func Float64ToByte(f float64) []byte {
-	var buf bytes.Buffer
-	err := binary.Write(&buf, binary.LittleEndian, f)
-	if err != nil {
-		fmt.Println("binary.Write failed:", err)
-	}
-	return buf.Bytes()
+	var buf [8]byte
+	n := math.Float64bits(f)
+	buf[7] = byte(n >> 56)
+	buf[6] = byte(n >> 48)
+	buf[5] = byte(n >> 40)
+	buf[4] = byte(n >> 32)
+	buf[3] = byte(n >> 24)
+	buf[2] = byte(n >> 16)
+	buf[1] = byte(n >> 8)
+	buf[0] = byte(n)
+	return buf[:]
 }
 
 func ByteToFloat64(b []byte) float64 {
