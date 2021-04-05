@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Benchmark script started"
+
 function run_benchmark {
   BENCHMARK_NAME=$1
   BENCHMARK_RESULTS_FILENAME=benchmark_results_$BENCHMARK_NAME.csv
@@ -41,9 +43,33 @@ function run_benchmark {
 
 }
 
+function parse_git_dirty() {
+  git diff --quiet --ignore-submodules HEAD 2>/dev/null; [ $? -eq 1 ] && echo "*"
+}
+
+function parse_git_branch() {
+  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1$(parse_git_dirty)/" | sed 's/[*]//g'
+}
+
+function parse_git_hash() {
+  git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/_at_\1/"
+}
+
+function move_all_to_target_folder() {
+  GIT_BRANCH=$(parse_git_branch)$(parse_git_hash)
+  TS=$(date --iso-8601=minutes | sed 's/[+].*//g' | sed 's/:/-/g')
+  BENCH_TARGET_DIR="./benchmark-results/"$GIT_BRANCH"_at_"$TS
+
+  echo $BENCH_TARGET_DIR
+  mkdir -p $BENCH_TARGET_DIR
+  mv benchmark_results*.csv $BENCH_TARGET_DIR/
+}
+
 run_benchmark BenchmarkDataReading
 run_benchmark BenchmarkLatestDataReading
 run_benchmark BenchmarkLinearDataWriting
 run_benchmark BenchmarkRandomDataWriting
 
 times
+
+move_all_to_target_folder
