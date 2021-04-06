@@ -2,7 +2,6 @@ package tss
 
 import (
 	"bytes"
-	"encoding/binary"
 	"fmt"
 	log "github.com/jeanphorn/log4go"
 	"github.com/nikita-tomilov/gotsdb/proto"
@@ -11,6 +10,7 @@ import (
 	"math"
 	"os"
 	"time"
+	"unsafe"
 )
 
 type BboltEntry struct {
@@ -94,24 +94,17 @@ func (b *BboltTSS) encodeTimestamp(ts uint64) []byte {
 	return []byte(str)
 }
 
+const bboltEntrySize = int(unsafe.Sizeof(BboltEntry{}))
+
 func (b *BboltTSS) encodeEntry(entry BboltEntry) []byte {
-	payloadLen := 8 + 8 + 8
-	arr := make([]byte, payloadLen)
-	binary.LittleEndian.PutUint64(arr, entry.Timestamp)
-	binary.LittleEndian.PutUint64(arr[8:], math.Float64bits(entry.Value))
-	binary.LittleEndian.PutUint64(arr[16:], entry.ExpireAt)
-	return arr
+	arr := *(*[bboltEntrySize]byte)(unsafe.Pointer(&entry))
+	return arr[:]
 }
 
 func (b *BboltTSS) decodeEntry(arr []byte) BboltEntry {
-	timestamp := binary.LittleEndian.Uint64(arr)
-	value := math.Float64frombits(binary.LittleEndian.Uint64(arr[8:]))
-	expiresAt := binary.LittleEndian.Uint64(arr[16:])
-	return BboltEntry{
-		Timestamp: timestamp,
-		Value:     value,
-		ExpireAt:  expiresAt,
-	}
+	rawPointer := unsafe.Pointer(&arr[0])
+	castedPointer := (*BboltEntry)(rawPointer)
+	return *castedPointer
 }
 
 func (b *BboltTSS) saveToDataSourceBucket(bucket *bolt.Bucket, data map[string]*proto.TSPoints, expireAt uint64) {

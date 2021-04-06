@@ -20,11 +20,11 @@ func BuildStoragesForTesting() []TimeSeriesStorage {
 
 func BuildStoragesForBenchmark(path string, readBenchmark bool) []TimeSeriesStorage {
 	if !readBenchmark {
-		os.MkdirAll(path + "/sqlite", os.ModePerm)
-		os.MkdirAll(path + "/csv", os.ModePerm)
-		os.MkdirAll(path + "/ql", os.ModePerm)
-		os.MkdirAll(path + "/lsm", os.ModePerm)
-		os.MkdirAll(path + "/bbolt", os.ModePerm)
+		os.MkdirAll(path+"/sqlite", os.ModePerm)
+		os.MkdirAll(path+"/csv", os.ModePerm)
+		os.MkdirAll(path+"/ql", os.ModePerm)
+		os.MkdirAll(path+"/lsm", os.ModePerm)
+		os.MkdirAll(path+"/bbolt", os.ModePerm)
 	}
 	inmem := buildInMemStorageForBenchmark()
 	lsm := buildLSMStorageForBenchmark(path + "/lsm")
@@ -144,12 +144,11 @@ func CloneAlreadySavedFiles(s TimeSeriesStorage, s2 TimeSeriesStorage, dataSourc
 	}
 }
 
-
 func ConvertToBatch(d map[string]*pb.TSPoints) []*pb.TSPoint {
 	m := make([]*pb.TSPoint, 0)
 	for tag, values := range d {
 		for ts, val := range values.Points {
-			m = append(m, &pb.TSPoint{Tag:tag, Timestamp:ts, Value:val})
+			m = append(m, &pb.TSPoint{Tag: tag, Timestamp: ts, Value: val})
 		}
 	}
 	return m
