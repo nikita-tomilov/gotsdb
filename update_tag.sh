@@ -1,6 +1,6 @@
 #!/bin/bash
-VER=v0.1
-git tag -d $VER
-git push --delete origin $VER
-git tag $VER
+. VERSION
+git tag -d $VERSION
+git push --delete origin $VERSION
+git tag $VERSION
 git push --tags
