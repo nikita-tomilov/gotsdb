@@ -81,7 +81,7 @@ func (c *CSVTSS) Availability(dataSource string, fromTimestamp uint64, toTimesta
 }
 
 func (c *CSVTSS) String() string {
-	return "CSV-based disk TSS at " + c.Path
+	return "CSV-based TSS at " + c.Path
 }
 
 func (c *CSVTSS) contains(dataSource string) bool {

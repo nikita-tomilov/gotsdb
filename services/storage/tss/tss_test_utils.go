@@ -14,8 +14,9 @@ func BuildStoragesForTesting() []TimeSeriesStorage {
 	lsm := buildLSMStorage()
 	sQ := buildSqliteStorage()
 	csv := buildCSVStorage()
+	bcsv := buildBCSVStorage()
 	bbolt := buildBboltStorage()
-	return toArray(inMem, qL, lsm, sQ, csv, bbolt)
+	return toArray(inMem, qL, lsm, sQ, csv, bcsv, bbolt)
 }
 
 func BuildStoragesForBenchmark(path string, readBenchmark bool) []TimeSeriesStorage {
@@ -33,9 +34,10 @@ func BuildStoragesForBenchmark(path string, readBenchmark bool) []TimeSeriesStor
 	}
 	sQ := buildSqliteStorageForBenchmark(path + "/sqlite")
 	csv := buildCSVStorageForBenchmark(path + "/csv")
+	bcsv := buildBCSVStorageForBenchmark(path + "/bcsv")
 	qL := buildQlStorageForBenchmark(path + "/ql")
 	bbolt := buildBboltStorageForBenchmark(path + "/bbolt")
-	return toArray(inmem, csv, lsm, sQ, qL, bbolt)
+	return toArray(inmem, csv, bcsv, lsm, sQ, qL, bbolt)
 }
 
 func toArray(items ...TimeSeriesStorage) []TimeSeriesStorage {
@@ -103,9 +105,23 @@ func buildCSVStorage() *CSVTSS {
 	return &s
 }
 
+func buildBCSVStorage() *BCSVTSS {
+	idx += 1
+	s := BCSVTSS{Path: fmt.Sprintf("/tmp/gotsdb_test/csvtest%d%d", utils.GetNowMillis(), idx), periodBetweenWipes: time.Second * 1}
+	s.InitStorage()
+	return &s
+}
+
 func buildCSVStorageForBenchmark(path string) *CSVTSS {
 	idx += 1
 	s := CSVTSS{Path: path, periodBetweenWipes: time.Hour * 1024}
+	s.InitStorage()
+	return &s
+}
+
+func buildBCSVStorageForBenchmark(path string) *BCSVTSS {
+	idx += 1
+	s := BCSVTSS{Path: path, periodBetweenWipes: time.Hour * 1024}
 	s.InitStorage()
 	return &s
 }
