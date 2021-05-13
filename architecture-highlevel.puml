@@ -1,0 +1,33 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Boundary(clientApp, "Client Application") {
+  System_Ext(extSoftware, "External code", "Client application that uses the TSDB")
+  Component(grpcClient, "gRPC API", "any language", "Client Implementation of gRPC")
+}
+
+Rel_Right(extSoftware, grpcClient, "uses")
+
+Boundary(serverApp, "Time Series Storage System") {
+  Component(grpcServer, "gRPC API", "golang", "Server Implementation of gRPC")
+
+  Component(manager, "Storage Manager", "golang", "Manages the storage implementations, wraps the gRPC calls")
+
+  ComponentDb(tss, "TimeSeriesStorage impl", "golang", "Implementation of TimeSeriesStorage interface")
+  ComponentDb(kvs, "KeyValueStorage impl", "golang", "Implementation of KeyValueStorage interface")
+}
+
+SystemDb_Ext(disk, "Disk storage", "Storage for files", "")
+
+Rel_Right(grpcClient, grpcServer, "works with API", "TCP/protobuf")
+
+Rel_Right(grpcServer, manager, "calls the storage impl", "")
+
+Rel(manager, tss, "passes the tss requests", "")
+Rel(manager, kvs, "passes the kvs requests", "")
+
+Rel(tss, disk, "stores data", "")
+Rel(kvs, disk, "stores data", "")
+
+@enduml

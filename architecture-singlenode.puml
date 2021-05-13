@@ -1,0 +1,54 @@
+@startuml
+
+node "Server" {
+    package "storage" {
+        package "kvs" {
+            () KeyValueStorage
+            [fileKVS]
+            [inmemKVS]
+        }
+
+        package "tss" {
+            () TimeSeriesStorage
+            [CSV]
+            [SQLite]
+            [qL]
+            [bbolt]
+            [LSM]
+        }
+    }
+
+    package "servers" {
+        [grpcUserServer]
+    }
+
+    package "proto" {
+         () "GoTSDB\n<<file:rpc.proto>>" as node1clientRpcProto
+    }
+
+    [singleNodeStorageManager]
+}
+
+node "Client" {
+    package rpc as clientrpc {
+        () "GoTSDB\n<<file:rpc.proto>>" as clientRpcProto
+    }
+}
+
+clientrpc <-down-> grpcUserServer : "<<protocol: GRPC>>"
+
+grpcUserServer ..> singleNodeStorageManager : Data operation request from client
+singleNodeStorageManager ..> storage : Local data operations
+singleNodeStorageManager -->> node1clientRpcProto : <<implements>>
+
+grpcUserServer -->> node1clientRpcProto : <<implements>>
+
+fileKVS -->> KeyValueStorage : <<implements>>
+inmemKVS -->> KeyValueStorage : <<implements>>
+
+CSV -up->> TimeSeriesStorage : <<implements>>
+SQLite -up->> TimeSeriesStorage : <<implements>>
+qL -up->> TimeSeriesStorage : <<implements>>
+bbolt -up->> TimeSeriesStorage : <<implements>>
+LSM -up->> TimeSeriesStorage : <<implements>>
+@enduml

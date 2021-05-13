@@ -7,6 +7,15 @@ node "ServerNode1" {
             [fileKVS]
             [inmemKVS]
         }
+
+        package "tss" {
+            () TimeSeriesStorage
+            [CSV]
+            [SQLite]
+            [qL]
+            [bbolt]
+            [LSM]
+        }
     }
 
     package "cluster" as node1cluster {
@@ -35,14 +44,14 @@ node "ServerNode2" {
 
 node "Client" {
     package rpc as clientrpc {
-        () GoTSDB as clientRpcProto
+        () "GoTSDB\n<<file:rpc.proto>>" as clientRpcProto
     }
 }
 
 node1clusterServer <-down- node2clusterClient : "<<protocol: GRPC>>"
 node2clusterServer <-up- node1clusterClient : "<<protocol: GRPC>>"
 
-clientrpc <-left-> grpcUserServer : "<<protocol: GRPC>>"
+clientrpc <-down-> grpcUserServer : "<<protocol: GRPC>>"
 
 grpcUserServer ..> clusteredStorageManager : Data operation request from client
 clusteredStorageManager ..> storage : Local data operations
@@ -57,6 +66,12 @@ clusterManager ..* node1clusterServer : owns one
 node1clusterRpcProto --|> node1clientRpcProto : <<extends>>
 grpcUserServer -->> node1clientRpcProto : <<implements>>
 
-fileKVS -->> KeyValueStorage
-inmemKVS -->> KeyValueStorage
+fileKVS -->> KeyValueStorage : <<implements>>
+inmemKVS -->> KeyValueStorage : <<implements>>
+
+CSV -up->> TimeSeriesStorage : <<implements>>
+SQLite -up->> TimeSeriesStorage : <<implements>>
+qL -up->> TimeSeriesStorage : <<implements>>
+bbolt -up->> TimeSeriesStorage : <<implements>>
+LSM -up->> TimeSeriesStorage : <<implements>>
 @enduml
