@@ -33,7 +33,8 @@ const kvsEnginePropertyFileValue = "file"
 const kvsEnginePropertyInMemValue = "inmem"
 
 const tssEnginePropertyKey = "tss.engine"
-const tssEnginePropertyFileValue = "file"
+const tssEnginePropertyCSVValue = "csv"
+const tssEnginePropertyBCSVValue = "bcsv"
 const tssEnginePropertyInMemValue = "inmem"
 const tssEnginePropertyLSMValue = "lsm"
 const tssEnginePropertySQLiteValue = "sqlite"
@@ -77,8 +78,10 @@ func setupDI() {
 	switch tssEngine {
 	case tssEnginePropertyInMemValue:
 		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.InMemTSS{}, tssStorageBeanType)
-	case tssEnginePropertyFileValue:
-		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.QlBasedPersistentTSS{}, tssStorageBeanType)
+	case tssEnginePropertyCSVValue:
+		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.CSVTSS{}, tssStorageBeanType)
+	case tssEnginePropertyBCSVValue:
+		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.BCSVTSS{}, tssStorageBeanType)
 	case tssEnginePropertyLSMValue:
 		summer.RegisterBeanWithTypeAlias(tssStorageBeanName, tss.LSMTSS{}, tssStorageBeanType)
 	case tssEnginePropertySQLiteValue:
