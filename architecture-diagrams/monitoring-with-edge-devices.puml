@@ -1,0 +1,50 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Boundary(cloud, "Облако") {
+  System_Ext(cloud_logic, "Облачная система", "Система облачного мониторинга")
+  SystemDb_Ext(cloud_db, "Облачное хранилище", "Хранилище для системы облачного мониторинга", "")
+}
+
+Rel_Right(cloud_logic, cloud_db, "Использует", "")
+
+Boundary(edge1, "Граничное устройство \n на Заводе №1") {
+    System_Ext(edgedev1, "Граничное ПО", "ПО на граничном устройстве")
+    SystemDb(edgedb1, "Система хранения временных рядов", "Хранилище для буферизации данных", "")
+}
+
+Boundary(edge2, "Граничное устройство \n на Заводе №2") {
+    System_Ext(edgedev2, "Граничное ПО", "ПО на граничном устройстве")
+    SystemDb(edgedb2, "Система хранения временных рядов", "Хранилище для буферизации данных", "")
+}
+
+Boundary(ds11_boundary, "Источник данных завода №1") {
+    System_Ext(ds11, "Delphin Device", "Data Acquisition Unit от Delphin Technology AG")
+}
+
+Boundary(ds12_boundary, "Источник данных завода №1") {
+    System_Ext(ds12, "imc CRONOS", "Data Acquisition Unit от imc Test & Measurement GmbH")
+}
+
+Boundary(ds21_boundary, "Источник данных завода №2") {
+    System_Ext(ds21, "Argus Controller", "Data Acquisition Unit от Argus Control Systems Ltd")
+}
+
+Boundary(ds22_boundary, "Источник данных завода №2") {
+    System_Ext(ds22, "EDAS-1031", "Data Acquisition Unit от Intelligent Instrumentation LLC")
+}
+
+Rel_Down(cloud_logic, edgedev1, "Получает данные из", "")
+Rel_Down(cloud_logic, edgedev2, "Получает данные из", "")
+
+Rel_Down(edgedev1, ds11, "Получает данные из", "")
+Rel_Down(edgedev1, ds12, "Получает данные из", "")
+
+Rel_Down(edgedev2, ds21, "Получает данные из", "")
+Rel_Down(edgedev2, ds22, "Получает данные из", "")
+
+Rel_Right(edgedev1, edgedb1, "Работает с", "")
+Rel_Right(edgedev2, edgedb2, "Работает с", "")
+
+@enduml

@@ -1,0 +1,42 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Person_Ext(user, "Пользователь", "Пользователь системы мониторинга")
+
+Boundary(cloud, "Облако") {
+    SystemDb_Ext(cloud_sql_db, "Реляционная СУБД", "Хранилище пользовательских данных", "")
+    SystemDb(cloud_tsdb, "Система хранения временных рядов", "Краткосрочное хранилище показаний датчиков", "")
+    SystemDb_Ext(cloud_dcdats, "Дисковое хранилище", "Долговременное хранилище показаний датчиков", "")
+
+    System_Ext(kafka, "Kafka", "Транспортный уровень для показаний датчиков")
+    System_Ext(rp, "Persister", "Считывает данные из очереди сообщений и записывает в хранилища", "")
+    System_Ext(elv, "Monitoring System", "Бизнес-логика аналитики и визуализации данных", "")
+}
+
+Rel_Down(user, elv, "Использует", "")
+Rel_Down(elv, cloud_sql_db, "Использует", "")
+Rel_Down(elv, cloud_tsdb, "Использует", "")
+Rel_Down(elv, cloud_dcdats, "Использует", "")
+
+Rel_Right(rp, kafka, "Считывает данные из")
+Rel_Up(rp, cloud_tsdb, "Записывает данные в")
+Rel_Up(rp, cloud_dcdats, "Записывает данные в")
+
+Boundary(datasources, "Источники данных") {
+    System_Ext(ds11, "Delphin Device", "Data Acquisition Unit от Delphin Technology AG")
+    System_Ext(ds12, "imc CRONOS", "Data Acquisition Unit от imc Test & Measurement GmbH")
+'    System_Ext(ds21, "Argus Controller", "Data Acquisition Unit от Argus Control Systems Ltd")
+'    System_Ext(ds22, "EDAS-1031", "Data Acquisition Unit от Intelligent Instrumentation LLC")
+    System_Ext(sdi, "Data Ingester", "Приложение, считывающее данные с устройств")
+}
+
+Rel_Up(sdi, kafka, "Отправляет данные в")
+
+Rel_Left(sdi, ds11, "Считывает данные из", "")
+Rel_Right(sdi, ds12, "Считывает данные из", "")
+' Rel(sdi, ds21, "Считывает данные из", "")
+' Rel(sdi, ds22, "Считывает данные из", "")
+
+
+@enduml
